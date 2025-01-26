@@ -4,7 +4,7 @@ import "./globals.css";
 import Header from "./_components/Header";
 import UpHeader from "./_components/UpHeader";
 import Footer from "./_components/Footer";
-import NotificationPopup from "./_components/alertmesage";
+import NotificationPopup from "./_components/Alertmesage";
 
 const outfit = Outfit({
   subsets: ["latin"],
