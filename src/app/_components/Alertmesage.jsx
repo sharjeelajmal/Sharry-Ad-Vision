@@ -24,7 +24,7 @@ export default function NotificationPopup() {
             transition={{ duration: 0.3, ease: "easeInOut" }}
           >
             <Image
-              src={"/tiktok.gif"}
+              src={"/Tiktok.gif"}
               width={140} // Reduced image width
               height={140} // Reduced image height
               unoptimized
