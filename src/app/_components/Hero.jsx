@@ -14,7 +14,7 @@ const Hero = () => {
 
 
   return (
-    <div className='bg-base-200 p-8 '> 
+    <div className='bg-customGray p-8 '> 
 
       <div className="  md:px-36">
   <div className="hero-content flex-col lg:flex-row-reverse">

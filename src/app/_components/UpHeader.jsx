@@ -15,8 +15,15 @@ const UpHeader = () => {
 
   return (
     <div>
- <div className='flex justify-between md:px-16 bg-base-200 pt-8 px-6'>
-    <Image src={'/logo.svg'} height={90} width={180}  alt="Logo" />
+ <div className='flex justify-between md:px-16 bg-customGray pt-8 px-6'>
+ <Image
+  src={'/logo.svg'}
+  alt="Logo"
+  className="max-w-full max-h-12 sm:max-h-10 md:max-h-8"
+  height={90}
+  width={180}
+/>
+
      {/* WhatsApp Button */}
             <Button
               onClick={handleWhatsAppRedirect}

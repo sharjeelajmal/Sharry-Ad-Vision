@@ -71,11 +71,11 @@ const Header = () => {
 
         {/* WhatsApp Button */}
         <Button
-          onClick={handleWhatsAppRedirect}
-          className="active:scale-95 hover:scale-105 transition-all ease-out"
-        >
-          WhatsApp
-        </Button>
+  onClick={handleWhatsAppRedirect}
+  className="active:scale-95 hover:scale-105 transition-all ease-out hidden md:block"
+>
+  WhatsApp
+</Button>
       </div>
     </div>
   );

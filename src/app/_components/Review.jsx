@@ -39,7 +39,7 @@ const Review = () => {
         }}
       >
 <Image
-          src="/loader.gif" // Replace with your loader GIF path
+          src="/Loader.gif" // Replace with your loader GIF path
           alt="Loading..."
           width={100}
           height={100}
