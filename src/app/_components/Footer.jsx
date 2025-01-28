@@ -3,7 +3,7 @@ import { Facebook, Instagram,Github , Linkedin } from 'lucide-react'; // Import 
 
 const Footer = () => {
   return (
-    <footer className="bg-white mb-40">
+    <footer className="bg-white pb-40">
       <div className="mx-auto max-w-screen-xl px-4 pb-8 pt-16 sm:px-6 lg:px-8">
         {/* Email Subscription Section */}
         <div className="mx-auto max-w-md">

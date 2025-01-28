@@ -76,7 +76,7 @@ const Contact = () => {
                     id="name"
                     name="name"
                     required
-                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 py-2"
+                    className="mt-1 block w-full bg-customGray outline-none px-3 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 py-2"
                   />
                 </div>
 
@@ -92,7 +92,7 @@ const Contact = () => {
                     id="email"
                     name="email"
                     required
-                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 py-2"
+                    className="mt-1 block w-full border-gray-300 bg-customGray outline-none px-3 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 py-2"
                   />
                 </div>
 
@@ -108,7 +108,7 @@ const Contact = () => {
                     name="message"
                     rows="4"
                     required
-                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 py-2"
+                    className="mt-1 block w-full border-gray-300 bg-customGray outline-none px-3 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 py-2"
                   ></textarea>
                 </div>
 
