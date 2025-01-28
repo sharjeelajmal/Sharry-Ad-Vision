@@ -17,13 +17,12 @@ const UpHeader = () => {
     <div>
  <div className='flex justify-between md:px-16 bg-customGray pt-8 px-6'>
  <Image
-  src={'/logo.svg'}
+  src="/logo.svg"
   alt="Logo"
-  className="max-w-full max-h-12 sm:max-h-10 md:max-h-8"
-  height={90}
-  width={180}
+  className="w-20 h-10 sm:w-24 sm:h-12 md:w-32 md:h-16 lg:w-40 lg:h-20 xl:w-48 xl:h-24"
+  height={180} // Optional for Next.js optimization
+  width={180}  // Optional for Next.js optimization
 />
-
      {/* WhatsApp Button */}
             <Button
               onClick={handleWhatsAppRedirect}

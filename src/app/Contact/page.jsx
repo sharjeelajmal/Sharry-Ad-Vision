@@ -129,7 +129,7 @@ const Contact = () => {
               <div className="space-y-4">
                 <div className="flex items-center">
                   <MapPin className="h-6 w-6 text-blue-600 mr-4" />
-                  <p>123 Main Street, Sialkot, Pakistan</p>
+                  <p>48-52 Floodgate Street, Birmingham, West Midlands, B5 5SL</p>
                 </div>
 
                 <div className="flex items-center">
@@ -139,7 +139,7 @@ const Contact = () => {
 
                 <div className="flex items-center">
                   <Phone className="h-6 w-6 text-blue-600 mr-4" />
-                  <p>+92 333 1234567</p>
+                  <p>+447751497015</p>
                 </div>
               </div>
 
