@@ -62,7 +62,7 @@ const Services = () => {
       <h1 className="font-bold text-4xl text-center py-5">Our Services</h1>
       <StatsCards />
  
-      <h2 className="text-center my-7 sticky top-0  z-50"><span  className="bg-gradient-to-r from-teal-400 via-cyan-500 to-blue-600 text-white shadow-lg rounded-lg py-4 px-2 m-7 font-bold text-sm " >Want to Know Our Rates? Just Click the Icon!</span></h2>
+      <h2 className="text-center my-7 sticky top-0  z-40"><span  className="bg-gradient-to-r from-teal-400 via-cyan-500 to-blue-600 text-white shadow-lg rounded-lg py-4 px-2 m-7 font-bold text-sm " >Want to Know Our Rates? Just Click the Icon!</span></h2>
 
 
       {/* Services Grid with reduced column spacing */}
