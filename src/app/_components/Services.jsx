@@ -61,6 +61,9 @@ const Services = () => {
     <section className="mb-40">
       <h1 className="font-bold text-4xl text-center py-5">Our Services</h1>
       <StatsCards />
+ 
+      <h2 className="text-center my-7 sticky top-0  z-50"><span  className="bg-customGray py-4 px-6 m-7 text-xl " >Click On Icon To Know Rate Of Service</span></h2>
+
 
       {/* Services Grid with reduced column spacing */}
       <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 px-4">

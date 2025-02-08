@@ -15,7 +15,7 @@ const UpHeader = () => {
 
   return (
     <div>
- <div className='flex justify-between md:px-16 bg-customGray pt-8 px-6'>
+ <div className=' flex justify-between md:px-16 bg-customGray pt-8 px-6'>
  <Image
   src="/logo.svg"
   alt="Logo"

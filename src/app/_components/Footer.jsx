@@ -91,7 +91,7 @@ const Footer = () => {
           </div>
         </div>
       </div>
-      <p className='text-center mb-4'>© 2025 Sharry Ads Marketing. All Rights Reserved.
+      <p className='text-center mb-4'>© 2025 Sharry Ads Vision. All Rights Reserved.
       Built with ❤️ by Sharry Yar.</p>
     </footer>
   );

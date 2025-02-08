@@ -38,7 +38,7 @@ export default function NotificationPopup() {
               Tiktok Followers Rate Decreased
             </h2>
             <p className="text-gray-700 mb-6">
-              Price 2.43$ = 1k <br />
+              Price 2.44$ = 1k <br />
               ⚡ Recommended ✅ <br />
               ⚡ 100% Always working <br />
              ⭐ Start: 0-5 minutes / 1 hour <br />
