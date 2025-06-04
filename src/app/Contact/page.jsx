@@ -129,7 +129,7 @@ const Contact = () => {
               <div className="space-y-4">
                 <div className="flex items-center">
                   <MapPin className="h-6 w-6 text-blue-600 mr-4" />
-                  <p>48-52 Floodgate Street, Birmingham, West Midlands, B5 5SL</p>
+                  <p>Council More, Near Harappa Museum, Harappa City, District Sahiwal, Punjab</p>
                 </div>
 
                 <div className="flex items-center">
