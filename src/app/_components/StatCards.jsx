@@ -2,10 +2,10 @@ import { Users, ShoppingCart, Image, Code } from "lucide-react";
 
 export default function StatsCards() {
   const stats = [
-    { id: 1, label: "Users", value: "41,723", icon: <Users className="h-6 w-6 text-white" /> },
-    { id: 2, label: "Orders", value: "1,312,306", icon: <ShoppingCart className="h-6 w-6 text-white" /> },
-    { id: 3, label: "Designs Delivered", value: "8,450", icon: <Image className="h-6 w-6 text-white" /> },
-    { id: 4, label: "Websites Built", value: "320", icon: <Code className="h-6 w-6 text-white" /> },
+    { id: 1, label: "Users", value: "4123", icon: <Users className="h-6 w-6 text-white" /> },
+    { id: 2, label: "Orders", value: "1,12,306", icon: <ShoppingCart className="h-6 w-6 text-white" /> },
+    { id: 3, label: "Designs Delivered", value: "850", icon: <Image className="h-6 w-6 text-white" /> },
+    { id: 4, label: "Websites Built", value: "220", icon: <Code className="h-6 w-6 text-white" /> },
   ];
 
   return (

@@ -5,6 +5,7 @@ import Header from "./_components/Header";
 import UpHeader from "./_components/UpHeader";
 import Footer from "./_components/Footer";
 import NotificationPopup from "./_components/Alertmesage";
+import { Toaster } from 'react-hot-toast';
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -28,6 +29,7 @@ export default function RootLayout({ children }) {
         <UpHeader />
       <NotificationPopup/>
         {children}
+         <Toaster position="top-center" reverseOrder={false} />
         <Footer />
       </body>
     </html>

@@ -1,360 +1,267 @@
-// app/api/reviews/route.js
-export async function GET() {
- // Sample reviews data
-const reviews = [
+let reviews = [
   {
     id: 1,
-    name: "Sophia",
+    name: "Ayesha",
     rating: 5,
-    review: "Amazing experience! My business has grown significantly thanks to the social media marketing services. Highly recommend!",
-
+    review: "Bhai kamaal ka kaam kiya! Social media se business mein bohat faida hua."
   },
   {
     id: 2,
-    name: "Emma",
+    name: "Zainab",
     rating: 4,
-    review: "The website development services were top-notch. The team delivered a stunning website in no time.",
-  
+    review: "Website bohat khoobsurat bani hai. Team ne time pe deliver kiya."
   },
   {
     id: 3,
-    name: "Alice Johnson",
+    name: "Aleena",
     rating: 5,
-    review: "Great results with Facebook Ads! My followers grew exponentially in just a few weeks.",
-
+    review: "Facebook Ads ka zabardast result mila, followers din-b-din barh rahe hain!"
   },
   {
     id: 4,
-    name: "Jacob",
+    name: "Usman",
     rating: 4,
-    review: "Wonderful service! The graphics designing team really understood my brand vision.",
-
+    review: "Graphic designing mein unhone meri soch ko samjha, bohat acha kaam kiya."
   },
   {
     id: 5,
-    name: "Charlie Wilson",
+    name: "Bilal",
     rating: 5,
-    review: "The website I got developed is amazing. The team was really responsive to my needs.",
-
+    review: "Website design aur response dono kamaal ke the. Highly satisfied!"
   },
   {
     id: 6,
-    name: "David Miller",
+    name: "Hamza",
     rating: 5,
-    review: "I am extremely satisfied with the social media marketing services. My sales have improved a lot.",
-
+    review: "Social media marketing ka asar sach mein nazar aya, sales double ho gayi hain."
   },
   {
     id: 7,
-    name: "Emma Davis",
+    name: "Fatima",
     rating: 3,
-    review: "The graphics were good, but the turnaround time could be improved.",
-
+    review: "Graphics theek thay, lekin delivery mein thora delay tha."
   },
   {
     id: 8,
-    name: "Frank Moore",
+    name: "Rehan",
     rating: 5,
-    review: "Very happy with the digital marketing campaign. It has brought great traffic to my site.",
-
+    review: "Digital marketing campaign se website pe traffic kaafi barh gaya hai. Shukriya!"
   },
   {
     id: 9,
-    name: "Grace Lee",
+    name: "Sana",
     rating: 4,
-    review: "Good services overall. Would love to see more options for ads optimization.",
-
+    review: "Service achi thi, lekin ads optimization ke aur options hone chahiyein."
   },
   {
     id: 10,
-    name: "Hannah Taylor",
+    name: "Hira",
     rating: 5,
-    review: "The team is very professional. They handled everything smoothly and the website looks great!",
-   
+    review: "Team ne kaam bohat professional tareeqay se kiya. Website dekh ke dil khush ho gaya."
   },
   {
     id: 11,
-    name: "Ian Harris",
+    name: "Imran",
     rating: 4,
-    review: "The website design is fantastic. Would recommend them for web development.",
-
+    review: "Website design superb hai. Web development ke liye recommend zaroor karun ga."
   },
   {
     id: 12,
-    name: "Jack Wilson",
+    name: "Yasir",
     rating: 5,
-    review: "Great services at affordable prices. The social media strategies really work!",
-
+    review: "Affordable price mein excellent service. Social media strategy bohat kaam ki hai."
   },
   {
     id: 13,
-    name: "Kathy Brown",
+    name: "Nimra",
     rating: 3,
-    review: "Good, but could be more personalized to my business.",
- 
+    review: "Kaam acha tha, lekin thora aur personal touch hota tou mazeed acha lagta."
   },
   {
     id: 14,
-    name: "Leo Anderson",
+    name: "Adil",
     rating: 4,
-    review: "Overall great experience. I am seeing results from the campaign.",
-
+    review: "Overall acha experience raha. Campaign ka result samne aa raha hai."
   },
   {
     id: 15,
-    name: "Maggie Clark",
+    name: "Mehwish",
     rating: 5,
-    review: "Excellent service, everything from design to marketing was handled efficiently.",
-
+    review: "Har cheez design se le kar marketing tak efficiently handle hui. Zabardast!"
   },
   {
     id: 16,
-    name: "Nathan Moore",
+    name: "Noman",
     rating: 4,
-    review: "Quick and efficient, but would love more customization options.",
-
+    review: "Kaam fast aur effective tha, lekin customization options aur honay chahiyein."
   },
   {
     id: 17,
-    name: "Olivia Martinez",
+    name: "Iqra",
     rating: 5,
-    review: "This digital marketing agency is top-tier! I saw results in less than a week.",
-
+    review: "Digital marketing mein top-level results milein. Sirf ek haftay mein fark nazar aya!"
   },
   {
     id: 18,
-    name: "Paul Garcia",
+    name: "Salman",
     rating: 4,
-    review: "Very professional, good experience overall.",
-
+    review: "Bohat professional log hain. Achha experience raha overall."
   },
   {
     id: 19,
-    name: "Quincy Scott",
+    name: "Fahad",
     rating: 5,
-    review: "Incredible website development. Exceeded my expectations!",
-  
+    review: "Website development ne meri expectations se zyada deliver kiya!"
   },
   {
     id: 20,
-    name: "Rachel Turner",
+    name: "Mahnoor",
     rating: 4,
-    review: "Impressed with the design quality. The final website looks amazing.",
-
-  },
-  {
+    review: "Website ka design dekh ke khushi hui. Quality bohat achi thi."
+  }, {
     id: 21,
-    name: "Samuel Young",
+    name: "Shazia",
     rating: 5,
-    review: "Highly recommend these services. My business has benefited greatly.",
-  
+    review: "Designs itne creative thay ke clients bhi hairaan reh gaye. Aala kaam!"
   },
   {
     id: 22,
-    name: "Tina Harris",
-    rating: 5,
-    review: "Fantastic graphics design work, will definitely use them again.",
-
+    name: "Tariq",
+    rating: 4,
+    review: "Social media posts timely aur professional the. Sirf thoda aur engaging ho sakte thay."
   },
   {
     id: 23,
-    name: "Ursula Campbell",
-    rating: 4,
-    review: "The service was good, but a little pricey for the options provided.",
-
+    name: "Lubna",
+    rating: 5,
+    review: "Unhon ne mujhe zero se hero bana diya online! Shukriya team ko!"
   },
   {
     id: 24,
-    name: "Victor Allen",
+    name: "Zeeshan",
     rating: 3,
-    review: "Service was okay, but more variety in packages would be better.",
-
+    review: "Kaam theek tha, lekin communication mein thodi improvement ki zarurat hai."
   },
   {
     id: 25,
-    name: "Wendy Robinson",
+    name: "Bushra",
     rating: 5,
-    review: "Amazing work on our website! It looks so professional.",
-  
+    review: "Website ka UI itna sleek tha ke har koi tareef kar raha hai!"
   },
   {
     id: 26,
-    name: "Xander Moore",
+    name: "Haroon",
     rating: 4,
-    review: "Really good service, just a little slow at times.",
-
+    review: "Graphic designing ka kaam accha tha, magar revisions mein thoda waqt laga."
   },
   {
     id: 27,
-    name: "Yvonne Walker",
+    name: "Komal",
     rating: 5,
-    review: "I am thrilled with the outcome. My website is live and has a great design.",
-
+    review: "Social media pages ka makeover dekh kar khushi hui. Bohat acha experience!"
   },
   {
     id: 28,
-    name: "Zachary Green",
+    name: "Nadeem",
     rating: 4,
-    review: "Good quality work and professional service.",
- 
+    review: "Digital ads ka reach acha tha. Bas conversion aur barhane ki zarurat hai."
   },
   {
     id: 29,
-    name: "Amy Evans",
+    name: "Huma",
     rating: 5,
-    review: "The team was wonderful to work with. They understood my needs perfectly.",
-
+    review: "Responsive website aur SEO-friendly content—dono ne magic kar diya!"
   },
   {
     id: 30,
-    name: "Brandon King",
+    name: "Asad",
     rating: 4,
-    review: "Good results but still requires more improvement in the speed of service.",
-
+    review: "Kaam acha tha, lekin pehla draft utna strong nahi tha. Baad mein behtareen ban gaya."
   },
   {
     id: 31,
-    name: "Cynthia Lee",
+    name: "Sadia",
     rating: 5,
-    review: "Exceptional work! I will definitely use this service again.",
-
+    review: "Inki marketing ne mere online store ko Udaan de di. Highly impressed!"
   },
   {
     id: 32,
-    name: "Dennis Martin",
-    rating: 3,
-    review: "The service is good, but it can be improved in terms of cost-effectiveness.",
-
+    name: "Waqar",
+    rating: 4,
+    review: "Professional aur timely service. Thodi aur transparency hoti tou aur acha lagta."
   },
   {
     id: 33,
-    name: "Eleanor Clark",
+    name: "Marium",
     rating: 5,
-    review: "My brand's social presence has grown immensely thanks to the team!",
-
+    review: "Har banner, har ad design classy tha. 100 mein se 100 marks!"
   },
   {
     id: 34,
-    name: "Felix Carter",
-    rating: 4,
-    review: "Great experience overall. The website development process was smooth.",
-
+    name: "Taha",
+    rating: 3,
+    review: "Team achi thi, lekin mera project thoda late deliver hua."
   },
   {
     id: 35,
-    name: "Gina Stewart",
+    name: "Areeba",
     rating: 5,
-    review: "I'm so happy with my results. The services are exactly what I was looking for.",
-
+    review: "Instagram page ko inhon ne brand bana diya. Brilliant!"
   },
   {
     id: 36,
-    name: "Hank Evans",
-    rating: 3,
-    review: "I had some issues with customer service, but the website looks good.",
-
+    name: "Junaid",
+    rating: 5,
+    review: "Unki web development ne meri company ko ek nayi pehchan di."
   },
   {
     id: 37,
-    name: "Ivy Scott",
-    rating: 5,
-    review: "The team's work was phenomenal. They exceeded my expectations in every aspect.",
-
+    name: "Nazia",
+    rating: 4,
+    review: "Thoda budget high laga, lekin quality ne justify kar diya."
   },
   {
     id: 38,
-    name: "James Morgan",
-    rating: 4,
-    review: "Very happy with the final results. However, I'd suggest faster response times.",
-
+    name: "Rizwan",
+    rating: 5,
+    review: "Creative, sharp aur deadline pe kaam. Mujhe aur kya chahiye?"
   },
   {
     id: 39,
-    name: "Karen Perez",
-    rating: 5,
-    review: "Superb customer service. They really listened to my needs and delivered.",
-
+    name: "Amna",
+    rating: 4,
+    review: "Inka team friendly tha, lekin feedback ka process thoda slow tha."
   },
   {
     id: 40,
-    name: "Louis Wright",
-    rating: 4,
-    review: "Good services but a bit costly compared to competitors.",
-  
-  },
-  {
-    id: 41,
-    name: "Monica Adams",
+    name: "Shabbir",
     rating: 5,
-    review: "I would highly recommend this team! Their work is top quality.",
+    review: "Ads itne catchy thay ke log rukh kar dekhte thay. Superb design!"
+  }
 
-  },
-  {
-    id: 42,
-    name: "Nathan James",
-    rating: 4,
-    review: "Very good service, but there is room for improvement in speed.",
-   
-  },
-  {
-    id: 43,
-    name: "Olivia Campbell",
-    rating: 5,
-    review: "My business has flourished thanks to their expertise in digital marketing.",
-   
-  },
-  {
-    id: 44,
-    name: "Paul White",
-    rating: 3,
-    review: "The service was okay, but there were some hiccups in the process.",
-   
-  },
-  {
-    id: 45,
-    name: "Quincy Lee",
-    rating: 5,
-    review: "Excellent design and development services. Very happy with the results.",
-
-  },
-  {
-    id: 46,
-    name: "Riley Harris",
-    rating: 4,
-    review: "Good overall, but the customer service could be a bit faster.",
-  
-  },
-  {
-    id: 47,
-    name: "Sarah Wilson",
-    rating: 5,
-    review: "Incredible work on the marketing campaign. We saw a huge boost in traffic.",
- 
-  },
-  {
-    id: 48,
-    name: "Thomas Adams",
-    rating: 4,
-    review: "Good service overall. Could improve on turnaround time.",
- 
-  },
-  {
-    id: 49,
-    name: "Ursula Turner",
-    rating: 3,
-    review: "The service was decent, but not worth the price.",
-
-  },
-  {
-    id: 50,
-    name: "Victor King",
-    rating: 5,
-    review: "The digital marketing team was outstanding. We achieved excellent results.",
-
-  },
 ];
 
-  return new Response(JSON.stringify(reviews), {
-    headers: { "Content-Type": "application/json" },
-  });
+export async function GET() {
+  return Response.json(reviews);
+}
+
+export async function POST(request) {
+  const { name, rating, review } = await request.json();
+
+  if (!name || !rating || !review) {
+    return new Response(
+      JSON.stringify({ message: "Missing required fields" }),
+      { status: 400 }
+    );
+  }
+
+  const newReview = {
+    id: reviews.length + 1,
+    name,
+    rating,
+    review,
+  };
+
+  reviews.unshift(newReview); // Add to top
+  return new Response(JSON.stringify(newReview), { status: 201 });
 }
