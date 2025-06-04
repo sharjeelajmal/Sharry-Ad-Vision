@@ -1,11 +1,15 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+
+import { motion } from "framer-motion";
+import React, { useEffect, useState, useRef } from "react";
 import toast from "react-hot-toast";
 
 const Review = () => {
   const [reviews, setReviews] = useState([]);
   const [form, setForm] = useState({ name: "", rating: "", review: "" });
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
 
   const fetchReviews = async () => {
     try {
@@ -19,6 +23,17 @@ const Review = () => {
 
   useEffect(() => {
     fetchReviews();
+  }, []);
+
+  // Close dropdown on click outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const handleSubmit = async (e) => {
@@ -47,7 +62,11 @@ const Review = () => {
     }
   };
 
+  const ratingStars = (num) => "⭐".repeat(num) + "☆".repeat(5 - num);
+
   return (
+
+     
     <section className="my-10 bg-white">
       <h1 className="font-bold text-3xl sm:text-4xl text-center py-5">
         Customer Reviews
@@ -66,17 +85,55 @@ const Review = () => {
           className="w-full border p-2 rounded mb-3 bg-white"
           required
         />
-        <select
-          value={form.rating}
-          onChange={(e) => setForm({ ...form, rating: e.target.value })}
-          className="w-full border p-2 rounded mb-3 bg-white"
-          required
-        >
-          <option value="">Select Rating</option>
-          {[1, 2, 3, 4, 5].map((n) => (
-            <option key={n} value={n}>{n} Star</option>
-          ))}
-        </select>
+
+        {/* DaisyUI Dropdown for Rating */}
+        <div className="mb-3 w-full relative" ref={dropdownRef}>
+          <label className="block mb-1 font-medium text-gray-700">Select Rating</label>
+          <button
+            type="button"
+            onClick={() => setDropdownOpen((open) => !open)}
+            className="btn w-full bg-white border border-gray-300 text-gray-700 justify-between flex items-center"
+          >
+            {form.rating ? `${form.rating} Star${form.rating > 1 ? "s" : ""}` : "Select Rating"}
+            <svg
+              className={`ml-2 h-4 w-4 shrink-0 transition-transform duration-200 ${
+                dropdownOpen ? "rotate-180" : "rotate-0"
+              }`}
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+
+          {dropdownOpen && (
+            <ul
+              className="absolute z-50 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-48 overflow-auto"
+              role="listbox"
+              aria-labelledby="rating-label"
+            >
+              {[1, 2, 3, 4, 5].map((n) => (
+                <li key={n} role="option" aria-selected={form.rating === n.toString()}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setForm({ ...form, rating: n.toString() });
+                      setDropdownOpen(false);
+                    }}
+                    className={`w-full text-left px-4 py-2 hover:bg-blue-100 ${
+                      form.rating === n.toString() ? "bg-blue-200 font-semibold" : ""
+                    }`}
+                  >
+                    {n} Star{n > 1 ? "s" : ""}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
         <textarea
           placeholder="Your Review"
           value={form.review}
@@ -85,6 +142,7 @@ const Review = () => {
           rows={4}
           required
         />
+
         <button
           type="submit"
           className="w-full bg-blue-700 text-white py-2 rounded hover:bg-blue-800"
@@ -94,6 +152,7 @@ const Review = () => {
       </form>
 
       {/* REVIEWS */}
+    
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 px-4">
         {reviews.map((review) => (
           <div
@@ -102,14 +161,15 @@ const Review = () => {
           >
             <h3 className="font-semibold text-lg sm:text-xl my-2">{review.name}</h3>
             <p className="text-yellow-500 text-xs sm:text-sm my-2">
-              {"⭐".repeat(review.rating)}{" "}
-              {"☆".repeat(5 - review.rating)}
+              {ratingStars(review.rating)}
             </p>
             <p className="mt-2 text-xs sm:text-sm text-center">{review.review}</p>
           </div>
         ))}
       </div>
+   
     </section>
+  
   );
 };
 

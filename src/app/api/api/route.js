@@ -1,17 +1,20 @@
 // app/api/api.js
 export async function GET() {
   const servicesData = [
-    {
-      id: 1,
-      title: "Tiktok Followers",
-      description: `Price 2.44$ = 1k \n⚡ Recommended ✅\n ⚡100% Always working 💯\n⭐Start: 0-5 minutes / 1 hour\n🔥 Speed : Excelent \n ♻️Refill : Lifetime\n✅Cancel Button : Yes\n🔥Drop Ratio : 0%\n⭐ Link : Add Profile link`,
-      imageUrl: "/Tiktok.gif",
-    },
+{
+  id: 1,
+  title: "Tiktok Followers",
+  description: `Price {{price}} = 1k\n⚡ Recommended ✅\n⚡100% Always working 💯\n⭐Start: 0-5 minutes / 1 hour\n🔥 Speed : Excellent \n♻️Refill : Lifetime\n✅Cancel Button : Yes\n🔥Drop Ratio : 0%\n⭐ Link : Add Profile link`,
+  imageUrl: "/Tiktok.gif",
+  price: 900,
+},
+
     {
       id: 2,
       title: "Tiktok Likes",
-      description: `Price 0.54$ = 1k \n⚡ Recommended ✅\n ⚡Provider Rate - For API Users\n⭐Start : 0/5 minutes\n🔥Speed : Very Fast\n♻️Refill : Lifetime\n🔥Cancel Button : Yes\n✅Drop Ratio : 0%\n🔥Link : Add video link`,
+      description: `Price {{price}} = 1k \n⚡ Recommended ✅\n ⚡Provider Rate - For API Users\n⭐Start : 0/5 minutes\n🔥Speed : Very Fast\n♻️Refill : Lifetime\n🔥Cancel Button : Yes\n✅Drop Ratio : 0%\n🔥Link : Add video link`,
       imageUrl:   "/Tiktok.gif",
+        price: 140,
     },
     {
       id: 3,
@@ -21,7 +24,7 @@ export async function GET() {
     },
     {
       id: 4,
-      title: "Sponsored Views",
+      title: "TikTok Sponsored Views",
       description:`Price 5.02$ = 10k\n ⚡In this service \n⚡100% Real For You Views\n⭐Bonus Likes + Bonus Followers\n 🔥 Start time 1 to 24 hours\n ♻️Non Drop Lifetime Guarantee\n✅ Best Rates In Market 😍\n🔥Best For Monetisation 💲`,
       imageUrl:  "/Tiktok.gif",
     },
@@ -128,4 +131,16 @@ export async function GET() {
     status: 200,
     headers: { "Content-Type": "application/json" },
   });
+
 }
+
+
+
+
+
+
+
+
+
+
+

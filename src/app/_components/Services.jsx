@@ -4,115 +4,145 @@ import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import StatsCards from "./StatCards";
+import CurrencySelector from "./CurrencySelector";
 
 const Services = () => {
   const [services, setServices] = useState([]);
-  const [isLoading, setIsLoading] = useState(true); // Loader state
-  const [activeService, setActiveService] = useState(null); // State to track active service
+  const [filteredServices, setFilteredServices] = useState([]);
+  const [activeTab, setActiveTab] = useState("Tiktok");
+  const [isLoading, setIsLoading] = useState(true);
+  const [selectedCurrency, setSelectedCurrency] = useState("PKR");
+
+  const conversionRates = {
+    PKR: 1,
+    USD: 0.0036,
+    INR: 0.30,
+  };
+
+  const tabs = [
+    "Tiktok",
+    "Youtube",
+    "Facebook",
+    "Instagram",
+    "Website Development",
+    "Graphics Designing",
+    "X-Twitter",
+  ];
 
   useEffect(() => {
     const fetchServicesData = async () => {
       try {
-        const response = await fetch("/api/api"); // Correct API URL
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
+        const response = await fetch("/api/api");
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();
-        console.log("Fetched services data:", data);
         setServices(data);
+        filterServices("Tiktok", data);
       } catch (error) {
         console.error("Error fetching services data:", error);
       } finally {
-        setIsLoading(false); // Hide loader after fetch completes
+        setIsLoading(false);
       }
     };
 
     fetchServicesData();
   }, []);
 
+  const filterServices = (category, allServices = services) => {
+    const filtered = allServices.filter((service) =>
+      service.title.toLowerCase().includes(category.toLowerCase())
+    );
+    setFilteredServices(filtered);
+  };
+
+  const handleTabClick = (tab) => {
+    setActiveTab(tab);
+    filterServices(tab);
+  };
+
+  const convertPrice = (price) => {
+    const rate = conversionRates[selectedCurrency] || 1;
+    const converted = price * rate;
+    return converted % 1 === 0
+      ? converted.toFixed(0)
+      : converted.toFixed(2).replace(/0$/, "");
+  };
+
   if (isLoading) {
-    // Loader centered in the screen
     return (
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "100vh",
-        }}
-      >
-        <Image
-          src="/Loader.gif" // Replace with your loader GIF path
-          alt="Loading..."
-          width={100}
-          height={100}
-          unoptimized
-        />
+      <div className="flex justify-center items-center h-screen">
+        <Image src="/Loader.gif" alt="Loading..." width={100} height={100} unoptimized />
       </div>
     );
   }
-
-  // Function to handle card click
-  const handleCardClick = (id) => {
-    setActiveService(activeService === id ? null : id); // Toggle active service visibility
-  };
 
   return (
     <section className="mb-40">
       <h1 className="font-bold text-4xl text-center py-5">Our Services</h1>
       <StatsCards />
- 
-      <h2 className="text-center my-7 sticky top-0  z-40"><span  className="bg-gradient-to-r from-teal-400 via-cyan-500 to-blue-600 text-white shadow-lg rounded-lg py-4 px-2 m-7 font-bold text-sm " >Want to Know Our Rates? Just Click the Icon!</span></h2>
 
+      <h2 className="text-center my-7 sticky top-0 z-40">
+        <span className="bg-gradient-to-r from-teal-400 via-cyan-500 to-blue-600 text-white shadow-lg rounded-lg py-4 px-2 m-7 font-bold text-sm">
+          Want to Know Our Service Description? Just Click the Icon!
+        </span>
+      </h2>
 
-      {/* Services Grid with reduced column spacing */}
-      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 px-4">
-        {services.map((service) => (
-          <div
-            key={service.id}
-            onClick={() => handleCardClick(service.id)} // Toggle on click
-            className="group relative hover:scale-105 transition-all border border-gray-300 rounded-lg p-3 max-w-xs mx-auto cursor-pointer"
-            style={{
-              textAlign: "left",
-              margin: "8px", // Reduced margin
-            }}
+      <CurrencySelector
+        selectedCurrency={selectedCurrency}
+        setSelectedCurrency={setSelectedCurrency}
+      />
+
+      <div className="flex justify-center space-x-4 py-6 flex-wrap">
+        {tabs.map((tab) => (
+          <Button
+            key={tab}
+            variant={activeTab === tab ? "default" : "outline"}
+            onClick={() => handleTabClick(tab)}
+            className="capitalize mb-2"
           >
-            {/* Image */}
-            <div className="group-hover:block">
+            {tab}
+          </Button>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 px-4">
+        {filteredServices.map((service) => {
+          // Replace {{price}} placeholder dynamically in description
+          const dynamicDescription = service.description.replace(
+            /{{price}}/g,
+            `${convertPrice(Number(service.price))} ${selectedCurrency}`
+          );
+
+          return (
+            <div
+              key={service.id}
+              className="group relative hover:scale-105 transition-all border border-gray-300 rounded-lg p-3 max-w-xs mx-auto cursor-pointer"
+              style={{ textAlign: "left", margin: "8px" }}
+            >
               {service.imageUrl && (
                 <Image
                   src={service.imageUrl}
                   alt={service.title}
-                  width={140} // Reduced image width
-                  height={140} // Reduced image height
+                  width={140}
+                  height={140}
                   unoptimized
-                  style={{
-                    display: "block",
-                    margin: "0 auto",
-                    maxWidth: "100%",
-                  }}
+                  style={{ display: "block", margin: "0 auto", maxWidth: "100%" }}
                 />
               )}
+              <h2 className="font-bold text-xl mt-2 text-center">{service.title}</h2>
+              <p className="text-center text-sm text-gray-600">
+                Price: {convertPrice(service.price || 0)} {selectedCurrency} = 1k
+              </p>
+              <div className="absolute bottom-0 left-0 w-full p-3 bg-white opacity-0 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 transform translate-y-4 max-h-40 overflow-y-auto whitespace-pre-wrap">
+                {dynamicDescription.split("\n").map((line, index) => (
+                  <React.Fragment key={index}>
+                    {line}
+                    <br />
+                  </React.Fragment>
+                ))}
+              </div>
             </div>
-
-            {/* Title */}
-            <h2 className="font-bold text-xl mt-2">{service.title}</h2>
-
-            {/* Description */}
-            <div
-              className={`absolute bottom-0 left-0 w-full p-3 bg-white opacity-0 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 transform translate-y-4 ${
-                activeService === service.id ? "opacity-100 translate-y-0" : ""
-              }`}
-            >
-              {service.description.split("\n").map((line, index) => (
-                <React.Fragment key={index}>
-                  {line}
-                  <br />
-                </React.Fragment>
-              ))}
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </section>
   );
