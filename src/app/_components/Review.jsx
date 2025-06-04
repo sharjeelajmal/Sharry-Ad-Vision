@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
@@ -56,7 +55,7 @@ const Review = () => {
 
       {/* FORM */}
       <form
-        className="max-w-md mx-auto p-5 border rounded-lg shadow mb-10"
+        className="w-[95%] sm:w-[90%] md:w-[80%] lg:max-w-md mx-auto p-4 sm:p-5 border border-gray-200 bg-gray-50 rounded-xl shadow-md transition-all duration-300 mb-3"
         onSubmit={handleSubmit}
       >
         <input
@@ -64,13 +63,13 @@ const Review = () => {
           placeholder="Your Name"
           value={form.name}
           onChange={(e) => setForm({ ...form, name: e.target.value })}
-          className="w-full border p-2 rounded mb-3"
+          className="w-full border p-2 rounded mb-3 bg-white"
           required
         />
         <select
           value={form.rating}
           onChange={(e) => setForm({ ...form, rating: e.target.value })}
-          className="w-full border p-2 rounded mb-3"
+          className="w-full border p-2 rounded mb-3 bg-white"
           required
         >
           <option value="">Select Rating</option>
@@ -82,13 +81,13 @@ const Review = () => {
           placeholder="Your Review"
           value={form.review}
           onChange={(e) => setForm({ ...form, review: e.target.value })}
-          className="w-full border p-2 rounded mb-3"
+          className="w-full border p-2 rounded mb-3 bg-white"
           rows={4}
           required
         />
         <button
           type="submit"
-          className="w-full bg-black text-white py-2 rounded hover:bg-gray-800"
+          className="w-full bg-blue-700 text-white py-2 rounded hover:bg-blue-800"
         >
           Submit Review
         </button>
