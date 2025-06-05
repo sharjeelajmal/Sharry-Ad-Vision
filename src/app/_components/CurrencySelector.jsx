@@ -62,7 +62,7 @@ const CurrencySelector = ({ selectedCurrency, setSelectedCurrency }) => {
         </button>
 
         {isOpen && (
-          <ul className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-36 absolute mt-1 right-0">
+          <ul className="dropdown-content z-[1] menu p-2 shadow bg-slate-50 rounded-box w-36 absolute mt-1 right-0">
             {["PKR", "USD", "INR"].map((currency) => (
               <li key={currency}>
                 <button
