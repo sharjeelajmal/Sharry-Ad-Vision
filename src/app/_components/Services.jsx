@@ -84,7 +84,7 @@ const Services = () => {
   }
 
   return (
-    <section className="mb-40">
+    <section className="mb-10">
       <AnimatedSection>
         <h1 className="font-bold text-4xl text-center py-5">Our Services</h1>
         <StatsCards />
