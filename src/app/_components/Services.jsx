@@ -17,7 +17,7 @@ const Services = () => {
   const conversionRates = {
     PKR: 1,
     USD: 0.0036,
-    INR: 0.30,
+    INR: 0.3,
   };
 
   const tabs = [
@@ -25,16 +25,17 @@ const Services = () => {
     "Youtube",
     "Facebook",
     "Instagram",
+    "X-Twitter",
     "Website Development",
     "Graphics Designing",
-    "X-Twitter",
   ];
 
   useEffect(() => {
     const fetchServicesData = async () => {
       try {
         const response = await fetch("/api/api");
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        if (!response.ok)
+          throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();
         setServices(data);
         filterServices("Tiktok", data);
@@ -71,7 +72,13 @@ const Services = () => {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-screen">
-        <Image src="/Loader.gif" alt="Loading..." width={100} height={100} unoptimized />
+        <Image
+          src="/Loader.gif"
+          alt="Loading..."
+          width={100}
+          height={100}
+          unoptimized
+        />
       </div>
     );
   }
@@ -79,36 +86,38 @@ const Services = () => {
   return (
     <section className="mb-40">
       <AnimatedSection>
-      <h1 className="font-bold text-4xl text-center py-5">Our Services</h1>
-      <StatsCards />
-</AnimatedSection>
+        <h1 className="font-bold text-4xl text-center py-5">Our Services</h1>
+        <StatsCards />
+      </AnimatedSection>
       <h2 className="text-center my-7 sticky top-0 z-40">
-  <span className="bg-gradient-to-r from-teal-400 via-cyan-500 to-blue-600 text-white shadow-lg rounded-lg 
+        <span
+          className="bg-gradient-to-r from-teal-400 via-cyan-500 to-blue-600 text-white shadow-lg rounded-lg 
     py-2 px-2 sm:py-4 sm:px-4 
     mx-4 sm:mx-7 
-    font-semibold text-xs sm:text-sm">
-    Check Service Description? Just Click the Icon!
-  </span>
-</h2>
+    font-semibold text-xs sm:text-sm"
+        >
+          Check Service Description? Just Click the Icon!
+        </span>
+      </h2>
 
       <CurrencySelector
         selectedCurrency={selectedCurrency}
         setSelectedCurrency={setSelectedCurrency}
       />
       <AnimatedSection>
-      <div className="flex justify-center space-x-4 py-6 flex-wrap">
-        {tabs.map((tab) => (
-          <Button
-            key={tab}
-            variant={activeTab === tab ? "default" : "outline"}
-            onClick={() => handleTabClick(tab)}
-            className="capitalize mb-2"
-          >
-            {tab}
-          </Button>
-        ))}
-      </div>
-</AnimatedSection>
+        <div className="flex justify-center space-x-4 py-6 flex-wrap">
+          {tabs.map((tab) => (
+            <Button
+              key={tab}
+              variant={activeTab === tab ? "default" : "outline"}
+              onClick={() => handleTabClick(tab)}
+              className="capitalize mb-2"
+            >
+              {tab}
+            </Button>
+          ))}
+        </div>
+      </AnimatedSection>
       <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 px-4">
         {filteredServices.map((service) => {
           // Replace {{price}} placeholder dynamically in description
@@ -118,40 +127,43 @@ const Services = () => {
           );
 
           return (
-     <AnimatedSection>
-            <div
-              key={service.id}
-              className="group relative hover:scale-105 transition-all border border-gray-300 rounded-lg p-3 max-w-xs mx-auto cursor-pointer"
-              style={{ textAlign: "left", margin: "8px" }}
-            > 
-                  
-              {service.imageUrl && (
-                <Image
-                  src={service.imageUrl}
-                  alt={service.title}
-                  width={140}
-                  height={140}
-                  unoptimized
-                  style={{ display: "block", margin: "0 auto", maxWidth: "100%" }}
-                />
-              )}
-              <h2 className="font-bold text-xl mt-2 text-center">{service.title}</h2>
-              <p className="text-center text-sm text-gray-600">
-                Price: {convertPrice(service.price || 0)} {selectedCurrency} = 1k
-              </p>
-              <div className="absolute bottom-0 left-0 w-full p-3 bg-white opacity-0 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 transform translate-y-4 max-h-40 overflow-y-auto whitespace-pre-wrap text-xs sm:text-sm">
-
-                {dynamicDescription.split("\n").map((line, index) => (
-                  <React.Fragment key={index}>
-                    {line}
-                    <br />
-                  </React.Fragment>
-                ))}
-            
+            <AnimatedSection>
+              <div
+                key={service.id}
+                className="group relative hover:scale-105 transition-all border border-gray-300 rounded-lg p-3 max-w-xs mx-auto cursor-pointer"
+                style={{ textAlign: "left", margin: "8px" }}
+              >
+                {service.imageUrl && (
+                  <Image
+                    src={service.imageUrl}
+                    alt={service.title}
+                    width={140}
+                    height={140}
+                    unoptimized
+                    style={{
+                      display: "block",
+                      margin: "0 auto",
+                      maxWidth: "100%",
+                    }}
+                  />
+                )}
+                <h2 className="font-bold text-xl mt-2 text-center">
+                  {service.title}
+                </h2>
+                <p className="text-center text-sm text-gray-600">
+                  Price: {convertPrice(service.price || 0)} {selectedCurrency} =
+                  1k
+                </p>
+                <div className="absolute bottom-0 left-0 w-full p-3 bg-white opacity-0 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 transform translate-y-4 max-h-40 overflow-y-auto whitespace-pre-wrap text-xs sm:text-sm">
+                  {dynamicDescription.split("\n").map((line, index) => (
+                    <React.Fragment key={index}>
+                      {line}
+                      <br />
+                    </React.Fragment>
+                  ))}
+                </div>
               </div>
-             
-            </div>
-     </AnimatedSection>
+            </AnimatedSection>
           );
         })}
       </div>
