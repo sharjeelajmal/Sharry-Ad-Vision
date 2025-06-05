@@ -90,7 +90,7 @@ const Review = () => {
 
         {/* DaisyUI Dropdown for Rating */}
         <div className="mb-3 w-full relative" ref={dropdownRef}>
-          <label className="block mb-1 font-mediumbg-white text-gray-700">Select Rating</label>
+          <label className="block mb-1 font-mediumbg-white bg-white text-gray-700">Select Rating</label>
           <button
             type="button"
             onClick={() => setDropdownOpen((open) => !open)}
