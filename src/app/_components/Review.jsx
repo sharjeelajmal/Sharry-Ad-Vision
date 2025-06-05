@@ -1,9 +1,8 @@
 "use client";
 
-
-import { motion } from "framer-motion";
 import React, { useEffect, useState, useRef } from "react";
 import toast from "react-hot-toast";
+import AnimatedSection from "./AnimatedSection";
 
 const Review = () => {
   const [reviews, setReviews] = useState([]);
@@ -68,11 +67,14 @@ const Review = () => {
 
      
     <section className="my-10 bg-white">
+
+      <AnimatedSection>
       <h1 className="font-bold text-3xl sm:text-4xl text-center py-5">
         Customer Reviews
       </h1>
-
+</AnimatedSection>
       {/* FORM */}
+           <AnimatedSection>
       <form
         className="w-[95%] sm:w-[90%] md:w-[80%] lg:max-w-md mx-auto p-4 sm:p-5 border border-gray-200 bg-gray-50 rounded-xl shadow-md transition-all duration-300 mb-3"
         onSubmit={handleSubmit}
@@ -150,11 +152,12 @@ const Review = () => {
           Submit Review
         </button>
       </form>
-
+</AnimatedSection>
       {/* REVIEWS */}
-    
+
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 px-4">
         {reviews.map((review) => (
+  <AnimatedSection>
           <div
             key={review.id}
             className="p-3 sm:p-5 border rounded-lg shadow flex flex-col items-center"
@@ -165,9 +168,10 @@ const Review = () => {
             </p>
             <p className="mt-2 text-xs sm:text-sm text-center">{review.review}</p>
           </div>
+          </AnimatedSection>
         ))}
       </div>
-   
+
     </section>
   
   );

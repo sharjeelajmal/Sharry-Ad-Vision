@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 
 import React from "react";
+import AnimatedSection from "../_components/AnimatedSection";
 
 const Contact = () => {
   const handleWhatsAppRedirect = () => {
@@ -25,6 +26,7 @@ const Contact = () => {
   return (
     <div className="bg-customGray p-8 ">
       <div className="  md:px-36">
+        <AnimatedSection>
         <div className="hero-content flex-col lg:flex-row-reverse">
           <img src="contact.svg" className="hidden md:flex md:max-w-sm" />
           <div>
@@ -44,21 +46,24 @@ const Contact = () => {
             </Button>
           </div>
         </div>
+        </AnimatedSection>
       </div>
-
+    
       <div className="min-h-screen bg-gray-50">
         {/* Page Header */}
+            <AnimatedSection>
         <header className="bg-blue-600 text-white py-8 text-center">
           <h1 className="text-4xl font-bold">Contact Us</h1>
           <p className="mt-2">
             We’d love to hear from you. Feel free to reach out!
           </p>
         </header>
-
+</AnimatedSection>
         {/* Contact Form and Info Section */}
         <div className="max-w-6xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             {/* Contact Form */}
+              <AnimatedSection>
             <div>
               <h2 className="text-2xl font-semibold text-gray-800 mb-4">
                 Send us a Message
@@ -120,8 +125,9 @@ const Contact = () => {
                 </button>
               </form>
             </div>
-
+</AnimatedSection>
             {/* Contact Info */}
+                   <AnimatedSection>
             <div>
               <h2 className="text-2xl font-semibold text-gray-800 mb-4">
                 Contact Information
@@ -176,9 +182,11 @@ const Contact = () => {
                 </div>
               </div>
             </div>
+            </AnimatedSection>
           </div>
         </div>
       </div>
+
     </div>
   );
 };

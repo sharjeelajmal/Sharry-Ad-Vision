@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-
+import AnimatedSection from "./AnimatedSection";
 const currencyIcons = {
   PKR: "₨",
   USD: "$",
@@ -37,6 +37,7 @@ const CurrencySelector = ({ selectedCurrency, setSelectedCurrency }) => {
 
   return (
     <div className="flex justify-center mb-3" ref={dropdownRef}>
+          <AnimatedSection>
       <div className="relative inline-block text-left">
         <button
           type="button"
@@ -78,6 +79,7 @@ const CurrencySelector = ({ selectedCurrency, setSelectedCurrency }) => {
           </ul>
         )}
       </div>
+      </AnimatedSection>
     </div>
   );
 };

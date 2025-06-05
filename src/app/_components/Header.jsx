@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation'; // For Next.js 13+ compatibility
 import { Button } from '@/components/ui/button';
 import { House, Compass, Phone } from 'lucide-react'; // Icons
+import AnimatedSection from "./AnimatedSection";
 
 const Header = () => {
   const pathname = usePathname(); // Get the current pathname
@@ -39,12 +40,15 @@ const Header = () => {
 
   return (
     <div className="fixed bottom-10 left-1/2 transform -translate-x-1/2 w-full md:w-9/12 flex items-center justify-center px-4 z-50 sm:w-3/5">
+
       <div className="flex flex-wrap items-center gap-4 p-5 justify-between shadow-sm border rounded-full bg-white w-full">
         {/* Logo */}
+        <AnimatedSection>
         <Image src={'/logo.svg'} height={90} width={140} alt="Logo" className="md:flex hidden" />
-
+</AnimatedSection>
         {/* Menu */}
         <div>
+           <AnimatedSection>
           <ul className="flex justify-center gap-7">
             {Menu.map((item) => (
               <Link href={item.path} key={item.id}>
@@ -67,15 +71,18 @@ const Header = () => {
               </Link>
             ))}
           </ul>
+          </AnimatedSection>
         </div>
 
         {/* WhatsApp Button */}
+                <AnimatedSection>
         <Button
   onClick={handleWhatsAppRedirect}
   className="active:scale-95 hover:scale-105 transition-all ease-out hidden md:block"
 >
   WhatsApp
 </Button>
+</AnimatedSection>
       </div>
     </div>
   );

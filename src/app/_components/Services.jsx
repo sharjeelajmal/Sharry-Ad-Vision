@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import StatsCards from "./StatCards";
 import CurrencySelector from "./CurrencySelector";
+import AnimatedSection from "./AnimatedSection";
 
 const Services = () => {
   const [services, setServices] = useState([]);
@@ -77,20 +78,24 @@ const Services = () => {
 
   return (
     <section className="mb-40">
+      <AnimatedSection>
       <h1 className="font-bold text-4xl text-center py-5">Our Services</h1>
       <StatsCards />
-
+</AnimatedSection>
       <h2 className="text-center my-7 sticky top-0 z-40">
-        <span className="bg-gradient-to-r from-teal-400 via-cyan-500 to-blue-600 text-white shadow-lg rounded-lg py-4 px-2 m-7 font-bold text-sm">
-          Want to Know Our Service Description? Just Click the Icon!
-        </span>
-      </h2>
+  <span className="bg-gradient-to-r from-teal-400 via-cyan-500 to-blue-600 text-white shadow-lg rounded-lg 
+    py-2 px-2 sm:py-4 sm:px-4 
+    mx-4 sm:mx-7 
+    font-semibold text-xs sm:text-sm">
+    Want to Know Our Service Description? Just Click the Icon!
+  </span>
+</h2>
 
       <CurrencySelector
         selectedCurrency={selectedCurrency}
         setSelectedCurrency={setSelectedCurrency}
       />
-
+      <AnimatedSection>
       <div className="flex justify-center space-x-4 py-6 flex-wrap">
         {tabs.map((tab) => (
           <Button
@@ -103,7 +108,7 @@ const Services = () => {
           </Button>
         ))}
       </div>
-
+</AnimatedSection>
       <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 px-4">
         {filteredServices.map((service) => {
           // Replace {{price}} placeholder dynamically in description
@@ -113,11 +118,13 @@ const Services = () => {
           );
 
           return (
+     <AnimatedSection>
             <div
               key={service.id}
               className="group relative hover:scale-105 transition-all border border-gray-300 rounded-lg p-3 max-w-xs mx-auto cursor-pointer"
               style={{ textAlign: "left", margin: "8px" }}
-            >
+            > 
+                  
               {service.imageUrl && (
                 <Image
                   src={service.imageUrl}
@@ -139,8 +146,11 @@ const Services = () => {
                     <br />
                   </React.Fragment>
                 ))}
+            
               </div>
+             
             </div>
+     </AnimatedSection>
           );
         })}
       </div>

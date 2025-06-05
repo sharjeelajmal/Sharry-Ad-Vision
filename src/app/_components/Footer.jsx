@@ -1,9 +1,11 @@
 import React from 'react';
+import AnimatedSection from "./AnimatedSection";
 import { Facebook, Instagram,Github , Linkedin } from 'lucide-react'; // Import Lucide React icons
 
 const Footer = () => {
   return (
     <footer className="bg-white pb-40">
+      <AnimatedSection>
       <div className="mx-auto max-w-screen-xl px-4 pb-8 pt-16 sm:px-6 lg:px-8">
         {/* Email Subscription Section */}
         <div className="mx-auto max-w-md">
@@ -93,6 +95,7 @@ const Footer = () => {
       </div>
       <p className='text-center mb-4'>© 2025 Sharry Ads Vision. All Rights Reserved.
       Built with ❤️ by Sharry Yar.</p>
+      </AnimatedSection>
     </footer>
   );
 };

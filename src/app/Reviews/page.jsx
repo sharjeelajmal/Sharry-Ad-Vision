@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import React from 'react';
 import Review from '../_components/Review';
-
+import AnimatedSection from "../_components/AnimatedSection";
 
 const Reviews = () => {
   const handleWhatsAppRedirect = () => {
@@ -21,14 +21,16 @@ const Reviews = () => {
       <div className="md:px-36">
         <div className="hero-content flex-col lg:flex-row-reverse">
           {/* Image Section */}
+          <AnimatedSection>
           <Image
             src="reviews.svg"
             width={500}
             height={500}
             className="hidden md:flex md:max-w-sm"
             alt="Reviews Illustration"
-          />
+          /></AnimatedSection>
           {/* Text Section */}
+                 <AnimatedSection>
           <div>
             <h1 className="text-5xl font-bold">
               Customer Reviews | Honest Feedback About Our SMM Panel
@@ -47,6 +49,7 @@ const Reviews = () => {
               WhatsApp
             </Button>
           </div>
+          </AnimatedSection>
         </div>
       </div>
 
