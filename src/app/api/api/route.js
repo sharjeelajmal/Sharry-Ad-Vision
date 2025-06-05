@@ -52,21 +52,21 @@ export async function GET() {
       price: 170,
     },
     {
-      id: 7,
+      id: 8,
       title: "TikTok Sponsored Views",
       description: `Price {{price}} = 1k\n ⚡In this service \n⚡100% Real For You Views\n⭐Bonus Likes + Bonus Followers\n 🔥 Start time 1 to 24 hours\n ♻️Non Drop Lifetime Guarantee\n✅ Best Rates In Market 😍\n🔥Best For Monetisation 💲`,
       imageUrl: "/Tiktok.gif",
       price: 200,
     },
       {
-      id: 7,
+      id: 9,
       title: "TikTok Comments",
       description: `Price {{price}} = 1k\n ⚡In this service \n⚡100% Real For You Views\n⭐Bonus Likes + Bonus Followers\n 🔥 Start time 0 -1 hours\n ♻️Non Drop Lifetime Guarantee\n✅ Best Rates In Market 😍\n🔥Best For Monetisation 💲`,
       imageUrl: "/Tiktok.gif",
       price: "Not Available",
     },
       {
-      id: 7,
+      id: 10,
       title: "TikTok Comments",
       description: `Price {{price}} = 1k\n ⚡In this service \n⚡100% Real For You Views\n⭐Bonus Likes + Bonus Followers\n 🔥 Start time 0 -1 hours\n ♻️Non Drop Lifetime Guarantee\n✅ Best Rates In Market 😍\n🔥Best For Monetisation 💲`,
       imageUrl: "/Tiktok.gif",
@@ -75,8 +75,9 @@ export async function GET() {
     {
       id: 5,
       title: "Youtube Subscribers",
-      description: `Price 5.38$ = 1k\n⚡Start: 0-1 Hours\n⚡Speed: ⚡Medium\n⭐ Recommended\n🔥 Non Drop\n♻️ Refill Button Active\n✅ Lifetime Refill\n🔥 Always working `,
+      description: `Price {{price}} = 1k\n⚡Start: 0-1 Hours\n⚡Speed: ⚡Medium\n⭐ Recommended\n🔥 Non Drop\n♻️ Refill Button Active\n✅ Lifetime Refill\n🔥 Always working `,
       imageUrl: "/Youtube.gif",
+      price: 280,
     },
     {
       id: 6,
