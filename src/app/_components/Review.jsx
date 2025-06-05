@@ -90,12 +90,12 @@ const Review = () => {
 
         {/* DaisyUI Dropdown for Rating */}
         <div className="mb-3 w-full relative" ref={dropdownRef}>
-          <label className="block mb-1 font-medium active:bg-white text-gray-700">Select Rating</label>
+    <label className="block mb-1 font-medium text-gray-700 bg-white dark:bg-white">Select Rating</label>
           <button
             type="button"
             onClick={() => setDropdownOpen((open) => !open)}
             className="btn w-full bg-white border border-gray-300 text-gray-700 justify-between flex items-center"
-          >
+           >
             {form.rating ? `${form.rating} Star${form.rating > 1 ? "s" : ""}` : "Select Rating"}
             <svg
               className={`ml-2 h-4 w-4 shrink-0 transition-transform duration-200 ${
