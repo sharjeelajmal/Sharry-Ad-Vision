@@ -66,7 +66,7 @@ const CurrencySelector = ({ selectedCurrency, setSelectedCurrency }) => {
             {["PKR", "USD", "INR"].map((currency) => (
               <li key={currency}>
                 <button
-                  className={`flex items-center space-x-2 w-full text-left px-2 py-1 rounded hover:bg-gray-200 ${
+                  className={`flex items-center space-x-2 w-full text-left px-2 py-1 rounded bg-slate-50 hover:bg-gray-200 ${
                     selectedCurrency === currency ? "font-bold text-primary" : ""
                   }`}
                   onClick={() => handleSelect(currency)}
