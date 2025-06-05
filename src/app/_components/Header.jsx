@@ -41,7 +41,7 @@ const Header = () => {
   return (
     <div className="fixed bottom-10 left-1/2 transform -translate-x-1/2 w-full md:w-9/12 flex items-center justify-center px-4 z-50 sm:w-3/5">
 
-      <div className="flex flex-wrap items-center gap-4 p-5 justify-between shadow-sm border rounded-full bg-white w-full">
+      <div className="flex flex-wrap items-center gap-4 p-3 md:p-5 justify-between shadow-sm border rounded-full bg-white w-full">
         {/* Logo */}
         <AnimatedSection>
         <Image src={'/logo.svg'} height={90} width={140} alt="Logo" className="md:flex hidden" />

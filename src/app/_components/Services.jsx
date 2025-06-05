@@ -139,7 +139,8 @@ const Services = () => {
               <p className="text-center text-sm text-gray-600">
                 Price: {convertPrice(service.price || 0)} {selectedCurrency} = 1k
               </p>
-              <div className="absolute bottom-0 left-0 w-full p-3 bg-white opacity-0 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 transform translate-y-4 max-h-40 overflow-y-auto whitespace-pre-wrap">
+              <div className="absolute bottom-0 left-0 w-full p-3 bg-white opacity-0 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 transform translate-y-4 max-h-40 overflow-y-auto whitespace-pre-wrap text-xs sm:text-sm">
+
                 {dynamicDescription.split("\n").map((line, index) => (
                   <React.Fragment key={index}>
                     {line}
