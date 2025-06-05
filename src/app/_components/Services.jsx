@@ -87,7 +87,7 @@ const Services = () => {
     py-2 px-2 sm:py-4 sm:px-4 
     mx-4 sm:mx-7 
     font-semibold text-xs sm:text-sm">
-    Want to Know Our Service Description? Just Click the Icon!
+    Check Service Description? Just Click the Icon!
   </span>
 </h2>
 
