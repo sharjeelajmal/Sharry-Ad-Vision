@@ -6,14 +6,16 @@ export async function GET() {
       title: "Tiktok Followers",
       description: `Price {{price}} = 1k\n⚡ Recommended ✅\n⚡100% Always working 💯\n⭐Start: 0-5 minutes / 1 hour\n🔥 Speed : Excellent \n♻️Refill : Lifetime\n🔥Drop Ratio : 0%\n⭐ Link : Add Profile link`,
       imageUrl: "/Tiktok.gif",
-      price: 560,
+      price: 880,
+      quantity: "1k",
     },
     {
       id: 2,
       title: "Tiktok Followers 🇵🇰",
       description: `Price {{price}} = 1k\n⚡ Recommended ✅\n⚡100% Always working 💯\n⭐Start: 0-5 minutes / 1 hour\n🔥 Speed : Slow \n♻️Refill : Lifetime\n🔥Drop Ratio : 0%\n⭐ Link : Add Profile link`,
       imageUrl: "/Tiktok.gif",
-      price: 850,
+      price: 900,
+      quantity: "1k",
     },
 
     {
@@ -22,6 +24,7 @@ export async function GET() {
       description: `Price {{price}} = 1k \n⚡ Recommended ✅\n⭐Start: 0-5 minutes / 1 hour\n🔥Speed : Very Fast\n♻️Refill : Lifetime\n✅Drop Ratio : 0%\n🔥Link : Add video link`,
       imageUrl: "/Tiktok.gif",
       price: 140,
+      quantity: "1k",
     },
     {
       id: 4,
@@ -29,6 +32,7 @@ export async function GET() {
       description: `Price {{price}} = 1k \n⚡ Recommended ✅\n⭐Start: 0-5 minutes / 1 hour\n🔥Speed : Slow \n♻️Refill : Lifetime\n✅Drop Ratio : 0%\n🔥Link : Add video link`,
       imageUrl: "/Tiktok.gif",
       price: 280,
+      quantity: "1k",
     },
     {
       id: 5,
@@ -36,6 +40,7 @@ export async function GET() {
       description: `Price {{price}} = 1k\n⚡Start: 0-1 Minutes\n⚡Speed: ⚡ Ultra Fast Speed\n⭐ Recommended\n🔥 Non Drop\n✅ Lifetime Refill\n🔥 Always working`,
       imageUrl: "/Tiktok.gif",
       price: 10,
+      quantity: "1k",
     },
     {
       id: 6,
@@ -43,20 +48,23 @@ export async function GET() {
       description: `Price {{price}} = 1k\n⚡Start: 0-1 Minutes\n⚡Speed: ⚡Fast Speed\n⭐ Recommended\n🔥 Non Drop\n✅ Lifetime Refill\n🔥 Always working`,
       imageUrl: "/Tiktok.gif",
       price: 5,
+      quantity: "1k",
     },
     {
       id: 7,
       title: "TikTok Sponsored Views",
       description: `Price {{price}} = 1k\n ⚡In this service \n⚡100% Real For You Views\n⭐Bonus Likes + Bonus Followers\n 🔥 Start time 1 to 24 hours\n ♻️Non Drop Lifetime Guarantee\n✅ Best Rates In Market 😍\n🔥Best For Monetisation 💲`,
       imageUrl: "/Tiktok.gif",
-      price: 170,
+      price: 950,
+      quantity: "10k",
     },
     {
       id: 8,
       title: "TikTok Sponsored Views",
       description: `Price {{price}} = 1k\n ⚡In this service \n⚡100% Real For You Views\n⭐Bonus Likes + Bonus Followers\n 🔥 Start time 1 to 24 hours\n ♻️Non Drop Lifetime Guarantee\n✅ Best Rates In Market 😍\n🔥Best For Monetisation 💲`,
       imageUrl: "/Tiktok.gif",
-      price: 200,
+      price: 800,
+      quantity: "10k",
     },
     {
       id: 9,
@@ -64,6 +72,7 @@ export async function GET() {
       description: `Price {{price}} = 1k\n ⚡In this service \n⚡100% Real For You Views\n⭐Bonus Likes + Bonus Followers\n 🔥 Start time 0 -1 hours\n ♻️Non Drop Lifetime Guarantee\n✅ Best Rates In Market 😍\n🔥Best For Monetisation 💲`,
       imageUrl: "/Tiktok.gif",
       price: "Not Available",
+      quantity: "1k",
     },
     {
       id: 10,
@@ -71,6 +80,7 @@ export async function GET() {
       description: `Price {{price}} = 1k\n ⚡In this service \n⚡100% Real For You Views\n⭐Bonus Likes + Bonus Followers\n 🔥 Start time 0 -1 hours\n ♻️Non Drop Lifetime Guarantee\n✅ Best Rates In Market 😍\n🔥Best For Monetisation 💲`,
       imageUrl: "/Tiktok.gif",
       price: "Not Available",
+      quantity: "1k",
     },
     {
       id: 11,
@@ -78,6 +88,7 @@ export async function GET() {
       description: `Price {{price}} = 1k\n⚡Start: 0-1 Hours\n⚡Speed: ⚡Medium\n⭐ Recommended\n🔥 Non Drop\n♻️ Refill Button Active\n✅ Lifetime Refill\n🔥 Always working `,
       imageUrl: "/Youtube.gif",
       price: 900,
+      quantity: "1k",
     },
     {
       id: 12,
@@ -85,6 +96,7 @@ export async function GET() {
       description: `Price {{price}} = 1k\n⚡Start: 0-1 Hours\n⚡Speed: ⚡Medium\n⭐ Recommended\n🔥 Non Drop\n♻️ Refill Button Active\n✅ Lifetime Refill\n🔥 Always working `,
       imageUrl: "/Youtube.gif",
       price: 1100,
+      quantity: "1k",
     },
     {
       id: 13,
@@ -92,6 +104,7 @@ export async function GET() {
       description: `Price {{price}} = 1k\n⚡Start: 0-5 Minutes\n⚡Speed: ⚡ Ultra Fast Speed\n⭐ Recommended\n🔥 Non Drop\n✅ Lifetime Refill\n🔥 Always working`,
       imageUrl: "/Youtube.gif",
       price: 180,
+      quantity: "1k",
     },
     {
       id: 14,
@@ -99,6 +112,7 @@ export async function GET() {
       description: `Price {{price}} = 1k\n⚡Start: 0-5 Minutes\n⚡Speed: ⚡ Ultra Fast Speed\n⭐ Recommended\n🔥 Non Drop\n✅ Lifetime Refill\n🔥 Always working`,
       imageUrl: "/Youtube.gif",
       price: 280,
+      quantity: "1k",
     },
     {
       id: 15,
@@ -106,6 +120,7 @@ export async function GET() {
       description: `Price {{price}} = 1k\n ⚡Recommended ✅\n ⚡100% Always working 💯\n⭐Start: 0-1 hour\n🔥 Speed : Slow \n♻️Refill : Lifetime\n🔥Drop Ratio : 0%\n🔥Link : Add Video link`,
       imageUrl: "/Youtube.gif",
       price: 300,
+      quantity: "1k",
     },
     {
       id: 16,
@@ -113,6 +128,7 @@ export async function GET() {
       description: `Price {{price}} = 1k\n ⚡Recommended ✅\n ⚡100% Always working 💯\n⭐Start: 0-1 hour\n🔥 Speed : Fast \n♻️Refill : Lifetime\n🔥Drop Ratio : 0%\n🔥Link : Add Video link`,
       imageUrl: "/Youtube.gif",
       price: 350,
+      quantity: "1k",
     },
     {
       id: 17,
@@ -120,6 +136,7 @@ export async function GET() {
       description: `Price {{price}} = 1k\n ⚡Start Time: 0-1 Hour !\n⚡Link: Page Link (Must have like button)\n⭐Location: Pakistani\n🔥Speed: Fast\n♻️Refill : Lifetime\n✅Best Rates In Market 😍\n🔥Best For Monetisation 💲`,
       imageUrl: "/Facebook.gif",
       price: 350,
+      quantity: "1k",
     },
     {
       id: 18,
@@ -127,6 +144,7 @@ export async function GET() {
       description: `Price {{price}} = 1k\n⚡Start Time: 0-5 Hour !\n⚡Link: Profile Link\n⭐Location: Global\n🔥 Speed: Fast\n♻️Refill : Lifetime\n✅Best Rates In Market 😍`,
       imageUrl: "/Facebook.gif",
       price: 300,
+      quantity: "1k",
     },
     {
       id: 19,
@@ -134,6 +152,7 @@ export async function GET() {
       description: `Price {{price}} = 1k\n ⚡Start Time: 0-1 Hour\n⚡Link: Post Link \n⭐Location: Global\n⚡Speed: ⚡ Ultra Fast Speed\n♻️Refill: Yes Lifetime \n✅Best Rates In Market 😍`,
       imageUrl: "/Facebook.gif",
       price: 300,
+      quantity: "1k",
     },
     {
       id: 20,
@@ -141,6 +160,7 @@ export async function GET() {
       description: `Price {{price}} = 1k\n ⚡Start Time: 0-1 Hour\n⚡Link: Post Link \n⭐Location: Global\n⚡Speed: ⚡ Ultra Fast Speed\n♻️Refill: Yes Lifetime \n✅Best Rates In Market 😍`,
       imageUrl: "/Facebook.gif",
       price: 350,
+      quantity: "1k",
     },
     {
       id: 21,
@@ -148,6 +168,7 @@ export async function GET() {
       description: `Price {{price}} = 1k\n ⚡Start Time: 0-1 Hour !\n ✅Video length should be at-least 6 seconds\n ✅View retention - 3 seconds\n Works for Reels as well\n ⚡Speed: Super Fast`,
       imageUrl: "/Facebook.gif",
       price: 140,
+      quantity: "1k",
     },
     {
       id: 22,
@@ -155,6 +176,7 @@ export async function GET() {
       description: `Price {{price}} = 1k\n ⚡Start Time: 0-1 Hour !\n ✅Video length should be at-least 6 seconds\n ✅View retention - 3 seconds\n Works for Reels as well\n ⚡Speed: Super Fast`,
       imageUrl: "/Facebook.gif",
       price: 180,
+      quantity: "1k",
     },
     {
       id: 23,
@@ -162,6 +184,7 @@ export async function GET() {
       description: `Price {{price}} = 1k\n ⚡Start Time: 0-1 Hour !\n🚨 If flag is on and you place the order no refill or refund would be provided \n⚡Speed - Excellent \n⭐Quality - 15+ Posts and 1 year old accounts\n♻️Drop Ratio - 0 - 5%\n✅Refill - Lifetime Guarantee\n🔥Link - Instagram Profile URL `,
       imageUrl: "/Instagram.gif",
       price: 450,
+      quantity: "1k",
     },
     {
       id: 24,
@@ -169,6 +192,7 @@ export async function GET() {
       description: `Price {{price}} = 1k\n ⚡Start Time: 0-1 Hour !\n🚨 If flag is on and you place the order no refill or refund would be provided \n⚡Speed - Super Ultra Fast \n⭐Quality - 15+ Posts and 1 year old accounts\n♻️Drop Ratio - 0 - 5%\n✅Refill - Lifetime Guarantee\n🔥Link - Instagram Profile URL `,
       imageUrl: "/Instagram.gif",
       price: 550,
+      quantity: "1k",
     },
     {
       id: 25,
@@ -176,6 +200,7 @@ export async function GET() {
       description: `Price {{price}} = 1k\n ⚡Start - Instant\n⚡Speed - Fast / Day\n⭐ Quality - High Quality [ Mix ]\n♻️Drop - No\n🔥Refill - Lifetime\n✅Link - Instagram Post / Reel / IGTV URL`,
       imageUrl: "/Instagram.gif",
       price: 80,
+      quantity: "1k",
     },
     {
       id: 26,
@@ -183,6 +208,7 @@ export async function GET() {
       description: `Price {{price}} = 1k\n ⚡Start - Instant\n⚡Speed - Super Fast / Day\n⭐ Quality - High Quality [ Mix ]\n♻️Drop - No\n🔥Refill - Lifetime\n✅Link - Instagram Post / Reel / IGTV URL`,
       imageUrl: "/Instagram.gif",
       price: 100,
+      quantity: "1k",
     },
     {
       id: 27,
@@ -190,6 +216,7 @@ export async function GET() {
       description: `Price {{price}} = 1k\n ⚡Start - Instant\n⚡Speed - Fast / Day\n⭐Quality - High Quality [ Mix ]\n♻️Drop - No\n🔥Refill - Lifetime\n✅Link - Instagram Video URL`,
       imageUrl: "/Instagram.gif",
       price: 80,
+      quantity: "1k",
     },
     {
       id: 28,
@@ -197,6 +224,7 @@ export async function GET() {
       description: `Price {{price}} = 1k\n ⚡Start - Instant\n⚡Speed - Super Fast / Day\n⭐Quality - High Quality [ Mix ]\n♻️Drop - No\n🔥Refill - Lifetime\n✅Link - Instagram Video URL`,
       imageUrl: "/Instagram.gif",
       price: 100,
+      quantity: "1k",
     },
     {
       id: 29,
@@ -204,6 +232,7 @@ export async function GET() {
       description: `Price {{price}} = 1k\n  ✨Start - 0-1 Hour⌛\n⚡Speed - Slow\n⭐Quality - High Quality [ Mix ]\n♻️Drop - No\n🔥Refill - Lifetime\n✅Link - Instagram Video URL`,
       imageUrl: "/Instagram.gif",
       price: 1700,
+      quantity: "1k",
     },
     {
       id: 30,
@@ -211,6 +240,7 @@ export async function GET() {
       description: `Price {{price}} = 1k\n  ✨Start - 0-1 Hour⌛\n⚡Speed - Medium\n⭐Quality - High Quality [ Mix ]\n♻️Drop - No\n🔥Refill - Lifetime\n✅Link - Instagram Video URL`,
       imageUrl: "/Instagram.gif",
       price: 1900,
+      quantity: "1k",
     },
     {
       id: 31,
@@ -218,6 +248,7 @@ export async function GET() {
       description: `Price {{price}}\n ✨Start - 0-1 Hour⌛\n⭐Enter channel link\n✨ Speed: Super Fast⚡\n🔄 Guarantee: Guaranteed Delivery\n🔄 Refill: No`,
       imageUrl: "/Whatsapp.gif",
       price: 1900,
+      quantity: "1k",
     },
     {
       id: 32,
@@ -225,6 +256,7 @@ export async function GET() {
       description: `Price {{price}}\n ✨Start - 0-1 Hour⌛\n⭐Enter channel link\n✨ Speed: Ultra Super Fast⚡\n🔄 Guarantee: Guaranteed Delivery\n🔄 Refill: No`,
       imageUrl: "/Whatsapp.gif",
       price: 2200,
+      quantity: "1k",
     },
     {
       id: 33,
@@ -232,6 +264,7 @@ export async function GET() {
       description: `Price {{price}}\n ✨Start - 0-1 Hour⌛\n⭐Enter Post link\n✨ Speed: Super Fast⚡\n🔄 Guarantee: Guaranteed Delivery\n🔄 Refill: No`,
       imageUrl: "/Whatsapp.gif",
       price: 850,
+      quantity: "1k",
     },
     {
       id: 34,
@@ -239,6 +272,7 @@ export async function GET() {
       description: `Price {{price}}\n ✨ Start - 0-3 Hours\n⭐Enter Profile link\n ✨ Speed:Slow⚡\n🔄 Guarantee: 30 Days`,
       imageUrl: "/Twitter.gif",
       price: 2600,
+      quantity: "1k",
     },
     {
       id: 35,
@@ -246,6 +280,7 @@ export async function GET() {
       description: `Price {{price}}\n ✨ Start - 0-1 Hour \n⭐Enter Profile link\n ✨ Speed:Medium⚡\n🔄 Guarantee: 30 Days`,
       imageUrl: "/Twitter.gif",
       price: 3000,
+      quantity: "1k",
     },
     {
       id: 36,
@@ -253,6 +288,7 @@ export async function GET() {
       description: `Price {{price}}n⚡Files Ready for Print\n🔥Simple design work 📦 Thumbnail, 🎨 Icons, 📱 Social Media Design, 📄 Basic One-Pager Designs + 🗂️ Source/Vector File`,
       imageUrl: "/Graphics.gif",
       price: 500,
+      quantity: "1 Post",
     },
     {
       id: 37,
@@ -261,6 +297,7 @@ export async function GET() {
 Includes:📄 Flyer,📬 Post,📢 Ads,🖼️ Banner,🎨 Logo Vector,🔹 Icons,💻 Web Illustration`,
       imageUrl: "/Graphics.gif",
       price: 800,
+      quantity: "1 Post",
     },
     {
       id: 38,
@@ -268,6 +305,7 @@ Includes:📄 Flyer,📬 Post,📢 Ads,🖼️ Banner,🎨 Logo Vector,🔹 Icon
       description: `⚡React/Next.js web app dev,⚛️ 1 Page Design or ⏱️ 1 Hour Work | 🚚 1-Day Delivery | 🔁 1 Revision | 📄 1 Page | 🎨 Design Customization | 📤 Content Upload | 📱 Responsive Design | 💾 Source Code`,
       imageUrl: "/Website.gif",
       price: 15000,
+      quantity: "1 Page",
     },
     {
       id: 39,
@@ -275,7 +313,50 @@ Includes:📄 Flyer,📬 Post,📢 Ads,🖼️ Banner,🎨 Logo Vector,🔹 Icon
       description: `⚡React/Next.js web app dev,⚛️ 3 Page Design  or ⏱️ 1 Hour Work | 🚚 1-Day Delivery | 🔁 1 Revision | 📄 1 Page | 🎨 Design Customization | 📤 Content Upload | 📱 Responsive Design | 💾 Source Code`,
       imageUrl: "/Website.gif",
       price: 20000,
+      quantity: "3 Page",
     },
+    {
+      id: 40,
+      title: " Tiktok Likes Offer",
+      description: `Price {{price}} = 1k\n⚡ Recommended ✅\n⚡100% Always working 💯\n⭐Start: 0-5 minutes / 1 hour\n🔥 Speed : Excellent \n♻️Refill : Lifetime\n🔥Drop Ratio : 0%\n⭐ Link : Add Video link`,
+      imageUrl: "/Tiktok.gif",
+      price: 130,
+      quantity: `1k \n Price: 1,200 PKR = 10k \n Price: 2,300 PKR = 20k \n Price: 5,500 PKR = 50k`,
+    },
+    {
+      id: 41,
+      title: "Instagram Likes Offer",
+      description: `Price {{price}} = 1k\n ⚡Start - Instant\n⚡Speed - Super Fast / Day\n⭐ Quality - High Quality [ Mix ]\n♻️Drop - No\n🔥Refill - Lifetime\n✅Link - Instagram Post / Reel / IGTV URL`,
+      imageUrl: "/Instagram.gif",
+      price: 80,
+      quantity: `1k \n Price: 700 PKR = 10k \n Price: 1,300 PKR = 20k \n Price: 3,200 PKR = 50k  `,
+    },
+      {
+      id: 42,
+      title: "Youtube Subscribers Offer",
+      description: `Price {{price}} = 1k\n⚡Start: 0-1 Hours\n⚡Speed: ⚡Medium\n⭐ Recommended\n🔥 Non Drop\n♻️ Refill Button Active\n✅ Lifetime Refill\n🔥 Always working `,
+      imageUrl: "/Youtube.gif",
+      price: 900,
+      quantity: `1k \n Price: 4,200 PKR = 5k \n Price: 8,000 PKR = 10k`,
+    },
+     {
+      id: 43,
+      title: " Tiktok Followers Offer",
+      description: `Price {{price}} = 1k\n⚡ Recommended ✅\n⚡100% Always working 💯\n⭐Start: 0-5 minutes / 1 hour\n🔥 Speed : Excellent \n♻️Refill : Lifetime\n🔥Drop Ratio : 0%\n⭐ Link : Add Profile link`,
+      imageUrl: "/Tiktok.gif",
+      price: 1000,
+      quantity: `1k \n Price: 4,500 PKR = 5k \n Price: 9,000 PKR = 10k`,
+    },
+     {
+      id: 44,
+      title: "New Offers Request",
+      description: `If you ever need a new service or special offer, feel free to reach out on WhatsApp anytime — no hesitation needed!`,
+      imageUrl: "/offer1.gif",
+
+      quantity: `If you ever need a new service or special offer, feel free to reach out on WhatsApp anytime — no hesitation needed!`,
+    },
+
+
   ];
 
   return new Response(JSON.stringify(servicesData), {
