@@ -1,11 +1,37 @@
+import { useEffect, useState } from "react";
 import { Users, ShoppingCart, Image, Code } from "lucide-react";
 
 export default function StatsCards() {
+  const [orders, setOrders] = useState(112306); // integer me rakho, comma useState me mat do
+  const [designs, setDesigns] = useState(850);
+  const [websites, setWebsites] = useState(220);
+
+  // Increment orders and designs every 1 hour
+  useEffect(() => {
+    const oneHour = 60 * 60 * 1000; // 1 hour in ms
+    const interval = setInterval(() => {
+      setOrders(prev => prev + 5);
+      setDesigns(prev => prev + 2);
+    }, oneHour);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Increment websites every 24 hours
+  useEffect(() => {
+    const oneDay = 24 * 60 * 60 * 1000; // 24 hours in ms
+    const interval = setInterval(() => {
+      setWebsites(prev => prev + 1);
+    }, oneDay);
+
+    return () => clearInterval(interval);
+  }, []);
+
   const stats = [
     { id: 1, label: "Users", value: "4123", icon: <Users className="h-6 w-6 text-white" /> },
-    { id: 2, label: "Orders", value: "1,12,306", icon: <ShoppingCart className="h-6 w-6 text-white" /> },
-    { id: 3, label: "Designs Delivered", value: "850", icon: <Image className="h-6 w-6 text-white" /> },
-    { id: 4, label: "Websites Built", value: "220", icon: <Code className="h-6 w-6 text-white" /> },
+    { id: 2, label: "Orders", value: orders.toLocaleString(), icon: <ShoppingCart className="h-6 w-6 text-white" /> },
+    { id: 3, label: "Designs Delivered", value: designs, icon: <Image className="h-6 w-6 text-white" /> },
+    { id: 4, label: "Websites Built", value: websites, icon: <Code className="h-6 w-6 text-white" /> },
   ];
 
   return (
