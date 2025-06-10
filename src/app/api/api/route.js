@@ -6,7 +6,7 @@ export async function GET() {
       title: "Tiktok Followers",
       description: `Price {{price}} = 1k\n⚡ Recommended ✅\n⚡100% Always working 💯\n⭐Start: 0-5 minutes / 1 hour\n🔥 Speed : Excellent \n♻️Refill : Lifetime\n🔥Drop Ratio : 0%\n⭐ Link : Add Profile link`,
       imageUrl: "/Tiktok.gif",
-      price: 880,
+      price: 800,
       quantity: "1k",
     },
     {
@@ -14,7 +14,7 @@ export async function GET() {
       title: "Tiktok Followers 🇵🇰",
       description: `Price {{price}} = 1k\n⚡ Recommended ✅\n⚡100% Always working 💯\n⭐Start: 0-5 minutes / 1 hour\n🔥 Speed : Slow \n♻️Refill : Lifetime\n🔥Drop Ratio : 0%\n⭐ Link : Add Profile link`,
       imageUrl: "/Tiktok.gif",
-      price: 900,
+      price: 700,
       quantity: "1k",
     },
 
