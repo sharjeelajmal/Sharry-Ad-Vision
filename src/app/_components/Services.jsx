@@ -22,13 +22,12 @@ const Services = () => {
 
   const tabs = [
     "Tiktok",
-    new "Youtube"(),
+    "Youtube",
     "Facebook",
     "Instagram",
     "X-Twitter",
-
-    "Website Development",
     "Whatsapp",
+    "Website Development",
     "Graphics Designing",
     "Offers",
   ];
