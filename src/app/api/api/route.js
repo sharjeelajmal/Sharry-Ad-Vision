@@ -6,7 +6,14 @@ export async function GET() {
       title: "Tiktok Followers",
       description: `Price {{price}} = 1k\n⚡ Recommended ✅\n⚡100% Always working 💯\n⭐Start: 0-5 minutes / 1 hour\n🔥 Speed : Excellent \n♻️Refill : Lifetime\n🔥Drop Ratio : 0%\n⭐ Link : Add Profile link`,
       imageUrl: "/Tiktok.gif",
-      price: 800,
+      price: 880,
+      quantity: "1k",
+    },    {
+      id: 45,
+      title: "Tiktok Followers ",
+      description: `Price {{price}} = 1k\n⚡ Recommended ✅\n⚡100% Always working 💯\n⭐Start: 0-5 minutes / 1 hour\n🔥 Speed : Slow \n♻️Refill : Lifetime\n🔥Drop Ratio : 0%\n⭐ Link : Add Profile link`,
+      imageUrl: "/Tiktok.gif",
+      price: 500,
       quantity: "1k",
     },
     {
@@ -14,9 +21,18 @@ export async function GET() {
       title: "Tiktok Followers 🇵🇰",
       description: `Price {{price}} = 1k\n⚡ Recommended ✅\n⚡100% Always working 💯\n⭐Start: 0-5 minutes / 1 hour\n🔥 Speed : Slow \n♻️Refill : Lifetime\n🔥Drop Ratio : 0%\n⭐ Link : Add Profile link`,
       imageUrl: "/Tiktok.gif",
-      price: 700,
+      price: 800,
+      quantity: "1k",
+    },  {
+      id: 46,
+      title: "Tiktok Followers 🇵🇰",
+      description: `Price {{price}} = 1k\n⚡ Recommended ✅\n⚡100% Always working 💯\n⭐Start: 0-5 minutes / 1 hour\n🔥 Speed : Normal \n♻️Refill : Lifetime\n🔥Drop Ratio : 0%\n⭐ Link : Add Profile link`,
+      imageUrl: "/Tiktok.gif",
+      price: 900,
       quantity: "1k",
     },
+
+
 
     {
       id: 3,
@@ -355,6 +371,8 @@ Includes:📄 Flyer,📬 Post,📢 Ads,🖼️ Banner,🎨 Logo Vector,🔹 Icon
 
       quantity: `If you ever need a new service or special offer, feel free to reach out on WhatsApp anytime — no hesitation needed!`,
     },
+   
+
 
 
   ];
