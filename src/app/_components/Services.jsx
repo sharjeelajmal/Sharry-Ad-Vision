@@ -21,13 +21,14 @@ const Services = () => {
   };
 
   const tabs = [
-    "Tiktok",new 
-    "Youtube",
+    "Tiktok",
+    new "Youtube"(),
     "Facebook",
     "Instagram",
     "X-Twitter",
-    "Whatsapp",
+
     "Website Development",
+    "Whatsapp",
     "Graphics Designing",
     "Offers",
   ];

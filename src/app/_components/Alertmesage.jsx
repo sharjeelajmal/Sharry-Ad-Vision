@@ -38,7 +38,7 @@ export default function NotificationPopup() {
               Tiktok Likes Rate Decreased
             </h2>
             <p className="text-gray-700 mb-6">
-                 Price 130 PKR = 1k <br />
+                 Price 140 PKR = 1k <br />
               ⚡ Recommended ✅ <br />
               ⚡ 100% Always working <br />
               ⭐ Start: 0-5 minutes / 1 hour <br />
