@@ -21,11 +21,12 @@ const Services = () => {
   };
 
   const tabs = [
-    "Tiktok",
+    "Tiktok",new 
     "Youtube",
     "Facebook",
     "Instagram",
     "X-Twitter",
+    "Whatsapp",
     "Website Development",
     "Graphics Designing",
     "Offers",
@@ -86,11 +87,14 @@ const Services = () => {
 
   // Function to convert PKR prices in quantity string
   const convertQuantityString = (quantityString) => {
-    return quantityString.replace(/(\d{1,3}(?:,\d{3})*|\d+)\s*PKR/g, (match, p1) => {
-      const numericValue = Number(p1.replace(/,/g, ""));
-      const converted = convertPrice(numericValue);
-      return `${converted} ${selectedCurrency}`;
-    });
+    return quantityString.replace(
+      /(\d{1,3}(?:,\d{3})*|\d+)\s*PKR/g,
+      (match, p1) => {
+        const numericValue = Number(p1.replace(/,/g, ""));
+        const converted = convertPrice(numericValue);
+        return `${converted} ${selectedCurrency}`;
+      }
+    );
   };
 
   if (isLoading) {
