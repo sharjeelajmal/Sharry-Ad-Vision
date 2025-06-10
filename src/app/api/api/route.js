@@ -8,22 +8,24 @@ export async function GET() {
       imageUrl: "/Tiktok.gif",
       price: 880,
       quantity: "1k",
-    },    {
+    },
+    {
       id: 45,
       title: "Tiktok Followers ",
       description: `Price {{price}} = 1k\n⚡ Recommended ✅\n⚡100% Always working 💯\n⭐Start: 0-5 minutes / 1 hour\n🔥 Speed : Slow \n♻️Refill : Lifetime\n🔥Drop Ratio : 0%\n⭐ Link : Add Profile link`,
       imageUrl: "/Tiktok.gif",
       price: 500,
-      quantity: "1k",
+      quantity: "1k", //Fastsmm
     },
     {
       id: 2,
       title: "Tiktok Followers 🇵🇰",
       description: `Price {{price}} = 1k\n⚡ Recommended ✅\n⚡100% Always working 💯\n⭐Start: 0-5 minutes / 1 hour\n🔥 Speed : Slow \n♻️Refill : Lifetime\n🔥Drop Ratio : 0%\n⭐ Link : Add Profile link`,
       imageUrl: "/Tiktok.gif",
-      price: 800,
+      price: 860,
       quantity: "1k",
-    },  {
+    },
+    {
       id: 46,
       title: "Tiktok Followers 🇵🇰",
       description: `Price {{price}} = 1k\n⚡ Recommended ✅\n⚡100% Always working 💯\n⭐Start: 0-5 minutes / 1 hour\n🔥 Speed : Normal \n♻️Refill : Lifetime\n🔥Drop Ratio : 0%\n⭐ Link : Add Profile link`,
@@ -32,14 +34,28 @@ export async function GET() {
       quantity: "1k",
     },
 
-
-
     {
       id: 3,
       title: "Tiktok Likes",
       description: `Price {{price}} = 1k \n⚡ Recommended ✅\n⭐Start: 0-5 minutes / 1 hour\n🔥Speed : Very Fast\n♻️Refill : Lifetime\n✅Drop Ratio : 0%\n🔥Link : Add video link`,
       imageUrl: "/Tiktok.gif",
       price: 140,
+      quantity: "1k",
+    },
+    {
+      id: 47,
+      title: "Tiktok Likes",
+      description: `Price {{price}} = 1k \n⚡ Recommended ✅\n⭐Start: 0-5 minutes / 1 hour\n🔥Speed :  Slow\n♻️Refill : Lifetime\n✅Drop Ratio : 0%\n🔥Link : Add video link`,
+      imageUrl: "/Tiktok.gif",
+      price: 50,
+      quantity: "1k",
+    },
+    {
+      id: 48,
+      title: "Tiktok Likes 🇵🇰",
+      description: `Price {{price}} = 1k \n⚡ Recommended ✅\n⭐Start: 0-5 minutes / 1 hour\n🔥Speed :  Slow\n♻️Refill : Lifetime\n✅Drop Ratio : 0%\n🔥Link : Add video link`,
+      imageUrl: "/Tiktok.gif",
+      price: 250,
       quantity: "1k",
     },
     {
@@ -347,7 +363,7 @@ Includes:📄 Flyer,📬 Post,📢 Ads,🖼️ Banner,🎨 Logo Vector,🔹 Icon
       price: 80,
       quantity: `1k \n Price: 700 PKR = 10k \n Price: 1,300 PKR = 20k \n Price: 3,200 PKR = 50k  `,
     },
-      {
+    {
       id: 42,
       title: "Youtube Subscribers Offer",
       description: `Price {{price}} = 1k\n⚡Start: 0-1 Hours\n⚡Speed: ⚡Medium\n⭐ Recommended\n🔥 Non Drop\n♻️ Refill Button Active\n✅ Lifetime Refill\n🔥 Always working `,
@@ -355,7 +371,7 @@ Includes:📄 Flyer,📬 Post,📢 Ads,🖼️ Banner,🎨 Logo Vector,🔹 Icon
       price: 900,
       quantity: `1k \n Price: 4,200 PKR = 5k \n Price: 8,000 PKR = 10k`,
     },
-     {
+    {
       id: 43,
       title: " Tiktok Followers Offer",
       description: `Price {{price}} = 1k\n⚡ Recommended ✅\n⚡100% Always working 💯\n⭐Start: 0-5 minutes / 1 hour\n🔥 Speed : Excellent \n♻️Refill : Lifetime\n🔥Drop Ratio : 0%\n⭐ Link : Add Profile link`,
@@ -363,7 +379,7 @@ Includes:📄 Flyer,📬 Post,📢 Ads,🖼️ Banner,🎨 Logo Vector,🔹 Icon
       price: 1000,
       quantity: `1k \n Price: 4,500 PKR = 5k \n Price: 9,000 PKR = 10k`,
     },
-     {
+    {
       id: 44,
       title: "New Offers Request",
       description: `If you ever need a new service or special offer, feel free to reach out on WhatsApp anytime — no hesitation needed!`,
@@ -371,10 +387,6 @@ Includes:📄 Flyer,📬 Post,📢 Ads,🖼️ Banner,🎨 Logo Vector,🔹 Icon
 
       quantity: `If you ever need a new service or special offer, feel free to reach out on WhatsApp anytime — no hesitation needed!`,
     },
-   
-
-
-
   ];
 
   return new Response(JSON.stringify(servicesData), {
