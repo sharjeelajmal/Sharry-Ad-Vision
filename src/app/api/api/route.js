@@ -61,7 +61,7 @@ export async function GET() {
     {
       id: 4,
       title: "Tiktok Likes 🇵🇰",
-      description: `Price {{price}} = 1k \n⚡ Recommended ✅\n⭐Start: 0-5 minutes / 1 hour\n🔥Speed : Slow \n♻️Refill : Lifetime\n✅Drop Ratio : 0%\n🔥Link : Add video link`,
+      description: `Price {{price}} = 1k \n⚡ Recommended ✅\n⭐Start: 0-5 minutes / 1 hour\n🔥Speed : Normal \n♻️Refill : Lifetime\n✅Drop Ratio : 0%\n🔥Link : Add video link`,
       imageUrl: "/Tiktok.gif",
       price: 280,
       quantity: "1k",
@@ -293,7 +293,15 @@ export async function GET() {
     {
       id: 33,
       title: "Whatsapp Post Reactions",
-      description: `Price {{price}}\n ✨Start - 0-1 Hour⌛\n⭐Enter Post link\n✨ Speed: Super Fast⚡\n🔄 Guarantee: Guaranteed Delivery\n🔄 Refill: No`,
+      description: `Price {{price}}\n ✨Start - 0-1 Hour⌛\n⭐Enter Post link\n✨ Speed: Super Fast⚡\n🔄 Guarantee: Guaranteed Delivery\n🔄 Refill: No\n❌️ No Refund in the case of Poll Delete and Wrong URL. `,
+      imageUrl: "/Whatsapp.gif",
+      price: 850,
+      quantity: "1k",
+    },
+    {
+      id: 33,
+      title: "Whatsapp Post Votes",
+      description: `Price {{price}}\n ✨Start - 0-1 Hour⌛\n⭐WhatsApp Poll Link\n✨ Speed: Not Confirm⚡\n🔄 Guarantee: Guaranteed Delivery\n🔄 Refill: Lifetime`,
       imageUrl: "/Whatsapp.gif",
       price: 850,
       quantity: "1k",
