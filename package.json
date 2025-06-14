@@ -16,7 +16,7 @@
     "clsx": "^2.1.1",
     "framer-motion": "^12.16.0",
     "lucide-react": "^0.468.0",
-    "mongoose": "^8.15.1",
+    "mongoose": "^8.15.2",
     "next": "15.0.4",
     "react": "^18",
     "react-dom": "^18",

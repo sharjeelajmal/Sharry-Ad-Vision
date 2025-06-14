@@ -1,3 +1,4 @@
+// src/app/_components/Services.jsx
 "use client";
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
@@ -6,7 +7,7 @@ import CurrencySelector from "../_components/CurrencySelector";
 import AnimatedSection from "../_components/AnimatedSection";
 import NotificationPopup from '../_components/Alertmesage.jsx';
 
-const Sharry326 = () => {
+const Services = () => { // Renamed from Sharry326 to Services to avoid confusion with admin page
   // Services state
   const [services, setServices] = useState([]);
   const [filteredServices, setFilteredServices] = useState([]);
@@ -26,7 +27,7 @@ const Sharry326 = () => {
         if (!servicesResponse.ok) throw new Error(`HTTP error! status: ${servicesResponse.status}`);
         const servicesData = await servicesResponse.json();
         setServices(servicesData);
-        filterServices("Tiktok", servicesData);
+        filterServices("Tiktok", servicesData); // Initial filter
 
         // Fetch currencies
         const currenciesResponse = await fetch("/api/currencies");
@@ -61,7 +62,8 @@ const Sharry326 = () => {
     } else {
       filtered = allServices.filter((service) => {
         const title = service.title.toLowerCase();
-        return title.includes(category.toLowerCase()) && !title.includes("offer");
+        // Check if service.category matches, or if title includes category and is not an offer
+        return service.category === category || (title.includes(category.toLowerCase()) && !title.includes("offer"));
       });
     }
     setFilteredServices(filtered);
@@ -76,28 +78,44 @@ const Sharry326 = () => {
   // Currency conversion functions
   const convertPrice = (price) => {
     const rate = conversionRates[selectedCurrency] || 1;
-    const converted = price * rate;
-    return converted % 1 === 0 ? converted.toFixed(0) : converted.toFixed(4).replace(/\.?0+$/, '');
+    let converted = price * rate;
+
+    // Check if it's a whole number after conversion
+    if (converted % 1 === 0) {
+      return converted.toFixed(0); // No decimal places if it's a whole number
+    } else {
+      return converted.toFixed(2); // Two decimal places if it has fractional part
+    }
   };
 
   const convertQuantityString = (quantityString) => {
-    return quantityString.replace(/(\d{1,3}(?:,\d{3})*|\d+)\s*PKR/g, (match, p1) => {
-      const numericValue = Number(p1.replace(/,/g, ""));
-      const converted = convertPrice(numericValue);
-      return `${converted} ${selectedCurrency}`;
+    if (!quantityString) return "";
+
+    // Regex to find numbers specifically followed by "PKR"
+    // This will only match "NUMBER PKR" patterns for conversion
+    const regex = /(\d{1,3}(?:,\d{3})*)\s*PKR/g;
+
+    return quantityString.replace(regex, (match, p1) => {
+      const numericValue = parseFloat(p1.replace(/,/g, ""));
+      if (isNaN(numericValue)) return match; // If it's not a number, return original match
+
+      const convertedValue = convertPrice(numericValue); // Converts PKR value to selected currency
+      return `${convertedValue} ${selectedCurrency}`;
     });
   };
 
   if (isLoading) {
     return (
-    <div className="flex justify-center items-center h-screen">
-           <Image    src="./Loader.gif"
-                       alt= "loading"
-                       width={140}
-                       height={140}
-                       unoptimized
-                       className="block mx-auto max-w-full"></Image>
-         </div>
+      <div className="flex justify-center items-center h-screen">
+        <Image
+          src="./Loader.gif"
+          alt="loading"
+          width={140}
+          height={140}
+          unoptimized
+          className="block mx-auto max-w-full"
+        />
+      </div>
     );
   }
 
@@ -113,10 +131,12 @@ const Sharry326 = () => {
           Check Service Description? Just Click the Icon!
         </span>
       </h2>
-      
-      <CurrencySelector 
-        selectedCurrency={selectedCurrency} 
+
+      <CurrencySelector
+        selectedCurrency={selectedCurrency}
         setSelectedCurrency={setSelectedCurrency}
+        conversionRates={conversionRates} // Prop added
+        setConversionRates={setConversionRates} // Prop added
       />
 
       <AnimatedSection>
@@ -137,8 +157,8 @@ const Sharry326 = () => {
               <button
                 key={tab}
                 className={`btn btn-md px-5 font-semibold py-2 text-md ${
-                  activeTab === tab 
-                    ?'bg-blue-700 text-white shadow-lg hover:bg-blue-700' 
+                  activeTab === tab
+                    ? 'bg-blue-700 text-white shadow-lg hover:bg-blue-700'
                     : 'bg-white text-black hover:bg-gray-200 border border-gray-300'
                 } capitalize rounded-lg`}
                 onClick={() => handleTabClick(tab)}
@@ -152,7 +172,8 @@ const Sharry326 = () => {
 
       <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 px-4">
         {filteredServices.map((service) => {
-          const dynamicDescription = service.description.replace(/{{price}}/g, `${convertPrice(Number(service.price))} ${selectedCurrency}`);
+          // Ensure service.price is a number before passing to Number()
+          const dynamicDescription = service.description.replace(/{{price}}/g, `${convertPrice(Number(service.price || 0))} ${selectedCurrency}`);
 
           return (
             <AnimatedSection key={service.id}>
@@ -163,7 +184,7 @@ const Sharry326 = () => {
                     alt={service.title}
                     width={140}
                     height={140}
-                    unoptimized
+                    unoptimized // Use unoptimized for GIFs or if Next.js Image optimization causes issues
                     className="block mx-auto max-w-full"
                   />
                 )}
@@ -190,4 +211,4 @@ const Sharry326 = () => {
   );
 };
 
-export default Sharry326;
+export default Services;

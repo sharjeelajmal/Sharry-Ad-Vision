@@ -1,134 +1,163 @@
-import { NextResponse } from "next/server";
-import path from "path";
-import { promises as fs } from "fs";
+// src/app/api/services/route.js
+import { NextResponse } from 'next/server';
+import mongooseConnect from '@/lib/mongodb'; // Corrected import
+import Service from '@/models/Service';
+import mongoose from 'mongoose';
 
-const dataDir = path.join(process.cwd(), 'data');
-const dataFilePath = path.join(dataDir, 'services.json');
-
-async function ensureDataDir() {
-  try {
-    await fs.mkdir(dataDir, { recursive: true });
-  } catch (error) {
-    console.error("Error creating data directory:", error);
-  }
+// Helper function to handle errors
+function handleError(error, message) {
+  console.error(message, error);
+  return NextResponse.json(
+    {
+      error: message,
+      details: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    },
+    { status: 500 }
+  );
 }
 
+// GET all services
 export async function GET() {
   try {
-    await ensureDataDir();
-    try {
-      const data = await fs.readFile(dataFilePath, 'utf8');
-      return NextResponse.json(JSON.parse(data));
-    } catch (error) {
-      // Return empty array if file doesn't exist
-      return NextResponse.json([]);
-    }
+    console.log('[GET /api/services] Connecting to MongoDB...');
+    await mongooseConnect(); // Call the function directly
+    console.log('[GET /api/services] Fetching services...');
+
+    const services = await Service.find().sort({ createdAt: -1 });
+    console.log(`[GET /api/services] Found ${services.length} services`);
+
+    return NextResponse.json(services);
   } catch (error) {
-    console.error("Error in GET:", error);
-    return NextResponse.json(
-      { error: "Error reading services data" },
-      { status: 500 }
-    );
+    console.error('[GET /api/services] Error:', error);
+    return handleError(error, 'Error fetching services');
   }
 }
 
+// CREATE new service
 export async function POST(request) {
   try {
-    await ensureDataDir();
-    const newService = await request.json();
-    let services = [];
-    
-    try {
-      const data = await fs.readFile(dataFilePath, 'utf8');
-      services = JSON.parse(data);
-    } catch (error) {
-      console.log("Creating new services file");
+    console.log('[POST /api/services] Connecting to MongoDB...');
+    await mongooseConnect(); // Call the function directly
+
+    const body = await request.json();
+    console.log('[POST /api/services] Request body:', body);
+
+    // Validate required fields
+    const requiredFields = ['title', 'description', 'price', 'category'];
+    const missingFields = requiredFields.filter(field => !body[field]);
+
+    if (missingFields.length > 0) {
+      console.error('[POST /api/services] Missing fields:', missingFields);
+      return NextResponse.json(
+        {
+          error: 'Missing required fields',
+          missingFields
+        },
+        { status: 400 }
+      );
     }
 
-    // Generate ID for new service
-    const newId = services.length > 0 ? Math.max(...services.map(s => s.id)) + 1 : 1;
-    const serviceToAdd = { ...newService, id: newId };
-    
-    await fs.writeFile(dataFilePath, JSON.stringify([...services, serviceToAdd], null, 2));
-    return NextResponse.json(serviceToAdd, { status: 201 });
+    console.log('[POST /api/services] Creating new service...');
+    const newService = new Service(body);
+    const savedService = await newService.save();
+    console.log('[POST /api/services] Service created:', savedService._id);
+
+    return NextResponse.json(savedService, { status: 201 });
   } catch (error) {
-    console.error("Error in POST:", error);
-    return NextResponse.json(
-      { error: "Error saving service" },
-      { status: 500 }
-    );
+    console.error('[POST /api/services] Error:', error);
+    return handleError(error, 'Error creating service');
   }
 }
 
+// UPDATE existing service
 export async function PUT(request) {
   try {
-    await ensureDataDir();
-    const updatedService = await request.json();
-    let services = [];
-    
-    try {
-      const data = await fs.readFile(dataFilePath, 'utf8');
-      services = JSON.parse(data);
-    } catch (error) {
+    await mongooseConnect(); // Call the function directly
+
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+    const updateData = await request.json();
+
+    if (!id || !mongoose.isValidObjectId(id)) {
       return NextResponse.json(
-        { error: "No services found to update" },
+        { error: 'Invalid service ID format' },
+        { status: 400 }
+      );
+    }
+
+    // Convert price to number if it exists
+    if (updateData.price) {
+      updateData.price = parseFloat(updateData.price);
+      if (isNaN(updateData.price)) {
+        return NextResponse.json(
+          { error: 'Price must be a valid number' },
+          { status: 400 }
+        );
+      }
+    }
+
+    const updatedService = await Service.findByIdAndUpdate(
+      id,
+      updateData,
+      {
+        new: true,
+        runValidators: true
+      }
+    );
+
+    if (!updatedService) {
+      return NextResponse.json(
+        { error: 'Service not found' },
         { status: 404 }
       );
     }
 
-    const index = services.findIndex(s => s.id === updatedService.id);
-    if (index === -1) {
-      return NextResponse.json(
-        { error: "Service not found" },
-        { status: 404 }
-      );
-    }
-
-    services[index] = updatedService;
-    await fs.writeFile(dataFilePath, JSON.stringify(services, null, 2));
     return NextResponse.json(updatedService);
+
   } catch (error) {
-    console.error("Error in PUT:", error);
+    console.error('PUT Error:', error);
     return NextResponse.json(
-      { error: "Error updating service" },
-      { status: 500 }
+      {
+        error: error.message,
+        details: error.errors || undefined
+      },
+      { status: 400 }
     );
   }
 }
-
+// DELETE service
 export async function DELETE(request) {
   try {
+    console.log('[DELETE /api/services] Connecting to MongoDB...');
+    await mongooseConnect(); // Call the function directly
+
     const { searchParams } = new URL(request.url);
-    const id = Number(searchParams.get("id"));
-    
-    await ensureDataDir();
-    let services = [];
-    
-    try {
-      const data = await fs.readFile(dataFilePath, 'utf8');
-      services = JSON.parse(data);
-    } catch (error) {
+    const id = searchParams.get('id');
+    console.log(`[DELETE /api/services] Deleting service: ${id}`);
+
+    if (!id) {
+      console.error('[DELETE /api/services] Missing service ID');
       return NextResponse.json(
-        { error: "No services found" },
+        { error: 'Service ID is required' },
+        { status: 400 }
+      );
+    }
+
+    const deletedService = await Service.findByIdAndDelete(id);
+
+    if (!deletedService) {
+      console.error(`[DELETE /api/services] Service not found: ${id}`);
+      return NextResponse.json(
+        { error: 'Service not found' },
         { status: 404 }
       );
     }
 
-    const filteredServices = services.filter(service => service.id !== id);
-    if (services.length === filteredServices.length) {
-      return NextResponse.json(
-        { error: "Service not found" },
-        { status: 404 }
-      );
-    }
-
-    await fs.writeFile(dataFilePath, JSON.stringify(filteredServices, null, 2));
+    console.log(`[DELETE /api/services] Service deleted: ${id}`);
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error in DELETE:", error);
-    return NextResponse.json(
-      { error: "Error deleting service" },
-      { status: 500 }
-    );
+    console.error('[DELETE /api/services] Error:', error);
+    return handleError(error, 'Error deleting service');
   }
 }

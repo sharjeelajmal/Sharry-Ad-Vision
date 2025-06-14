@@ -1,36 +1,29 @@
+// src/app/api/stats/route.js
 import { NextResponse } from "next/server";
-import path from "path";
-import { promises as fs } from "fs";
-
-const dataFilePath = path.join(process.cwd(), 'data', 'stats.json');
-
-async function readData() {
-  try {
-    const data = await fs.readFile(dataFilePath, 'utf8');
-    return JSON.parse(data);
-  } catch (error) {
-    // Return default stats if file doesn't exist
-    return [
-      { id: 1, label: "Users", value: "4123" },
-      { id: 2, label: "Orders", value: "112306" },
-      { id: 3, label: "Designs Delivered", value: "850" },
-      { id: 4, label: "Websites Built", value: "220" }
-    ];
-  }
-}
-
-async function writeData(data) {
-  await fs.mkdir(path.dirname(dataFilePath), { recursive: true });
-  await fs.writeFile(dataFilePath, JSON.stringify(data, null, 2));
-}
+import mongooseConnect from '@/lib/mongodb'; // Corrected import
+import Stat from '@/models/Stat'; // Corrected model path
 
 export async function GET() {
   try {
-    const data = await readData();
-    return NextResponse.json(data);
+    await mongooseConnect(); // Call the function directly
+    let stats = await Stat.find({});
+
+    // Agar database mein koi stats nahi hain, to default stats insert karo
+    if (stats.length === 0) {
+      const defaultStats = [
+        { label: "Users", value: "4123" },
+        { label: "Orders", value: "112306" },
+        { label: "Designs Delivered", value: "850" },
+        { label: "Websites Built", value: "220" }
+      ];
+      await Stat.insertMany(defaultStats);
+      stats = await Stat.find({}); // Insert karne ke baad dobara fetch karo
+    }
+    return NextResponse.json(stats);
   } catch (error) {
+    console.error("GET /api/stats Error:", error);
     return NextResponse.json(
-      { error: "Error reading stats data" },
+      { error: "Error reading stats data", details: error.message },
       { status: 500 }
     );
   }
@@ -38,12 +31,26 @@ export async function GET() {
 
 export async function POST(request) {
   try {
+    await mongooseConnect(); // Call the function directly
     const newStats = await request.json();
-    await writeData(newStats);
-    return NextResponse.json(newStats, { status: 201 });
+
+    if (!Array.isArray(newStats)) {
+      return NextResponse.json(
+        { error: 'Invalid data format. Expected an array of stat objects.' },
+        { status: 400 }
+      );
+    }
+
+    // Delete all existing stats and insert the new ones
+    // This is a common approach for managing a fixed set of "stats"
+    await Stat.deleteMany({});
+    const savedStats = await Stat.insertMany(newStats);
+
+    return NextResponse.json(savedStats, { status: 201 });
   } catch (error) {
+    console.error("POST /api/stats Error:", error);
     return NextResponse.json(
-      { error: "Error saving stats" },
+      { error: "Error saving stats", details: error.message },
       { status: 500 }
     );
   }

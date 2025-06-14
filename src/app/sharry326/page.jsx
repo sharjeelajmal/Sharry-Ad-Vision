@@ -1,43 +1,35 @@
+// src/app/sharry326/page.jsx
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react"; // Added useCallback
 import Image from "next/image";
 import StatsCards from "../_components/StatCards";
 import CurrencySelector from "../_components/CurrencySelector";
 import AnimatedSection from "../_components/AnimatedSection";
-import NoSSRNotification from "../_components/NoSSRNotification";
-import NotificationPopup from '../_components/Alertmesage.jsx';
-import { toast } from 'react-hot-toast';
+import NotificationPopup from "../_components/Alertmesage.jsx";
+import { toast } from "react-hot-toast";
 
 const Sharry326 = () => {
+  const [isClient, setIsClient] = useState(false);
+
   // Services state
   const [services, setServices] = useState([]);
   const [filteredServices, setFilteredServices] = useState([]);
-  const [activeTab, setActiveTab] = useState("Tiktok");
+  const [activeTab, setActiveTab] = useState("Tiktok"); // Default tab, will be set by fetched data
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentService, setCurrentService] = useState({
-    id: 0,
     title: "",
     description: "",
     price: 0,
     quantity: "",
-    imageUrl: ""
+    imageUrl: "",
+    category: "Tiktok", // Default category for new service, can be changed
   });
 
   // Tabs state
-  const [tabs, setTabs] = useState([
-    "Tiktok",
-    "Youtube",
-    "Facebook",
-    "Instagram",
-    "X-Twitter",
-    "Whatsapp",
-    "Website Development",
-    "Graphics Designing",
-    "Offers",
-  ]);
+  const [tabs, setTabs] = useState([]);
   const [isEditingTabs, setIsEditingTabs] = useState(false);
-  const [editTabs, setEditTabs] = useState([...tabs]);
+  const [editTabs, setEditTabs] = useState([]);
 
   // Currency state
   const [selectedCurrency, setSelectedCurrency] = useState("PKR");
@@ -47,71 +39,146 @@ const Sharry326 = () => {
   // Stats state
   const [isEditingStats, setIsEditingStats] = useState(false);
 
-  // Fetch initial data
+  // --- Functions that need to be defined before useEffect ---
+
+  // filterServices function
+  // Using useCallback to memoize the function, good practice for functions passed as props or in dependency arrays
+  const filterServices = useCallback((category, allServicesList) => {
+    let filtered;
+    if (category.toLowerCase() === "offers") {
+      filtered = allServicesList.filter((service) =>
+        service.title.toLowerCase().includes("offer")
+      );
+    } else {
+      filtered = allServicesList.filter((service) => {
+        const title = service.title.toLowerCase();
+        const serviceCategory = service.category ? service.category.toLowerCase() : '';
+        return (
+          serviceCategory === category.toLowerCase() || // Prefer exact category match
+          (title.includes(category.toLowerCase()) && !title.includes("offer"))
+        );
+      });
+    }
+    setFilteredServices(filtered);
+    setActiveTab(category);
+  }, []); // Dependencies: none, as it uses internal state setters
+
+  // Currency conversion functions
+  const convertPrice = useCallback((price) => {
+    const rate = conversionRates[selectedCurrency] || 1;
+    let converted = price * rate;
+
+    if (converted % 1 === 0) {
+      return converted.toFixed(0);
+    } else {
+      return converted.toFixed(2);
+    }
+  }, [conversionRates, selectedCurrency]); // Dependencies: conversionRates, selectedCurrency
+
+  const convertQuantityString = useCallback((quantityString) => {
+    if (!quantityString) return "";
+
+    const regex = /(\d{1,3}(?:,\d{3})*)\s*PKR/g;
+
+    return quantityString.replace(regex, (match, p1) => {
+      const numericValue = parseFloat(p1.replace(/,/g, ""));
+      if (isNaN(numericValue)) return match;
+
+      const convertedValue = convertPrice(numericValue);
+      return `${convertedValue} ${selectedCurrency}`;
+    });
+  }, [convertPrice, selectedCurrency]); // Dependencies: convertPrice, selectedCurrency
+
+  // --- useEffect for initial data fetching ---
   useEffect(() => {
+    setIsClient(true);
     const fetchInitialData = async () => {
       try {
-        // Fetch services
-        const servicesResponse = await fetch("/api/services");
-        if (!servicesResponse.ok) throw new Error(`HTTP error! status: ${servicesResponse.status}`);
+        setIsLoading(true);
+
+        const [servicesResponse, tabsResponse, currenciesResponse] = await Promise.all([
+          fetch("/api/services"),
+          fetch("/api/tabs"),
+          fetch("/api/currencies"),
+        ]);
+
+        // Services
+        if (!servicesResponse.ok) {
+          const errorData = await servicesResponse.json();
+          throw new Error(`HTTP error! status: ${servicesResponse.status} for services: ${errorData.details || servicesResponse.statusText}`);
+        }
         const servicesData = await servicesResponse.json();
         setServices(servicesData);
-        filterServices("Tiktok", servicesData);
 
-        // Fetch tabs
-        const tabsResponse = await fetch("/api/tabs");
-        if (tabsResponse.ok) {
-          const tabsData = await tabsResponse.json();
-          if (tabsData.length > 0) {
-            setTabs(tabsData);
-            setEditTabs([...tabsData]);
-          }
+        // Tabs
+        if (!tabsResponse.ok) {
+          const errorData = await tabsResponse.json();
+          throw new Error(`HTTP error! status: ${tabsResponse.status} for tabs: ${errorData.details || tabsResponse.statusText}`);
+        }
+        const tabsData = await tabsResponse.json(); // This is expected to be an array of strings (tab names)
+        if (tabsData.length > 0) {
+          setTabs(tabsData);
+          setEditTabs([...tabsData]);
+          // After fetching tabs and services, set the initial active tab and filter services
+          const initialActiveTab = tabsData[0] || "Tiktok"; // Use the first fetched tab or default
+          filterServices(initialActiveTab, servicesData); // Call with the fetched data
+        } else {
+          // If no tabs in DB, use a default set and try to save them (optional, or just use for display)
+          const defaultTabs = ["Tiktok", "Youtube", "Facebook", "Instagram", "X-Twitter", "Whatsapp", "Website Development", "Graphics Designing", "Offers"];
+          setTabs(defaultTabs);
+          setEditTabs(defaultTabs);
+          // And also filter services based on a default if no tabs are loaded
+          filterServices("Tiktok", servicesData);
         }
 
-        // Fetch currencies
-        const currenciesResponse = await fetch("/api/currencies");
-        if (currenciesResponse.ok) {
-          const currenciesData = await currenciesResponse.json();
-          const rates = currenciesData.reduce((acc, curr) => {
-            acc[curr.code] = curr.rate;
-            return acc;
-          }, {});
-          setConversionRates(rates);
-          if (currenciesData.length > 0) {
-            setSelectedCurrency(currenciesData[0].code);
-          }
+        // Currencies
+        if (!currenciesResponse.ok) {
+          const errorData = await currenciesResponse.json();
+          throw new Error(`HTTP error! status: ${currenciesResponse.status} for currencies: ${errorData.details || currenciesResponse.statusText}`);
         }
+        const currenciesData = await currenciesResponse.json();
+        const rates = currenciesData.reduce((acc, curr) => {
+          acc[curr.code] = curr.rate;
+          return acc;
+        }, {});
+        setConversionRates(rates);
+        if (currenciesData.length > 0) {
+          setSelectedCurrency(currenciesData[0].code);
+        } else {
+          const defaultCurrencies = [{code: "PKR", name: "Pakistani Rupee", symbol: "₨", rate: 1}];
+          setConversionRates({"PKR": 1});
+          setSelectedCurrency("PKR");
+        }
+
       } catch (error) {
         console.error("Error fetching initial data:", error);
-        toast.error("Failed to load initial data");
+        toast.error(`Failed to load initial data: ${error.message}`);
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchInitialData();
-  }, []);
+  }, [filterServices]); // Add filterServices to dependencies since it's used inside and is memoized
 
-  // Filter services by category
-  const filterServices = (category, allServices = services) => {
-    let filtered;
-    if (category.toLowerCase() === "offers") {
-      filtered = allServices.filter((service) =>
-        service.title.toLowerCase().includes("offer")
-      );
-    } else {
-      filtered = allServices.filter((service) => {
-        const title = service.title.toLowerCase();
-        return title.includes(category.toLowerCase()) && !title.includes("offer");
-      });
-    }
-    setFilteredServices(filtered);
-  };
+  if (!isClient) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <img
+          src="/loader326.gif"
+          alt="loading"
+          width={140}
+          height={140}
+          className="block mx-auto max-w-full"
+        />
+      </div>
+    );
+  }
 
-  // Tab management functions
+  // --- Tab management functions ---
   const handleTabClick = (tab) => {
-    setActiveTab(tab);
-    filterServices(tab);
+    // When a tab is clicked, filter services based on the current 'services' state
+    filterServices(tab, services);
   };
 
   const handleAddTab = () => {
@@ -119,61 +186,56 @@ const Sharry326 = () => {
   };
 
   const handleSaveTabs = async () => {
-    const filteredTabs = editTabs.filter(tab => tab.trim() !== "");
+    const filteredTabs = editTabs.filter((tab) => tab.trim() !== "");
     if (filteredTabs.length === 0) {
       toast.error("At least one tab is required");
       return;
     }
-    
-    setTabs(filteredTabs);
-    setEditTabs(filteredTabs);
-    setIsEditingTabs(false);
-    
+
     try {
-      const response = await fetch('/api/tabs', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(filteredTabs)
+      const response = await fetch("/api/tabs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(filteredTabs),
       });
-      
-      if (!response.ok) throw new Error('Failed to save tabs');
-      toast.success('Tabs saved successfully!');
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.details || "Failed to save tabs");
+      }
+
+      const savedTabsData = await response.json(); // API returns array of strings
+      setTabs(savedTabsData); // Update main tabs state
+      setEditTabs([...savedTabsData]); // Keep editTabs in sync
+      setIsEditingTabs(false);
+      toast.success("Tabs saved successfully!");
+      // After saving tabs, re-filter services to ensure correct display with new/updated categories
+      filterServices(activeTab, services);
+
     } catch (error) {
       console.error("Error saving tabs:", error);
-      toast.error('Failed to save tabs. Please try again.');
+      toast.error(`Failed to save tabs: ${error.message}`);
     }
   };
 
-  // Currency conversion functions
-  const convertPrice = (price) => {
-    const rate = conversionRates[selectedCurrency] || 1;
-    const converted = price * rate;
-    return converted % 1 === 0 ? converted.toFixed(0) : converted.toFixed(4).replace(/\.?0+$/, '');
-  };
-
-  const convertQuantityString = (quantityString) => {
-    return quantityString.replace(/(\d{1,3}(?:,\d{3})*|\d+)\s*PKR/g, (match, p1) => {
-      const numericValue = Number(p1.replace(/,/g, ""));
-      const converted = convertPrice(numericValue);
-      return `${converted} ${selectedCurrency}`;
-    });
-  };
-
-  // Service CRUD functions
+  // --- Service CRUD functions ---
   const handleAddService = () => {
     setCurrentService({
-      id: 0,
       title: "",
       description: "",
       price: 0,
       quantity: "",
-      imageUrl: ""
+      imageUrl: "",
+      category: activeTab,
     });
     setIsModalOpen(true);
   };
 
   const handleEditService = (service) => {
-    setCurrentService({ ...service });
+    setCurrentService({
+      ...service,
+      price: parseFloat(service.price) || 0,
+    });
     setIsModalOpen(true);
   };
 
@@ -183,77 +245,92 @@ const Sharry326 = () => {
         const response = await fetch(`/api/services?id=${id}`, {
           method: "DELETE",
         });
-        
-        if (!response.ok) throw new Error("Failed to delete service");
-        
-        setServices(services.filter(service => service.id !== id));
-        filterServices(activeTab);
-        toast.success('Service deleted successfully!');
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.details || "Failed to delete service");
+        }
+
+        const updatedServices = services.filter((service) => service._id !== id);
+        setServices(updatedServices);
+        filterServices(activeTab, updatedServices);
+        toast.success("Service deleted successfully!");
       } catch (error) {
         console.error("Error deleting service:", error);
-        toast.error('Failed to delete service. Please try again.');
+        toast.error(`Failed to delete service: ${error.message}`);
       }
     }
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setCurrentService(prev => ({
+    setCurrentService((prev) => ({
       ...prev,
-      [name]: name === "price" ? Number(value) : value
+      [name]: name === "price" ? parseFloat(value) || 0 : value,
     }));
   };
 
   const handleSaveService = async () => {
-    if (!currentService.title.trim() || !currentService.description.trim()) {
-      toast.error("Title and description are required");
-      return;
-    }
-
     try {
-      const method = currentService.id ? "PUT" : "POST";
-      const url = "/api/services" + (currentService.id ? `?id=${currentService.id}` : "");
-      
+      const serviceData = {
+        title: String(currentService.title).trim(),
+        description: String(currentService.description).trim(),
+        price: parseFloat(currentService.price) || 0,
+        quantity: String(currentService.quantity).trim(),
+        imageUrl: String(currentService.imageUrl).trim(),
+        category: currentService.category || activeTab,
+      };
+
+      if (!serviceData.title || serviceData.title.length < 3) {
+        throw new Error("Title must be at least 3 characters.");
+      }
+      if (!serviceData.description || serviceData.description.length < 10) {
+        throw new Error("Description must be at least 10 characters.");
+      }
+      if (isNaN(serviceData.price) || serviceData.price < 0) {
+        throw new Error("Price must be a non-negative number.");
+      }
+      if (!serviceData.category) {
+        throw new Error("Category is required.");
+      }
+
+      const method = currentService._id ? "PUT" : "POST";
+      const url = currentService._id
+        ? `/api/services?id=${currentService._id}`
+        : "/api/services";
+
       const response = await fetch(url, {
         method,
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(currentService),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(serviceData),
       });
-      
+
+      const result = await response.json();
+
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || `Failed to ${method === "POST" ? "create" : "update"} service`);
+        throw new Error(
+          result.error || result.details || "Failed to save service"
+        );
       }
-      
-      const data = await response.json();
-      const updatedServices = currentService.id
-        ? services.map(s => s.id === currentService.id ? data : s)
-        : [...services, data];
-      
+
+      let updatedServices;
+      if (currentService._id) {
+        updatedServices = services.map((s) =>
+          s._id === result._id ? result : s
+        );
+      } else {
+        updatedServices = [...services, result];
+      }
       setServices(updatedServices);
-      filterServices(activeTab, updatedServices);
+      filterServices(activeTab, updatedServices); // Re-filter to show changes immediately
+
       setIsModalOpen(false);
-      toast.success('Service saved successfully!');
+      toast.success("Service saved successfully!");
     } catch (error) {
-      console.error("Error saving service:", error);
-      toast.error(`Error saving service: ${error.message}`);
+      console.error("Save Service Error:", error);
+      toast.error(`Save failed: ${error.message}`);
     }
   };
-
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <Image    src="./loader326.gif"
-                    alt= "loading"
-                    width={140}
-                    height={140}
-                    unoptimized
-                    className="block mx-auto max-w-full"></Image>
-      </div>
-    );
-  }
 
   return (
     <section className="mb-10">
@@ -261,18 +338,10 @@ const Sharry326 = () => {
         <h2 className="text-2xl font-bold mb-4">Popup Messages</h2>
         <NotificationPopup isAdmin={true} />
       </div>
-      
+
       <AnimatedSection>
         <h1 className="font-bold text-4xl text-center py-5">Our Services</h1>
-        <div className="flex justify-end px-6 pb-4 space-x-2">
-          <button 
-            className={`btn ${isEditingStats ? 'btn-success' : 'btn-outline'}`}
-            onClick={() => setIsEditingStats(!isEditingStats)}
-          >
-            {isEditingStats ? 'Save Stats' : 'Edit Stats'}
-          </button>
-        </div>
-        <StatsCards isAdmin={true} isEditing={isEditingStats} />
+        <StatsCards isAdmin={true} isEditing={isEditingStats} setIsEditing={setIsEditingStats} />
       </AnimatedSection>
 
       <h2 className="text-center my-7 sticky top-0 z-40">
@@ -281,210 +350,294 @@ const Sharry326 = () => {
         </span>
       </h2>
 
-      <div className="flex justify-end px-6 pb-4 space-x-2">
-        <button 
-          className={`btn ${isEditingCurrencies ? 'btn-success' : 'btn-outline'}`}
-          onClick={() => setIsEditingCurrencies(!isEditingCurrencies)}
-        >
-          {isEditingCurrencies ? 'Save Currencies' : 'Edit Currencies'}
-        </button>
-      </div>
-      
-      <CurrencySelector 
-        selectedCurrency={selectedCurrency} 
+      <CurrencySelector
+        selectedCurrency={selectedCurrency}
         setSelectedCurrency={setSelectedCurrency}
+        conversionRates={conversionRates}
+        setConversionRates={setConversionRates}
         isAdmin={true}
         isEditing={isEditingCurrencies}
         setIsEditing={setIsEditingCurrencies}
       />
-
       <AnimatedSection>
-<div className="rounded-lg p-6 mb-6 bg-white  w-full max-w-4xl mx-auto">
-  <div className="flex justify-between items-center mb-4">
-    <h2 className="text-xl font-semibold">Service Categories</h2>
-    {isEditingTabs ? (
-      <div className="flex space-x-2">
-        <button className="btn btn-md btn-success" onClick={handleSaveTabs}>
-          Save
-        </button>
-        <button className="btn btn-md btn-error" onClick={() => setIsEditingTabs(false)}>
-          Cancel
-        </button>
-        <button className="btn btn-md btn-primary" onClick={handleAddTab}>
-          Add Tab
-        </button>
-      </div>
-    ) : (
-      <button className="btn btn-md btn-primary" onClick={() => setIsEditingTabs(true)}>
-        Edit Categories
-      </button>
-    )}
-  </div>
+        <div className="rounded-lg p-6 mb-6 bg-white w-full max-w-4xl mx-auto">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold">Service Categories</h2>
+            {isEditingTabs ? (
+              <div className="flex space-x-2">
+                <button
+                  className="btn btn-md btn-success"
+                  onClick={handleSaveTabs}
+                >
+                  Save
+                </button>
+                <button
+                  className="btn btn-md btn-error"
+                  onClick={() => {
+                    setIsEditingTabs(false);
+                    setEditTabs([...tabs]);
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="btn btn-md btn-primary"
+                  onClick={handleAddTab}
+                >
+                  Add Tab
+                </button>
+              </div>
+            ) : (
+              <button
+                className="btn btn-md btn-primary"
+                onClick={() => setIsEditingTabs(true)}
+              >
+                Edit Categories
+              </button>
+            )}
+          </div>
 
-  {isEditingTabs ? (
-    <div className="space-y-3 w-full">
-      {editTabs.map((tab, index) => (
-        <div key={index} className="flex items-center space-x-3">
-          <input
-            type="text"
-            className="input input-md w-full bg-gray-50 text-gray-800 border border-gray-300 rounded-lg px-4 py-2"
-            value={tab}
-            onChange={(e) => {
-              const newTabs = [...editTabs];
-              newTabs[index] = e.target.value;
-              setEditTabs(newTabs);
-            }}
-            placeholder="Enter category name"
-          />
-          <button
-            className="btn btn-md btn-error min-w-[3rem] h-10 text-lg"
-            onClick={() => {
-              setEditTabs(editTabs.filter((_, i) => i !== index));
-            }}
-          >
-            ×
-          </button>
+          {isEditingTabs ? (
+            <div className="space-y-3 w-full">
+              {editTabs.map((tab, index) => (
+                <div key={index} className="flex items-center space-x-3">
+                  <input
+                    type="text"
+                    className="input input-md w-full bg-gray-50 text-gray-800 border border-gray-300 rounded-lg px-4 py-2"
+                    value={tab}
+                    onChange={(e) => {
+                      const newTabs = [...editTabs];
+                      newTabs[index] = e.target.value;
+                      setEditTabs(newTabs);
+                    }}
+                    placeholder="Enter category name"
+                  />
+                  <button
+                    className="btn btn-md btn-error min-w-[3rem] h-10 text-lg"
+                    onClick={() => {
+                      setEditTabs(editTabs.filter((_, i) => i !== index));
+                    }}
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-wrap gap-3 justify-center">
+              {tabs.map((tab) => (
+                <button
+                  key={tab}
+                  className={`btn btn-md px-5 font-semibold py-2 text-md ${
+                    activeTab === tab
+                      ? "bg-blue-700 text-white shadow-lg hover:bg-blue-700"
+                      : "bg-white text-black hover:bg-gray-200 border border-gray-300"
+                  } capitalize rounded-lg`}
+                  onClick={() => handleTabClick(tab)}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
-      ))}
-    </div>
-  ) : (
-    <div className="flex flex-wrap gap-3 justify-center">
-      {tabs.map((tab) => (
-        <button
-          key={tab}
-          className={`btn btn-md px-5 font-semibold py-2 text-md ${
-            activeTab === tab 
-              ?'bg-blue-700 text-white shadow-lg hover:bg-blue-700' 
-              : 'bg-white  text-black hover:bg-gray-200 border border-gray-300'
-          } capitalize rounded-lg `}
-          onClick={() => handleTabClick(tab)}
-        >
-          {tab}
-        </button>
-      ))}
-    </div>
-  )}
-</div>
       </AnimatedSection>
 
       <div className="flex justify-end px-6 pt-6 pb-2">
-        <button className="btn btn-primary" onClick={handleAddService}>Add Service</button>
+        <button className="btn btn-primary" onClick={handleAddService}>
+          Add Service
+        </button>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 px-4">
         {filteredServices.map((service) => {
-          const dynamicDescription = service.description.replace(/{{price}}/g, `${convertPrice(Number(service.price))} ${selectedCurrency}`);
+          const dynamicDescription = service.description.replace(
+            /{{price}}/g,
+            `${convertPrice(Number(service.price || 0))} ${selectedCurrency}`
+          );
 
           return (
-            <AnimatedSection key={service.id}>
+            <AnimatedSection key={service._id}>
               <div className="group relative hover:scale-105 transition-all border border-gray-300 rounded-lg p-3 max-w-xs mx-auto cursor-pointer">
                 {service.imageUrl && (
-                  <Image
-                    src={service.imageUrl}
-                    alt={service.title}
-                    width={140}
-                    height={140}
-                    unoptimized
-                    className="block mx-auto max-w-full"
-                  />
+                  <div className="relative h-40 w-full mb-3">
+                    <img
+                      src={service.imageUrl}
+                      alt={service.title}
+                      className="object-contain h-full w-full"
+                      onError={(e) => {
+                        e.target.src = "/placeholder-image.png";
+                        e.target.className =
+                          "object-contain h-full w-full opacity-50";
+                      }}
+                    />
+                  </div>
                 )}
-                <h2 className="font-bold text-xl mt-2 text-center">{service.title}</h2>
+                <h2 className="font-bold text-xl mt-2 text-center">
+                  {service.title}
+                </h2>
                 <p className="text-center text-sm text-gray-600">
-                  Price: {convertPrice(service.price || 0)} {selectedCurrency} =
-                  {convertQuantityString(service.quantity)
-                    .split("\n")
-                    .map((line, index) => (
-                      <React.Fragment key={index}> {line}<br /></React.Fragment>
-                    ))}
+                  Price: {convertPrice(service.price || 0)} {selectedCurrency}
+                  {service.quantity && (
+                    <>
+                      <br />
+                      {convertQuantityString(service.quantity)
+                        .split("\n")
+                        .map((line, index) => (
+                          <React.Fragment key={index}>
+                            {line}
+                            <br />
+                          </React.Fragment>
+                        ))}
+                    </>
+                  )}
                 </p>
                 <div className="absolute bottom-0 left-0 w-full p-3 bg-white opacity-0 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 transform translate-y-4 max-h-40 overflow-y-auto whitespace-pre-wrap text-xs sm:text-sm">
                   {dynamicDescription.split("\n").map((line, index) => (
-                    <React.Fragment key={index}>{line}<br /></React.Fragment>
+                    <React.Fragment key={index}>
+                      {line}
+                      <br />
+                    </React.Fragment>
                   ))}
                 </div>
-              
               </div>
-                <div className="flex justify-center mt-4 space-x-2">
-                  <button className="btn btn-sm" onClick={() => handleEditService(service)}>Edit</button>
-                  <button className="btn btn-sm btn-error" onClick={() => handleDeleteService(service.id)}>Delete</button>
-                </div>
+              <div className="flex justify-center mt-4 space-x-2">
+                <button
+                  className="btn btn-sm"
+                  onClick={() => handleEditService(service)}
+                >
+                  Edit
+                </button>
+                <button
+                  className="btn btn-sm btn-error"
+                  onClick={() => handleDeleteService(service._id)}
+                >
+                  Delete
+                </button>
+              </div>
             </AnimatedSection>
           );
         })}
       </div>
 
-      {/* Service Edit/Create Modal */}
-      <dialog open={isModalOpen} className="modal">
-        <div className="modal-box max-w-3xl">
-          <h3 className="font-bold text-lg">{currentService.id ? "Edit Service" : "Add New Service"}</h3>
-          <div className="py-4 space-y-4">
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text">Title</span>
-              </label>
-              <input
-                type="text"
-                className="input input-bordered w-full"
-                name="title"
-                value={currentService.title}
-                onChange={handleInputChange}
-              />
+      {isModalOpen && (
+        <dialog open className="modal modal-open">
+          <div className="modal-box max-w-3xl">
+            <h3 className="font-bold text-lg">
+              {currentService._id ? "Edit Service" : "Add New Service"}
+            </h3>
+            <div className="py-4 space-y-4">
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text">Title*</span>
+                </label>
+                <input
+                  type="text"
+                  className="input input-bordered w-full"
+                  name="title"
+                  value={currentService.title}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text">Price (PKR)*</span>
+                </label>
+                <input
+                  type="number"
+                  className="input input-bordered w-full"
+                  name="price"
+                  value={currentService.price}
+                  onChange={handleInputChange}
+                  min="0"
+                  step="0.01"
+                  required
+                />
+              </div>
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text">Quantity</span>
+                </label>
+                <textarea
+                  className="textarea textarea-bordered h-24"
+                  name="quantity"
+                  value={currentService.quantity}
+                  onChange={handleInputChange}
+                  placeholder="Enter quantity details (e.g., 1k or 1k Price: 1,200 PKR = 10k)"
+                />
+              </div>
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text">Image URL</span>
+                </label>
+                <input
+                  type="url"
+                  className="input input-bordered w-full"
+                  name="imageUrl"
+                  value={currentService.imageUrl}
+                  onChange={handleInputChange}
+                  placeholder="https://example.com/image.jpg"
+                />
+                {currentService.imageUrl && (
+                  <div className="mt-2">
+                    <p className="text-sm text-gray-500">Image Preview:</p>
+                    <img
+                      src={currentService.imageUrl}
+                      alt="Preview"
+                      className="mt-1 max-h-20 object-contain"
+                      onError={(e) => {
+                        e.target.src = "/placeholder-image.png";
+                        e.target.className =
+                          "mt-1 max-h-20 object-contain opacity-50";
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text">Description*</span>
+                </label>
+                <textarea
+                  className="textarea textarea-bordered h-32"
+                  name="description"
+                  value={currentService.description}
+                  onChange={handleInputChange}
+                  placeholder="Use {{price}} for dynamic price insertion"
+                  required
+                />
+              </div>
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text">Category*</span>
+                </label>
+                <select
+                  className="select select-bordered w-full"
+                  name="category"
+                  value={currentService.category}
+                  onChange={handleInputChange}
+                  required
+                >
+                  {tabs.map((tab) => (
+                    <option key={tab} value={tab}>
+                      {tab}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text">Price (PKR)</span>
-              </label>
-              <input
-                type="number"
-                className="input input-bordered w-full"
-                name="price"
-                value={currentService.price}
-                onChange={handleInputChange}
-              />
-            </div>
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text">Quantity</span>
-              </label>
-              <textarea
-                className="textarea textarea-bordered h-24"
-                name="quantity"
-                value={currentService.quantity}
-                onChange={handleInputChange}
-                placeholder="Enter quantity details (one per line)"
-              />
-            </div>
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text">Image URL</span>
-              </label>
-              <input
-                type="text"
-                className="input input-bordered w-full"
-                name="imageUrl"
-                value={currentService.imageUrl}
-                onChange={handleInputChange}
-              />
-            </div>
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text">Description</span>
-              </label>
-              <textarea
-                className="textarea textarea-bordered h-32"
-                name="description"
-                value={currentService.description}
-                onChange={handleInputChange}
-                placeholder="Use {{price}} for dynamic price insertion"
-              />
+            <div className="modal-action">
+              <button className="btn" onClick={() => setIsModalOpen(false)}>
+                Cancel
+              </button>
+              <button className="btn btn-primary" onClick={handleSaveService}>
+                Save
+              </button>
             </div>
           </div>
-          <div className="modal-action">
-            <button className="btn" onClick={() => setIsModalOpen(false)}>Cancel</button>
-            <button className="btn btn-primary" onClick={handleSaveService}>Save</button>
-          </div>
-        </div>
-      </dialog>
+        </dialog>
+      )}
     </section>
   );
 };

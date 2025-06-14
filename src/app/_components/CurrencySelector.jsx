@@ -1,8 +1,8 @@
+// src/app/_components/CurrencySelector.jsx
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import AnimatedSection from "./AnimatedSection";
 import toast from "react-hot-toast";
-
 
 const currencyIcons = {
   PKR: "₨",
@@ -13,40 +13,56 @@ const currencyIcons = {
   AED: "د.إ"
 };
 
-const CurrencySelector = ({ 
-  selectedCurrency, 
+const CurrencySelector = ({
+  selectedCurrency,
   setSelectedCurrency,
+  conversionRates, // Receive current rates
+  setConversionRates, // Receive setter for rates
   isAdmin = false,
   isEditing = false,
-  setIsEditing
+  setIsEditing // Receive setter for editing state from parent
 }) => {
   const [currencies, setCurrencies] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
+  const [hasMounted, setHasMounted] = useState(false);
   const dropdownRef = useRef(null);
 
-  // Fetch currencies on mount
   useEffect(() => {
+    setHasMounted(true);
     const fetchCurrencies = async () => {
       try {
         const response = await fetch('/api/currencies');
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();
         setCurrencies(data);
+        // Also update conversionRates here when fetched
+        const rates = data.reduce((acc, curr) => {
+          acc[curr.code] = curr.rate;
+          return acc;
+        }, {});
+        setConversionRates(rates);
+        // If selectedCurrency is not in fetched data, default to first or PKR
+        if (data.length > 0 && !data.some(c => c.code === selectedCurrency)) {
+            setSelectedCurrency(data[0].code);
+        } else if (data.length === 0) {
+            setSelectedCurrency("PKR"); // Fallback if no currencies
+        }
+
       } catch (error) {
         console.error("Error fetching currencies:", error);
+        toast.error("Failed to load currencies.");
       } finally {
         setIsLoading(false);
       }
     };
     fetchCurrencies();
-  }, []);
+  }, []); // Re-run only on mount
 
-  const toggleDropdown = () => {
-    setIsOpen(prev => !prev);
-  };
+  const toggleDropdown = () => setIsOpen(prev => !prev);
 
-  const handleSelect = (currency) => {
-    setSelectedCurrency(currency);
+  const handleSelect = (currencyCode) => {
+    setSelectedCurrency(currencyCode);
     setIsOpen(false);
   };
 
@@ -54,49 +70,60 @@ const CurrencySelector = ({
     setCurrencies([...currencies, { code: "", name: "", symbol: "", rate: 0 }]);
   };
 
- const handleSaveCurrencies = async () => {
-  try {
-    const validCurrencies = currencies.filter(c => 
-      c.code && c.name && c.symbol && !isNaN(c.rate)
-    );
+  const handleSaveCurrencies = async () => {
+    try {
+      // Validate currencies before saving
+      const validCurrencies = currencies
+        .filter(c => c.code && c.name && !isNaN(c.rate))
+        .map(c => ({
+          code: c.code.toUpperCase(),
+          name: c.name,
+          symbol: c.symbol || currencyIcons[c.code] || c.code, // Use custom symbol or fallback
+          rate: parseFloat(c.rate) || 0
+        }));
 
-    const response = await fetch('/api/currencies', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(validCurrencies)
-    });
+      // Ensure we have at least one currency
+      if (validCurrencies.length === 0) {
+        throw new Error('At least one valid currency is required');
+      }
 
-    if (!response.ok) throw new Error('Failed to save currencies');
+      // Make API call to save currencies
+      const response = await fetch('/api/currencies', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(validCurrencies)
+      });
 
-    const savedCurrencies = await response.json();
-    setCurrencies(savedCurrencies);
-    setIsEditing(false);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to save currencies');
+      }
 
-    if (!savedCurrencies.some(c => c.code === selectedCurrency)) {
-      setSelectedCurrency(savedCurrencies[0]?.code || 'PKR');
+      const savedCurrencies = await response.json();
+
+      // Update local state
+      setCurrencies(savedCurrencies);
+      setIsEditing(false); // Exit editing mode
+
+      // Update conversion rates in parent/global state
+      const newRates = savedCurrencies.reduce((acc, curr) => {
+        acc[curr.code] = curr.rate;
+        return acc;
+      }, {});
+      setConversionRates(newRates);
+
+      // Ensure selected currency still exists in the new list, or default
+      if (!savedCurrencies.some(c => c.code === selectedCurrency)) {
+        setSelectedCurrency(savedCurrencies[0]?.code || 'PKR');
+      }
+
+      toast.success("Currencies saved successfully!");
+    } catch (error) {
+      console.error("Error saving currencies:", error);
+      toast.error(error.message || "Failed to save currencies");
     }
+  };
 
-    // ✅ Replace alert with toast
-    toast.success("Currencies saved successfully!");
-    
-    // 🪄 Optional: Detect if new currency was added
-    const newOnes = savedCurrencies.filter(
-      saved => !currencies.some(c => c.code === saved.code)
-    );
-    if (newOnes.length > 0) {
-      toast.success(`${newOnes.length} new currency(ies) added!`);
-    } else {
-      toast("Edit complete!");
-    }
-
-  } catch (error) {
-    console.error("Error saving currencies:", error);
-    toast.error("Failed to save currencies. Please try again.");
-  }
-};
-
-
-  // Close dropdown if clicked outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -105,12 +132,10 @@ const CurrencySelector = ({
     };
 
     document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  if (isLoading) {
+  if (!hasMounted || isLoading) {
     return (
       <div className="flex justify-center items-center">
         <span className="loading loading-spinner loading-sm"></span>
@@ -124,19 +149,23 @@ const CurrencySelector = ({
         <div className="flex space-x-2 mb-2">
           {isEditing ? (
             <>
-              <button 
+              <button
                 className="btn btn-sm btn-success"
                 onClick={handleSaveCurrencies}
               >
                 Save
               </button>
-              <button 
+              <button
                 className="btn btn-sm btn-error"
-                onClick={() => setIsEditing(false)}
+                onClick={() => {
+                  setIsEditing(false);
+                  // Optionally, refetch currencies to revert unsaved changes
+                  // fetchCurrencies();
+                }}
               >
                 Cancel
               </button>
-              <button 
+              <button
                 className="btn btn-sm btn-primary"
                 onClick={handleAddCurrency}
               >
@@ -144,7 +173,7 @@ const CurrencySelector = ({
               </button>
             </>
           ) : (
-            <button 
+            <button
               className="btn btn-sm btn-primary"
               onClick={() => setIsEditing(true)}
             >
@@ -153,10 +182,10 @@ const CurrencySelector = ({
           )}
         </div>
       )}
-      
+
       <AnimatedSection>
         {isEditing ? (
-          <div className="bg-white p-4 rounded-lg shadow-md">
+          <div className="bg-white p-4 rounded-lg shadow-md overflow-x-auto w-full max-w-xl">
             <table className="table table-zebra table-xs">
               <thead>
                 <tr>
@@ -169,7 +198,7 @@ const CurrencySelector = ({
               </thead>
               <tbody>
                 {currencies.map((currency, index) => (
-                  <tr key={index}>
+                  <tr key={currency._id || index}> {/* Use _id if available, otherwise index */}
                     <td>
                       <input
                         type="text"
@@ -185,7 +214,7 @@ const CurrencySelector = ({
                     <td>
                       <input
                         type="text"
-                        className="input input-sm input-bordered"
+                        className="input input-sm input-bordered w-28"
                         value={currency.name}
                         onChange={(e) => {
                           const newCurrencies = [...currencies];
@@ -240,21 +269,18 @@ const CurrencySelector = ({
               type="button"
               className="btn m-1 bg-gradient-to-r from-teal-400 to-blue-600 text-white shadow-lg flex items-center space-x-2"
               onClick={toggleDropdown}
-              aria-haspopup="true"
               aria-expanded={isOpen}
             >
               <span>{currencyIcons[selectedCurrency] || selectedCurrency}</span>
               <span>{selectedCurrency}</span>
               <svg
-                className={`w-4 h-4 ml-1 transition-transform duration-200 ${
-                  isOpen ? "rotate-180" : ""
-                }`}
+                className={`w-4 h-4 ml-1 transition-transform ${isOpen ? "rotate-180" : ""}`}
                 fill="none"
                 stroke="currentColor"
-                strokeWidth="2"
                 viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
               >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
               </svg>
             </button>
 
@@ -263,12 +289,12 @@ const CurrencySelector = ({
                 {currencies.map((currency) => (
                   <li key={currency.code}>
                     <button
-                      className={`flex items-center space-x-2 w-full text-left px-2 py-1 rounded bg-slate-50 hover:bg-gray-200 ${
+                      className={`flex items-center space-x-2 w-full text-left px-2 py-1 rounded hover:bg-gray-200 ${
                         selectedCurrency === currency.code ? "font-bold text-primary" : ""
                       }`}
                       onClick={() => handleSelect(currency.code)}
                     >
-                      <span>{currencyIcons[currency.code] || currency.symbol}</span>
+                      <span>{currency.symbol || currencyIcons[currency.code] || currency.code}</span> {/* Use stored symbol first */}
                       <span>{currency.code}</span>
                     </button>
                   </li>
