@@ -141,7 +141,6 @@ const Services = () => { // Renamed from Sharry326 to Services to avoid confusio
 
       <AnimatedSection>
         <div className="rounded-lg p-6 mb-6 bg-white w-full max-w-4xl mx-auto">
-          <h2 className="text-xl font-semibold mb-4">Service Categories</h2>
           <div className="flex flex-wrap gap-3 justify-center">
             {[
               "Tiktok",
