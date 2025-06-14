@@ -1,0 +1,32 @@
+[
+  {
+    "code": "PKR",
+    "name": "Pakistani Rupee",
+    "symbol": "₨",
+    "rate": 1
+  },
+  {
+    "code": "USD",
+    "name": "US Dollar",
+    "symbol": "$",
+    "rate": 0.0036
+  },
+  {
+    "code": "INR",
+    "name": "Indian Rupee",
+    "symbol": "₹",
+    "rate": 0.3
+  },
+  {
+    "code": "AED",
+    "name": "Dubai Rupee",
+    "symbol": "AED",
+    "rate": 0.013
+  },
+  {
+    "code": "EURO ",
+    "name": "UK Rupee",
+    "symbol": "€",
+    "rate": 0.031
+  }
+]

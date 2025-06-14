@@ -10,15 +10,19 @@ const Review = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
 
-  const fetchReviews = async () => {
-    try {
-      const response = await fetch("/api/reviews");
-      const data = await response.json();
-      setReviews(data);
-    } catch (err) {
-      console.error(err);
-    }
-  };
+  const shuffleArray = (array) => {
+  return array.sort(() => Math.random() - 0.5);
+};
+ const fetchReviews = async () => {
+  try {
+    const response = await fetch("/api/reviews");
+    const data = await response.json();
+    const shuffled = shuffleArray(data);
+    setReviews(shuffled);
+  } catch (err) {
+    console.error(err);
+  }
+};
 
   useEffect(() => {
     fetchReviews();

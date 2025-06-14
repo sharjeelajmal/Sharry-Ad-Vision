@@ -1,0 +1,66 @@
+[
+  {
+    "id": 1,
+    "title": "",
+    "description": "",
+    "price": 0,
+    "quantity": "1k",
+    "imageUrl": ""
+  },
+  {
+    "id": 2,
+    "title": "Instagram Likes",
+    "description": "Price {{price}} = 1k\\n ⚡Start - Instant\\n⚡Speed - Fast / Day\\n⭐ Quality - High Quality [ Mix ]\\n♻️Drop - No\\n🔥Refill - Lifetime\\n✅Link - Instagram Post / Reel / IGTV URL",
+    "price": 80,
+    "quantity": "1k",
+    "imageUrl": "/Instagram.gif"
+  },
+  {
+    "id": 3,
+    "title": "Youtube Subscribers Offer",
+    "description": "Price {{price}} = 1k\n⚡Start: 0-1 Hours\n⚡Speed: ⚡Medium\n⭐ Recommended\\n🔥 Non Drop\n♻️ Refill Button Active\n✅ Lifetime Refill\n🔥 Always working",
+    "price": 900,
+    "quantity": "1k \nPrice: 4,200 PKR = 5k \nPrice: 8,000 PKR = 10k",
+    "imageUrl": "/Youtube.gif"
+  },
+  {
+    "id": 4,
+    "title": "Tiktok Followers",
+    "description": "Price {{price}} = 1k\n⚡ Recommended ✅\n⚡100% Always working 💯\n⭐Start: 0-5 minutes / 1 hour\n🔥 Speed : Excellent \n♻️Refill : Lifetime\n🔥Drop Ratio : 0%\n⭐ Link : Add Profile link",
+    "price": 100,
+    "quantity": "1k",
+    "imageUrl": "/Tiktok.gif"
+  },
+  {
+    "id": 5,
+    "title": "Titkok Follwers",
+    "description": "/Tiktok.gif",
+    "price": 10,
+    "quantity": "1k",
+    "imageUrl": "/Tiktok.gif"
+  },
+  {
+    "id": 6,
+    "title": "Facebook Followers",
+    "description": "/Tiktok.gif",
+    "price": 10,
+    "quantity": "1k",
+    "imageUrl": "/Youtube.gif"
+  },
+  {
+    "id": 7,
+    "title": "Tiktok Followers ",
+    "description": "Price {{price}} = 1k\\n⚡ Recommended ✅\\n⚡100% Always working 💯\\n⭐Start: 0-5 minutes / 1 hour\\n🔥 Speed : Slow \\n♻️Refill : Lifetime\\n🔥Drop Ratio : 0%\\n⭐ Link : Add Profile link",
+    "price": 220,
+    "quantity": "1k",
+    "imageUrl": "/Tiktok.gif"
+  },
+  {
+    "id": 8,
+    "title": "Whatsapp Post Votes",
+    "description": "Price {{price}}\\n ✨Start - 0-1 Hour⌛\\n⭐WhatsApp Poll Link\\n✨ Speed: Not Confirm⚡\\n🔄 Guarantee: Guaranteed Delivery\\n🔄 Refill: Lifetime\\n❌️ No Refund in the case of Poll Delete and Wrong URL.",
+    "price": 850,
+    "quantity": "1k",
+    "imageUrl": "/Whatsapp.gif"
+  }
+]

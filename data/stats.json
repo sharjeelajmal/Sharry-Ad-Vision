@@ -1,0 +1,58 @@
+[
+  {
+    "id": 1,
+    "label": "Users",
+    "value": "4125",
+    "icon": {
+      "type": {},
+      "key": null,
+      "props": {
+        "className": "h-6 w-6 text-white"
+      },
+      "_owner": null,
+      "_store": {}
+    }
+  },
+  {
+    "id": 2,
+    "label": "Orders",
+    "value": "112305",
+    "icon": {
+      "type": {},
+      "key": null,
+      "props": {
+        "className": "h-6 w-6 text-white"
+      },
+      "_owner": null,
+      "_store": {}
+    }
+  },
+  {
+    "id": 3,
+    "label": "Designs Delivered",
+    "value": "950",
+    "icon": {
+      "type": {},
+      "key": null,
+      "props": {
+        "className": "h-6 w-6 text-white"
+      },
+      "_owner": null,
+      "_store": {}
+    }
+  },
+  {
+    "id": 4,
+    "label": "Websites Built",
+    "value": "220",
+    "icon": {
+      "type": {},
+      "key": null,
+      "props": {
+        "className": "h-6 w-6 text-white"
+      },
+      "_owner": null,
+      "_store": {}
+    }
+  }
+]
