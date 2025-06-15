@@ -144,19 +144,19 @@ const CurrencySelector = ({
   }
 
   return (
-    <div className="flex flex-col items-center mb-3" ref={dropdownRef}>
+    <div className="flex flex-col items-center " ref={dropdownRef}>
       {isAdmin && (
         <div className="flex space-x-2 mb-2">
           {isEditing ? (
             <>
               <button
-                className="btn btn-sm btn-success"
+                className="btn btn-sm btn-success text-white "
                 onClick={handleSaveCurrencies}
               >
                 Save
               </button>
               <button
-                className="btn btn-sm btn-error"
+                className="btn btn-sm btn-error text-white"
                 onClick={() => {
                   setIsEditing(false);
                   // Optionally, refetch currencies to revert unsaved changes
@@ -166,7 +166,7 @@ const CurrencySelector = ({
                 Cancel
               </button>
               <button
-                className="btn btn-sm btn-primary"
+                className="btn btn-sm btn-primary text-white"
                 onClick={handleAddCurrency}
               >
                 Add
@@ -186,7 +186,7 @@ const CurrencySelector = ({
       <AnimatedSection>
         {isEditing ? (
           <div className="bg-white p-4 rounded-lg shadow-md overflow-x-auto w-full max-w-xl">
-            <table className="table table-zebra table-xs">
+            <table className="table table-zebra table-xs bg-white">
               <thead>
                 <tr>
                   <th>Code</th>
@@ -202,7 +202,7 @@ const CurrencySelector = ({
                     <td>
                       <input
                         type="text"
-                        className="input input-sm input-bordered w-20"
+                        className="input input-sm input-bordered w-20 bg-white"
                         value={currency.code}
                         onChange={(e) => {
                           const newCurrencies = [...currencies];
@@ -214,7 +214,7 @@ const CurrencySelector = ({
                     <td>
                       <input
                         type="text"
-                        className="input input-sm input-bordered w-28"
+                        className="input input-sm input-bordered w-28 bg-white"
                         value={currency.name}
                         onChange={(e) => {
                           const newCurrencies = [...currencies];
@@ -226,7 +226,7 @@ const CurrencySelector = ({
                     <td>
                       <input
                         type="text"
-                        className="input input-sm input-bordered w-16"
+                        className="input input-sm input-bordered w-16 bg-white"
                         value={currency.symbol}
                         onChange={(e) => {
                           const newCurrencies = [...currencies];
@@ -238,7 +238,7 @@ const CurrencySelector = ({
                     <td>
                       <input
                         type="number"
-                        className="input input-sm input-bordered w-24"
+                        className="input input-sm input-bordered w-24 bg-white"
                         value={currency.rate}
                         step="0.0001"
                         onChange={(e) => {
@@ -250,7 +250,7 @@ const CurrencySelector = ({
                     </td>
                     <td>
                       <button
-                        className="btn btn-xs btn-error"
+                        className="btn btn-xs btn-error text-white"
                         onClick={() => {
                           setCurrencies(currencies.filter((_, i) => i !== index));
                         }}

@@ -366,13 +366,13 @@ const Sharry326 = () => {
             {isEditingTabs ? (
               <div className="flex space-x-2">
                 <button
-                  className="btn btn-md btn-success"
+                  className="btn btn-md btn-success text-white"
                   onClick={handleSaveTabs}
                 >
                   Save
                 </button>
                 <button
-                  className="btn btn-md btn-error"
+                  className="btn btn-md btn-error text-white"
                   onClick={() => {
                     setIsEditingTabs(false);
                     setEditTabs([...tabs]);
@@ -381,7 +381,7 @@ const Sharry326 = () => {
                   Cancel
                 </button>
                 <button
-                  className="btn btn-md btn-primary"
+                  className="btn btn-md btn-primary text-white"
                   onClick={handleAddTab}
                 >
                   Add Tab
@@ -389,7 +389,7 @@ const Sharry326 = () => {
               </div>
             ) : (
               <button
-                className="btn btn-md btn-primary"
+                className="btn btn-md btn-primary text-white"
                 onClick={() => setIsEditingTabs(true)}
               >
                 Edit Categories
@@ -398,9 +398,9 @@ const Sharry326 = () => {
           </div>
 
           {isEditingTabs ? (
-            <div className="space-y-3 w-full">
+            <div className="space-y-3 w-full bg-white">
               {editTabs.map((tab, index) => (
-                <div key={index} className="flex items-center space-x-3">
+                <div key={index} className="flex items-center space-x-3 bg-white">
                   <input
                     type="text"
                     className="input input-md w-full bg-gray-50 text-gray-800 border border-gray-300 rounded-lg px-4 py-2"
@@ -473,7 +473,7 @@ const Sharry326 = () => {
                     />
                   </div>
                 )}
-                <h2 className="font-bold text-xl mt-2 text-center">
+                <h2 className="font-bold text-xl mt-2 text-center ">
                   {service.title}
                 </h2>
                 <p className="text-center text-sm text-gray-600">
@@ -521,8 +521,8 @@ const Sharry326 = () => {
       </div>
 
       {isModalOpen && (
-        <dialog open className="modal modal-open">
-          <div className="modal-box max-w-3xl">
+        <dialog open className="modal modal-open ">
+          <div className="modal-box max-w-3xl bg-white">
             <h3 className="font-bold text-lg">
               {currentService._id ? "Edit Service" : "Add New Service"}
             </h3>
@@ -533,7 +533,7 @@ const Sharry326 = () => {
                 </label>
                 <input
                   type="text"
-                  className="input input-bordered w-full"
+                  className="input input-bordered w-full bg-white"
                   name="title"
                   value={currentService.title}
                   onChange={handleInputChange}
@@ -546,7 +546,7 @@ const Sharry326 = () => {
                 </label>
                 <input
                   type="number"
-                  className="input input-bordered w-full"
+                  className="input input-bordered w-full bg-white"
                   name="price"
                   value={currentService.price}
                   onChange={handleInputChange}
@@ -560,7 +560,7 @@ const Sharry326 = () => {
                   <span className="label-text">Quantity</span>
                 </label>
                 <textarea
-                  className="textarea textarea-bordered h-24"
+                  className="textarea textarea-bordered h-24 bg-white"
                   name="quantity"
                   value={currentService.quantity}
                   onChange={handleInputChange}
@@ -573,7 +573,7 @@ const Sharry326 = () => {
                 </label>
                 <input
                   type="url"
-                  className="input input-bordered w-full"
+                  className="input input-bordered w-full bg-white"
                   name="imageUrl"
                   value={currentService.imageUrl}
                   onChange={handleInputChange}
@@ -600,7 +600,7 @@ const Sharry326 = () => {
                   <span className="label-text">Description*</span>
                 </label>
                 <textarea
-                  className="textarea textarea-bordered h-32"
+                  className="textarea textarea-bordered h-32 bg-white"
                   name="description"
                   value={currentService.description}
                   onChange={handleInputChange}
@@ -613,7 +613,7 @@ const Sharry326 = () => {
                   <span className="label-text">Category*</span>
                 </label>
                 <select
-                  className="select select-bordered w-full"
+                  className="select select-bordered w-full bg-white"
                   name="category"
                   value={currentService.category}
                   onChange={handleInputChange}

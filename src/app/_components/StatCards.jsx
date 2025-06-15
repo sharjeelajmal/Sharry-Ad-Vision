@@ -98,14 +98,14 @@ export default function StatsCards({ isAdmin = false, isEditing, setIsEditing })
           {isEditing ? (
             <>
             <button
-              className="btn btn-sm btn-success"
+              className="btn btn-sm btn-success text-white"
               onClick={handleSaveClick}
               disabled={false} // Disable while saving if `isSaving` state is added
             >
               Save Stats
             </button>
             <button
-              className="btn btn-sm btn-error"
+              className="btn btn-sm btn-error text-white"
               onClick={() => setIsEditing(false)} // Cancel editing
             >
               Cancel
@@ -137,7 +137,7 @@ export default function StatsCards({ isAdmin = false, isEditing, setIsEditing })
             {isEditing ? (
               <input
                 type="text"
-                className="input input-sm w-20 text-center text-black"
+                className="input input-sm w-20 text-center text-black bg-white"
                 value={editValues[stat.label] || ''} // Use label as key for value
                 onChange={(e) => handleInputChange(stat.label, e.target.value)}
               />
