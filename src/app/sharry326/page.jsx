@@ -1,3 +1,4 @@
+// src/app/sharry326/page.jsx
 "use client";
 import React, { useEffect, useState, useCallback } from "react";
 import Image from "next/image";
@@ -109,9 +110,10 @@ const Sharry326 = () => {
   // --- Helper function to fetch user location ---
   const fetchUserLocation = useCallback(async () => {
     try {
-      // Use a more robust IP geolocation service in production if needed,
-      // or implement a server-side endpoint to get location from headers.
-      const geoResponse = await fetch("http://ip-api.com/json/");
+      // **CRITICAL FIX: Changed http:// to https:// for Vercel deployment**
+      // For production, consider using a server-side endpoint to fetch location
+      // to avoid rate limits on public APIs and potential CORS issues.
+      const geoResponse = await fetch("https://ip-api.com/json/");
       if (!geoResponse.ok) {
         console.error("Geolocation API response not OK:", geoResponse.status);
         throw new Error("Failed to fetch location from ip-api.com");
@@ -125,10 +127,10 @@ const Sharry326 = () => {
       }
     } catch (error) {
       console.error("Error fetching user location:", error);
-      toast.error("Failed to determine your location.");
+      toast.error("Failed to determine your location. Defaulting currency."); // More user-friendly message
       return null;
     }
-  }, []); // No dependencies, as it only fetches external data
+  }, []);
 
   // --- useEffect for initial data fetching ---
   useEffect(() => {
@@ -168,7 +170,7 @@ const Sharry326 = () => {
           setEditTabs(defaultTabs);
           initialActiveTab = "Tiktok";
         }
-        filterServices(initialActiveTab, servicesData); // Filter services after fetching both
+        filterServices(initialActiveTab, servicesData);
 
         // Currencies
         if (!currenciesResponse.ok) {
@@ -178,10 +180,11 @@ const Sharry326 = () => {
         const currenciesData = await currenciesResponse.json();
 
         // Sort currencies by 'createdAt' to ensure oldest is first
+        // Ensure your backend provides a 'createdAt' timestamp for reliable sorting!
         const orderedCurrencies = currenciesData.sort((a, b) => {
-            const dateA = new Date(a.createdAt || 0);
+            const dateA = new Date(a.createdAt || 0); // Use 0 if createdAt is missing for robust comparison
             const dateB = new Date(b.createdAt || 0);
-            return dateA.getTime() - dateB.getTime();
+            return dateA.getTime() - dateB.getTime(); // Ascending order (oldest first)
         });
 
         const rates = orderedCurrencies.reduce((acc, curr) => {
@@ -190,9 +193,9 @@ const Sharry326 = () => {
         }, {});
         setConversionRates(rates);
 
-        // --- Location-based currency determination logic moved here ---
+        // --- Location-based currency determination logic ---
         const userCountryCode = await fetchUserLocation(); // Await location
-        let determinedCurrency = "PKR"; // Default fallback if all else fails
+        let determinedCurrency = "PKR"; // Fallback default if all else fails
 
         if (orderedCurrencies.length > 0) {
             if (userCountryCode && countryCurrencyMap[userCountryCode]) {
@@ -201,11 +204,11 @@ const Sharry326 = () => {
                 if (orderedCurrencies.some(c => c.code === preferredCurrencyCode)) {
                     determinedCurrency = preferredCurrencyCode;
                 } else {
-                    // Preferred currency not available, fallback to the oldest one
+                    // Preferred currency from location is not available in fetched currencies, fallback to the oldest one
                     determinedCurrency = orderedCurrencies[0].code;
                 }
             } else {
-                // No country code or no map entry, fallback to the oldest one
+                // No country code detected or no map entry for it, fallback to the oldest one
                 determinedCurrency = orderedCurrencies[0].code;
             }
         }
@@ -215,8 +218,8 @@ const Sharry326 = () => {
 
 
       } catch (error) {
-        console.error("Error fetching initial data:", error);
-        toast.error(`Failed to load initial data: ${error.message}`);
+        console.error("Error fetching initial data for admin dashboard:", error);
+        toast.error(`Failed to load admin data: ${error.message}`);
       } finally {
         setIsLoading(false);
       }
