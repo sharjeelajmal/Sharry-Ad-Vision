@@ -1,12 +1,28 @@
-// Services .jsx
 "use client";
 import React, { useEffect, useState, useCallback } from "react";
 import Image from "next/image";
 import StatsCards from "../_components/StatCards";
 import CurrencySelector from "../_components/CurrencySelector";
 import AnimatedSection from "../_components/AnimatedSection";
-// import NotificationPopup from "../_components/Alertmesage.jsx"; // Removed import, as it's rendered in layout.js
 import { toast } from "react-hot-toast";
+
+// Define a mapping of country codes to preferred default currencies.
+// This should be comprehensive for the regions you serve.
+const countryCurrencyMap = {
+  PK: "PKR", // Pakistan
+  US: "USD", // United States
+  IN: "INR", // India
+  AE: "AED", // United Arab Emirates
+  GB: "GBP", // United Kingdom
+  DE: "EUR", // Germany (example for Eurozone)
+  FR: "EUR", // France
+  // Add more as needed:
+  // JP: "JPY", // Japan
+  // AU: "AUD", // Australia
+  // CA: "CAD", // Canada
+  // SA: "SAR", // Saudi Arabia
+  // QA: "QAR", // Qatar
+};
 
 const Services = () => {
   const [isClient, setIsClient] = useState(false);
@@ -17,11 +33,12 @@ const Services = () => {
   const [activeTab, setActiveTab] = useState("Tiktok");
   const [isLoading, setIsLoading] = useState(true);
 
-  // Tabs state
+  // Tabs state (read-only in this component)
   const [tabs, setTabs] = useState([]);
 
   // Currency state
-  const [selectedCurrency, setSelectedCurrency] = useState("PKR");
+  // Set initial selectedCurrency to null/empty string so it gets determined by location/first-added on load
+  const [selectedCurrency, setSelectedCurrency] = useState("");
   const [conversionRates, setConversionRates] = useState({ PKR: 1 });
 
   // --- Functions that need to be defined before useEffect ---
@@ -36,7 +53,9 @@ const Services = () => {
     } else {
       filtered = allServicesList.filter((service) => {
         const title = service.title.toLowerCase();
-        const serviceCategory = service.category ? service.category.toLowerCase() : '';
+        const serviceCategory = service.category
+          ? service.category.toLowerCase()
+          : "";
         return (
           serviceCategory === category.toLowerCase() ||
           (title.includes(category.toLowerCase()) && !title.includes("offer"))
@@ -48,30 +67,60 @@ const Services = () => {
   }, []);
 
   // Currency conversion functions
-  const convertPrice = useCallback((price) => {
-    const rate = conversionRates[selectedCurrency] || 1;
-    let converted = price * rate;
+  const convertPrice = useCallback(
+    (price) => {
+      const rate = conversionRates[selectedCurrency] || 1;
+      let converted = price * rate;
 
-    if (converted % 1 === 0) {
-      return converted.toFixed(0);
-    } else {
-      return converted.toFixed(2);
+      if (converted % 1 === 0) {
+        return converted.toFixed(0);
+      } else {
+        return converted.toFixed(2);
+      }
+    },
+    [conversionRates, selectedCurrency]
+  );
+
+  const convertQuantityString = useCallback(
+    (quantityString) => {
+      if (!quantityString) return "";
+
+      const regex = /(\d{1,3}(?:,\d{3})*)\s*PKR/g;
+
+      return quantityString.replace(regex, (match, p1) => {
+        const numericValue = parseFloat(p1.replace(/,/g, ""));
+        if (isNaN(numericValue)) return match;
+
+        const convertedValue = convertPrice(numericValue);
+        return `${convertedValue} ${selectedCurrency}`;
+      });
+    },
+    [convertPrice, selectedCurrency]
+  );
+
+  // --- Helper function to fetch user location ---
+  const fetchUserLocation = useCallback(async () => {
+    try {
+      // For production, consider using a server-side endpoint to fetch location
+      // to avoid rate limits on public APIs and potential CORS issues.
+      const geoResponse = await fetch("http://ip-api.com/json/");
+      if (!geoResponse.ok) {
+        console.error("Geolocation API response not OK:", geoResponse.status);
+        throw new Error("Failed to fetch location from ip-api.com");
+      }
+      const geoData = await geoResponse.json();
+      if (geoData && geoData.countryCode) {
+        return geoData.countryCode;
+      } else {
+        console.warn("Geolocation data missing countryCode.");
+        return null;
+      }
+    } catch (error) {
+      console.error("Error fetching user location:", error);
+      toast.error("Failed to determine your location.");
+      return null;
     }
-  }, [conversionRates, selectedCurrency]);
-
-  const convertQuantityString = useCallback((quantityString) => {
-    if (!quantityString) return "";
-
-    const regex = /(\d{1,3}(?:,\d{3})*)\s*PKR/g;
-
-    return quantityString.replace(regex, (match, p1) => {
-      const numericValue = parseFloat(p1.replace(/,/g, ""));
-      if (isNaN(numericValue)) return match;
-
-      const convertedValue = convertPrice(numericValue);
-      return `${convertedValue} ${selectedCurrency}`;
-    });
-  }, [convertPrice, selectedCurrency]);
+  }, []); // No dependencies, as it only fetches external data
 
   // --- useEffect for initial data fetching ---
   useEffect(() => {
@@ -80,16 +129,21 @@ const Services = () => {
       try {
         setIsLoading(true);
 
-        const [servicesResponse, tabsResponse, currenciesResponse] = await Promise.all([
-          fetch("/api/services"),
-          fetch("/api/tabs"),
-          fetch("/api/currencies"),
-        ]);
+        const [servicesResponse, tabsResponse, currenciesResponse] =
+          await Promise.all([
+            fetch("/api/services"),
+            fetch("/api/tabs"),
+            fetch("/api/currencies"),
+          ]);
 
         // Services
         if (!servicesResponse.ok) {
           const errorData = await servicesResponse.json();
-          throw new Error(`HTTP error! status: ${servicesResponse.status} for services: ${errorData.details || servicesResponse.statusText}`);
+          throw new Error(
+            `HTTP error! status: ${servicesResponse.status} for services: ${
+              errorData.details || servicesResponse.statusText
+            }`
+          );
         }
         const servicesData = await servicesResponse.json();
         setServices(servicesData);
@@ -97,38 +151,82 @@ const Services = () => {
         // Tabs
         if (!tabsResponse.ok) {
           const errorData = await tabsResponse.json();
-          throw new Error(`HTTP error! status: ${tabsResponse.status} for tabs: ${errorData.details || tabsResponse.statusText}`);
+          throw new Error(
+            `HTTP error! status: ${tabsResponse.status} for tabs: ${
+              errorData.details || tabsResponse.statusText
+            }`
+          );
         }
         const tabsData = await tabsResponse.json();
+        let initialActiveTab;
         if (tabsData.length > 0) {
           setTabs(tabsData);
-          const initialActiveTab = tabsData[0] || "Tiktok";
-          filterServices(initialActiveTab, servicesData);
+          initialActiveTab = tabsData[0];
         } else {
-          const defaultTabs = ["Tiktok", "Youtube", "Facebook", "Instagram", "X-Twitter", "Whatsapp", "Website Development", "Graphics Designing", "Offers"];
+          // Default tabs if none are fetched from DB
+          const defaultTabs = [
+            "Tiktok",
+            "Youtube",
+            "Facebook",
+            "Instagram",
+            "X-Twitter",
+            "Whatsapp",
+            "Website Development",
+            "Graphics Designing",
+            "Offers",
+          ];
           setTabs(defaultTabs);
-          filterServices("Tiktok", servicesData);
+          initialActiveTab = "Tiktok";
         }
+        filterServices(initialActiveTab, servicesData); // Filter services after fetching both
 
         // Currencies
         if (!currenciesResponse.ok) {
           const errorData = await currenciesResponse.json();
-          throw new Error(`HTTP error! status: ${currenciesResponse.status} for currencies: ${errorData.details || currenciesResponse.statusText}`);
+          throw new Error(
+            `HTTP error! status: ${currenciesResponse.status} for currencies: ${
+              errorData.details || currenciesResponse.statusText
+            }`
+          );
         }
         const currenciesData = await currenciesResponse.json();
-        const rates = currenciesData.reduce((acc, curr) => {
+
+        // Sort currencies by 'createdAt' to ensure oldest is first
+        // Ensure your backend provides a 'createdAt' timestamp!
+        const orderedCurrencies = currenciesData.sort((a, b) => {
+          const dateA = new Date(a.createdAt || 0); // Use 0 if createdAt is missing
+          const dateB = new Date(b.createdAt || 0);
+          return dateA.getTime() - dateB.getTime(); // Ascending order (oldest first)
+        });
+
+        const rates = orderedCurrencies.reduce((acc, curr) => {
           acc[curr.code] = curr.rate;
           return acc;
         }, {});
         setConversionRates(rates);
-        if (currenciesData.length > 0) {
-          setSelectedCurrency(currenciesData[0].code);
-        } else {
-          const defaultCurrencies = [{code: "PKR", name: "Pakistani Rupee", symbol: "₨", rate: 1}];
-          setConversionRates({"PKR": 1});
-          setSelectedCurrency("PKR");
-        }
 
+        // --- Location-based currency determination logic ---
+        const userCountryCode = await fetchUserLocation(); // Await location
+        let determinedCurrency = "PKR"; // Default fallback if all else fails
+
+        if (orderedCurrencies.length > 0) {
+          if (userCountryCode && countryCurrencyMap[userCountryCode]) {
+            const preferredCurrencyCode = countryCurrencyMap[userCountryCode];
+            // Check if the preferred currency is actually in our fetched list
+            if (orderedCurrencies.some((c) => c.code === preferredCurrencyCode)) {
+              determinedCurrency = preferredCurrencyCode;
+            } else {
+              // Preferred currency not available, fallback to the oldest one
+              determinedCurrency = orderedCurrencies[0].code;
+            }
+          } else {
+            // No country code or no map entry, fallback to the oldest one
+            determinedCurrency = orderedCurrencies[0].code;
+          }
+        }
+        // If orderedCurrencies is empty, determinedCurrency remains "PKR" (initial default)
+
+        setSelectedCurrency(determinedCurrency); // Set the determined currency
       } catch (error) {
         console.error("Error fetching initial data:", error);
         toast.error(`Failed to load initial data: ${error.message}`);
@@ -138,13 +236,13 @@ const Services = () => {
     };
 
     fetchInitialData();
-  }, [filterServices]); // Dependency on filterServices for memoization
+  }, [filterServices, fetchUserLocation]); // Add fetchUserLocation to dependencies
 
   if (!isClient) {
     return (
       <div className="flex justify-center items-center h-screen">
         <img
-          src="/Loader.gif"
+          src="/Loader.gif" // Assuming Loader.gif is the correct path for this page
           alt="loading"
           width={140}
           height={140}
@@ -161,16 +259,11 @@ const Services = () => {
 
   return (
     <section className="mb-10">
-      {/* Removed this div containing NotificationPopup:
-      <div className="my-8 p-4 border rounded-lg">
-        <h2 className="text-2xl font-bold mb-4">Popup Messages</h2>
-        <NotificationPopup isAdmin={false} />
-      </div>
-      */}
+      {/* Removed NotificationPopup section as per your comment */}
 
       <AnimatedSection>
         <h1 className="font-bold text-4xl text-center py-5">Our Services</h1>
-        {/* StatsCards will now always be in non-editing mode for this page */}
+        {/* StatsCards will always be in non-editing mode for this public page */}
         <StatsCards isAdmin={false} />
       </AnimatedSection>
 
@@ -180,18 +273,20 @@ const Services = () => {
         </span>
       </h2>
 
-      {/* CurrencySelector will now always be in non-editing mode for this page */}
+      {/* CurrencySelector will always be in non-editing mode for this public page */}
       <CurrencySelector
         selectedCurrency={selectedCurrency}
         setSelectedCurrency={setSelectedCurrency}
         conversionRates={conversionRates}
         setConversionRates={setConversionRates}
-        isAdmin={false}
+        isAdmin={false} // This page is not for admin, so isAdmin is false
+        // isEditing and setIsEditing props are removed as isAdmin is false
       />
       <AnimatedSection>
         <div className="rounded-lg p-6 mb-6 bg-white w-full max-w-4xl mx-auto">
           <div className="flex justify-between items-center mb-4">
-            {/* Removed Edit Categories button and editing UI */}
+            {/* Removed Edit Categories button and editing UI as this is a public page */}
+            <h2 className="text-xl font-semibold">Service Categories</h2>
           </div>
 
           <div className="flex flex-wrap gap-3 justify-center">
@@ -212,7 +307,7 @@ const Services = () => {
         </div>
       </AnimatedSection>
 
-      {/* Removed Add Service button */}
+      {/* Removed Add Service button as this is a public page */}
 
       <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 px-4">
         {filteredServices.map((service) => {
@@ -266,13 +361,13 @@ const Services = () => {
                   ))}
                 </div>
               </div>
-              {/* Removed Edit and Delete buttons for each service */}
+              {/* Removed Edit and Delete buttons for each service as this is a public page */}
             </AnimatedSection>
           );
         })}
       </div>
 
-      {/* Removed Service Edit/Create Modal */}
+      {/* Removed Service Edit/Create Modal as this is a public page */}
     </section>
   );
 };

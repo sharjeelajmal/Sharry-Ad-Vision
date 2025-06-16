@@ -10,17 +10,32 @@ const currencyIcons = {
   INR: "₹",
   EUR: "€",
   GBP: "£",
-  AED: "د.إ"
+  AED: "د.إ",
+};
+
+const countryCurrencyMap = {
+  PK: "PKR", // Pakistan
+  US: "USD", // United States
+  IN: "INR", // India
+  AE: "AED", // United Arab Emirates
+  GB: "GBP", // United Kingdom
+  DE: "EUR", // Germany (example for Eurozone)
+  FR: "EUR", // France
+  // **ADD MORE COUNTRY CODES AND THEIR CURRENCIES HERE AS NEEDED**
+  // Example for another country:
+  // JP: "JPY", // Japan
+  // AU: "AUD", // Australia
+  // CA: "CAD", // Canada
 };
 
 const CurrencySelector = ({
   selectedCurrency,
   setSelectedCurrency,
-  conversionRates, // Receive current rates
-  setConversionRates, // Receive setter for rates
+  conversionRates,
+  setConversionRates,
   isAdmin = false,
   isEditing = false,
-  setIsEditing // Receive setter for editing state from parent
+  setIsEditing,
 }) => {
   const [currencies, setCurrencies] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -30,36 +45,113 @@ const CurrencySelector = ({
 
   useEffect(() => {
     setHasMounted(true);
-    const fetchCurrencies = async () => {
+
+    const fetchUserLocation = async () => {
+      console.log("Attempting to fetch user location...");
       try {
-        const response = await fetch('/api/currencies');
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        const geoResponse = await fetch("http://ip-api.com/json/");
+        if (!geoResponse.ok) {
+          console.error("Geolocation API response not OK:", geoResponse.status);
+          throw new Error("Failed to fetch location from ip-api.com");
+        }
+        const geoData = await geoResponse.json();
+        console.log("Geolocation data received:", geoData);
+        if (geoData && geoData.countryCode) {
+          console.log("User country code:", geoData.countryCode);
+          return geoData.countryCode;
+        } else {
+          console.warn("Geolocation data missing countryCode.");
+          return null;
+        }
+      } catch (error) {
+        console.error("Error fetching user location:", error);
+        toast.error("Failed to determine your location."); // User-facing toast
+        return null;
+      }
+    };
+
+    const fetchAndSetCurrencies = async () => {
+      console.log("Fetching currencies from /api/currencies...");
+      try {
+        const response = await fetch("/api/currencies");
+        if (!response.ok) {
+          console.error("API /api/currencies response not OK:", response.status);
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
         const data = await response.json();
-        setCurrencies(data);
-        // Also update conversionRates here when fetched
-        const rates = data.reduce((acc, curr) => {
+        console.log("Currencies data received:", data);
+
+        // Sort currencies by 'createdAt' timestamp
+        const orderedCurrencies = data.sort((a, b) => {
+          // Check if createdAt exists before creating Date objects
+          if (!a.createdAt || !b.createdAt) {
+            console.warn("Missing 'createdAt' field in one or more currencies. Sorting might be unreliable.");
+            // Fallback to alphabetical or current order if createdAt is missing
+            return String(a.code).localeCompare(String(b.code));
+          }
+          const dateA = new Date(a.createdAt);
+          const dateB = new Date(b.createdAt);
+          return dateA.getTime() - dateB.getTime(); // Ascending order (oldest first)
+        });
+        console.log("Currencies after sorting:", orderedCurrencies);
+
+        setCurrencies(orderedCurrencies);
+
+        const rates = orderedCurrencies.reduce((acc, curr) => {
           acc[curr.code] = curr.rate;
           return acc;
         }, {});
         setConversionRates(rates);
-        // If selectedCurrency is not in fetched data, default to first or PKR
-        if (data.length > 0 && !data.some(c => c.code === selectedCurrency)) {
-            setSelectedCurrency(data[0].code);
-        } else if (data.length === 0) {
-            setSelectedCurrency("PKR"); // Fallback if no currencies
+
+        const userCountryCode = await fetchUserLocation(); // Get user's country code
+        let defaultCurrencyCode = "PKR"; // Fallback default
+
+        console.log("Attempting to determine default currency...");
+        console.log("User Country Code:", userCountryCode);
+
+        if (userCountryCode && countryCurrencyMap[userCountryCode]) {
+          const preferredCurrency = countryCurrencyMap[userCountryCode];
+          console.log("Preferred currency for location:", preferredCurrency);
+
+          if (orderedCurrencies.some((c) => c.code === preferredCurrency)) {
+            defaultCurrencyCode = preferredCurrency;
+            console.log("Location-based currency found and is available:", defaultCurrencyCode);
+          } else {
+            console.log("Preferred currency from location not available in fetched currencies.");
+            if (orderedCurrencies.length > 0) {
+                defaultCurrencyCode = orderedCurrencies[0].code;
+                console.log("Defaulting to first-created currency:", defaultCurrencyCode);
+            }
+          }
+        } else if (orderedCurrencies.length > 0) {
+          defaultCurrencyCode = orderedCurrencies[0].code;
+          console.log("No location preference or location not found. Defaulting to first-created currency:", defaultCurrencyCode);
+        } else {
+            console.log("No currencies fetched. Defaulting to PKR.");
+            defaultCurrencyCode = "PKR";
+        }
+
+        // Only update selectedCurrency if it's not already valid
+        if (!selectedCurrency || !orderedCurrencies.some(c => c.code === selectedCurrency)) {
+            setSelectedCurrency(defaultCurrencyCode);
+            console.log("Setting selectedCurrency to:", defaultCurrencyCode);
+        } else {
+            console.log("selectedCurrency already valid:", selectedCurrency);
         }
 
       } catch (error) {
-        console.error("Error fetching currencies:", error);
-        toast.error("Failed to load currencies.");
+        console.error("Error in fetchAndSetCurrencies:", error);
+        toast.error("Failed to load currencies or determine default.");
       } finally {
         setIsLoading(false);
+        console.log("Loading finished. Is loading:", isLoading);
       }
     };
-    fetchCurrencies();
+
+    fetchAndSetCurrencies();
   }, []); // Re-run only on mount
 
-  const toggleDropdown = () => setIsOpen(prev => !prev);
+  const toggleDropdown = () => setIsOpen((prev) => !prev);
 
   const handleSelect = (currencyCode) => {
     setSelectedCurrency(currencyCode);
@@ -67,54 +159,101 @@ const CurrencySelector = ({
   };
 
   const handleAddCurrency = () => {
-    setCurrencies([...currencies, { code: "", name: "", symbol: "", rate: 0 }]);
+    setCurrencies([
+      ...currencies,
+      { code: "", name: "", symbol: "", rate: 0, createdAt: new Date().toISOString() },
+    ]);
   };
 
   const handleSaveCurrencies = async () => {
+    console.log("Saving currencies...");
     try {
-      // Validate currencies before saving
       const validCurrencies = currencies
-        .filter(c => c.code && c.name && !isNaN(c.rate))
-        .map(c => ({
+        .filter((c) => c.code && c.name && !isNaN(c.rate))
+        .map((c) => ({
           code: c.code.toUpperCase(),
           name: c.name,
-          symbol: c.symbol || currencyIcons[c.code] || c.code, // Use custom symbol or fallback
-          rate: parseFloat(c.rate) || 0
+          symbol: c.symbol || currencyIcons[c.code] || c.code,
+          rate: parseFloat(c.rate) || 0,
+          createdAt: c.createdAt, // Preserve existing createdAt, backend should handle new ones
         }));
 
-      // Ensure we have at least one currency
       if (validCurrencies.length === 0) {
-        throw new Error('At least one valid currency is required');
+        throw new Error("At least one valid currency is required");
       }
 
-      // Make API call to save currencies
-      const response = await fetch('/api/currencies', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(validCurrencies)
+      const response = await fetch("/api/currencies", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(validCurrencies),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to save currencies');
+        console.error("Failed to save currencies API response:", errorData);
+        throw new Error(errorData.error || "Failed to save currencies");
       }
 
       const savedCurrencies = await response.json();
+      console.log("Currencies saved by API:", savedCurrencies);
 
-      // Update local state
-      setCurrencies(savedCurrencies);
-      setIsEditing(false); // Exit editing mode
+      // Sort saved currencies by 'createdAt' timestamp
+      const orderedSavedCurrencies = savedCurrencies.sort((a, b) => {
+        if (!a.createdAt || !b.createdAt) {
+            console.warn("Missing 'createdAt' field in one or more saved currencies. Sorting might be unreliable.");
+            return String(a.code).localeCompare(String(b.code));
+        }
+        const dateA = new Date(a.createdAt);
+        const dateB = new Date(b.createdAt);
+        return dateA.getTime() - dateB.getTime(); // Ascending order (oldest first)
+      });
+      console.log("Saved currencies after sorting:", orderedSavedCurrencies);
 
-      // Update conversion rates in parent/global state
-      const newRates = savedCurrencies.reduce((acc, curr) => {
+
+      setCurrencies(orderedSavedCurrencies);
+      setIsEditing(false);
+
+      const newRates = orderedSavedCurrencies.reduce((acc, curr) => {
         acc[curr.code] = curr.rate;
         return acc;
       }, {});
       setConversionRates(newRates);
 
-      // Ensure selected currency still exists in the new list, or default
-      if (!savedCurrencies.some(c => c.code === selectedCurrency)) {
-        setSelectedCurrency(savedCurrencies[0]?.code || 'PKR');
+      // After saving, re-evaluate default based on location/oldest
+      const userCountryCode = await fetchUserLocation(); // Re-fetch location or use cached
+      let defaultCurrencyCode = "PKR";
+
+      console.log("After save: Attempting to determine default currency...");
+      console.log("After save: User Country Code:", userCountryCode);
+
+
+      if (userCountryCode && countryCurrencyMap[userCountryCode]) {
+        const preferredCurrency = countryCurrencyMap[userCountryCode];
+        console.log("After save: Preferred currency for location:", preferredCurrency);
+        if (orderedSavedCurrencies.some((c) => c.code === preferredCurrency)) {
+          defaultCurrencyCode = preferredCurrency;
+          console.log("After save: Location-based currency found and is available:", defaultCurrencyCode);
+        } else {
+            console.log("After save: Preferred currency from location not available in fetched currencies.");
+            if (orderedSavedCurrencies.length > 0) {
+                defaultCurrencyCode = orderedSavedCurrencies[0].code;
+                console.log("After save: Defaulting to first-created currency:", defaultCurrencyCode);
+            }
+        }
+      } else if (orderedSavedCurrencies.length > 0) {
+        defaultCurrencyCode = orderedSavedCurrencies[0].code;
+        console.log("After save: No location preference or location not found. Defaulting to first-created currency:", defaultCurrencyCode);
+      } else {
+          console.log("After save: No currencies saved. Defaulting to PKR.");
+          defaultCurrencyCode = "PKR";
+      }
+
+      // Set the selected currency, but only if it's not already a valid selection
+      if (!selectedCurrency || !orderedSavedCurrencies.some(c => c.code === selectedCurrency)) {
+          setSelectedCurrency(defaultCurrencyCode);
+          console.log("After save: Setting selectedCurrency to:", defaultCurrencyCode);
+      } else {
+          console.log("After save: selectedCurrency already valid:", selectedCurrency);
       }
 
       toast.success("Currencies saved successfully!");
@@ -159,8 +298,8 @@ const CurrencySelector = ({
                 className="btn btn-sm btn-error text-white"
                 onClick={() => {
                   setIsEditing(false);
-                  // Optionally, refetch currencies to revert unsaved changes
-                  // fetchCurrencies();
+                  // If you want to discard unsaved changes and revert to the last fetched state:
+                  // fetchAndSetCurrencies(); // Uncomment this line
                 }}
               >
                 Cancel
@@ -198,7 +337,7 @@ const CurrencySelector = ({
               </thead>
               <tbody>
                 {currencies.map((currency, index) => (
-                  <tr key={currency._id || index}> {/* Use _id if available, otherwise index */}
+                  <tr key={currency._id || index}>
                     <td>
                       <input
                         type="text"
@@ -274,13 +413,20 @@ const CurrencySelector = ({
               <span>{currencyIcons[selectedCurrency] || selectedCurrency}</span>
               <span>{selectedCurrency}</span>
               <svg
-                className={`w-4 h-4 ml-1 transition-transform ${isOpen ? "rotate-180" : ""}`}
+                className={`w-4 h-4 ml-1 transition-transform ${
+                  isOpen ? "rotate-180" : ""
+                }`}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
                 xmlns="http://www.w3.org/2000/svg"
               >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M19 9l-7 7-7-7"
+                />
               </svg>
             </button>
 
@@ -290,11 +436,17 @@ const CurrencySelector = ({
                   <li key={currency.code}>
                     <button
                       className={`flex items-center space-x-2 w-full text-left px-2 py-1 rounded hover:bg-gray-200 ${
-                        selectedCurrency === currency.code ? "font-bold text-primary" : ""
+                        selectedCurrency === currency.code
+                          ? "font-bold text-primary"
+                          : ""
                       }`}
                       onClick={() => handleSelect(currency.code)}
                     >
-                      <span>{currency.symbol || currencyIcons[currency.code] || currency.code}</span> {/* Use stored symbol first */}
+                      <span>
+                        {currency.symbol ||
+                          currencyIcons[currency.code] ||
+                          currency.code}
+                      </span>
                       <span>{currency.code}</span>
                     </button>
                   </li>

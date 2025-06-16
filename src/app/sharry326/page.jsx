@@ -1,12 +1,29 @@
-// src/app/sharry326/page.jsx
 "use client";
-import React, { useEffect, useState, useCallback } from "react"; // Added useCallback
+import React, { useEffect, useState, useCallback } from "react";
 import Image from "next/image";
 import StatsCards from "../_components/StatCards";
 import CurrencySelector from "../_components/CurrencySelector";
 import AnimatedSection from "../_components/AnimatedSection";
 import NotificationPopup from "../_components/Alertmesage.jsx";
 import { toast } from "react-hot-toast";
+
+// Define a mapping of country codes to preferred default currencies.
+// This should be comprehensive for the regions you serve.
+const countryCurrencyMap = {
+  PK: "PKR", // Pakistan
+  US: "USD", // United States
+  IN: "INR", // India
+  AE: "AED", // United Arab Emirates
+  GB: "GBP", // United Kingdom
+  DE: "EUR", // Germany (example for Eurozone)
+  FR: "EUR", // France
+  // Add more as needed:
+  // JP: "JPY", // Japan
+  // AU: "AUD", // Australia
+  // CA: "CAD", // Canada
+  // SA: "SAR", // Saudi Arabia
+  // QA: "QAR", // Qatar
+};
 
 const Sharry326 = () => {
   const [isClient, setIsClient] = useState(false);
@@ -32,7 +49,8 @@ const Sharry326 = () => {
   const [editTabs, setEditTabs] = useState([]);
 
   // Currency state
-  const [selectedCurrency, setSelectedCurrency] = useState("PKR");
+  // Set initial selectedCurrency to null/empty string so it gets determined by location/first-added on load
+  const [selectedCurrency, setSelectedCurrency] = useState("");
   const [conversionRates, setConversionRates] = useState({ PKR: 1 });
   const [isEditingCurrencies, setIsEditingCurrencies] = useState(false);
 
@@ -42,7 +60,6 @@ const Sharry326 = () => {
   // --- Functions that need to be defined before useEffect ---
 
   // filterServices function
-  // Using useCallback to memoize the function, good practice for functions passed as props or in dependency arrays
   const filterServices = useCallback((category, allServicesList) => {
     let filtered;
     if (category.toLowerCase() === "offers") {
@@ -52,7 +69,7 @@ const Sharry326 = () => {
     } else {
       filtered = allServicesList.filter((service) => {
         const title = service.title.toLowerCase();
-        const serviceCategory = service.category ? service.category.toLowerCase() : '';
+        const serviceCategory = service.category ? service.category.toLowerCase() : "";
         return (
           serviceCategory === category.toLowerCase() || // Prefer exact category match
           (title.includes(category.toLowerCase()) && !title.includes("offer"))
@@ -61,7 +78,7 @@ const Sharry326 = () => {
     }
     setFilteredServices(filtered);
     setActiveTab(category);
-  }, []); // Dependencies: none, as it uses internal state setters
+  }, []);
 
   // Currency conversion functions
   const convertPrice = useCallback((price) => {
@@ -73,7 +90,7 @@ const Sharry326 = () => {
     } else {
       return converted.toFixed(2);
     }
-  }, [conversionRates, selectedCurrency]); // Dependencies: conversionRates, selectedCurrency
+  }, [conversionRates, selectedCurrency]);
 
   const convertQuantityString = useCallback((quantityString) => {
     if (!quantityString) return "";
@@ -87,7 +104,31 @@ const Sharry326 = () => {
       const convertedValue = convertPrice(numericValue);
       return `${convertedValue} ${selectedCurrency}`;
     });
-  }, [convertPrice, selectedCurrency]); // Dependencies: convertPrice, selectedCurrency
+  }, [convertPrice, selectedCurrency]);
+
+  // --- Helper function to fetch user location ---
+  const fetchUserLocation = useCallback(async () => {
+    try {
+      // Use a more robust IP geolocation service in production if needed,
+      // or implement a server-side endpoint to get location from headers.
+      const geoResponse = await fetch("http://ip-api.com/json/");
+      if (!geoResponse.ok) {
+        console.error("Geolocation API response not OK:", geoResponse.status);
+        throw new Error("Failed to fetch location from ip-api.com");
+      }
+      const geoData = await geoResponse.json();
+      if (geoData && geoData.countryCode) {
+        return geoData.countryCode;
+      } else {
+        console.warn("Geolocation data missing countryCode.");
+        return null;
+      }
+    } catch (error) {
+      console.error("Error fetching user location:", error);
+      toast.error("Failed to determine your location.");
+      return null;
+    }
+  }, []); // No dependencies, as it only fetches external data
 
   // --- useEffect for initial data fetching ---
   useEffect(() => {
@@ -115,21 +156,19 @@ const Sharry326 = () => {
           const errorData = await tabsResponse.json();
           throw new Error(`HTTP error! status: ${tabsResponse.status} for tabs: ${errorData.details || tabsResponse.statusText}`);
         }
-        const tabsData = await tabsResponse.json(); // This is expected to be an array of strings (tab names)
+        const tabsData = await tabsResponse.json();
+        let initialActiveTab;
         if (tabsData.length > 0) {
           setTabs(tabsData);
           setEditTabs([...tabsData]);
-          // After fetching tabs and services, set the initial active tab and filter services
-          const initialActiveTab = tabsData[0] || "Tiktok"; // Use the first fetched tab or default
-          filterServices(initialActiveTab, servicesData); // Call with the fetched data
+          initialActiveTab = tabsData[0];
         } else {
-          // If no tabs in DB, use a default set and try to save them (optional, or just use for display)
           const defaultTabs = ["Tiktok", "Youtube", "Facebook", "Instagram", "X-Twitter", "Whatsapp", "Website Development", "Graphics Designing", "Offers"];
           setTabs(defaultTabs);
           setEditTabs(defaultTabs);
-          // And also filter services based on a default if no tabs are loaded
-          filterServices("Tiktok", servicesData);
+          initialActiveTab = "Tiktok";
         }
+        filterServices(initialActiveTab, servicesData); // Filter services after fetching both
 
         // Currencies
         if (!currenciesResponse.ok) {
@@ -137,18 +176,43 @@ const Sharry326 = () => {
           throw new Error(`HTTP error! status: ${currenciesResponse.status} for currencies: ${errorData.details || currenciesResponse.statusText}`);
         }
         const currenciesData = await currenciesResponse.json();
-        const rates = currenciesData.reduce((acc, curr) => {
+
+        // Sort currencies by 'createdAt' to ensure oldest is first
+        const orderedCurrencies = currenciesData.sort((a, b) => {
+            const dateA = new Date(a.createdAt || 0);
+            const dateB = new Date(b.createdAt || 0);
+            return dateA.getTime() - dateB.getTime();
+        });
+
+        const rates = orderedCurrencies.reduce((acc, curr) => {
           acc[curr.code] = curr.rate;
           return acc;
         }, {});
         setConversionRates(rates);
-        if (currenciesData.length > 0) {
-          setSelectedCurrency(currenciesData[0].code);
-        } else {
-          const defaultCurrencies = [{code: "PKR", name: "Pakistani Rupee", symbol: "₨", rate: 1}];
-          setConversionRates({"PKR": 1});
-          setSelectedCurrency("PKR");
+
+        // --- Location-based currency determination logic moved here ---
+        const userCountryCode = await fetchUserLocation(); // Await location
+        let determinedCurrency = "PKR"; // Default fallback if all else fails
+
+        if (orderedCurrencies.length > 0) {
+            if (userCountryCode && countryCurrencyMap[userCountryCode]) {
+                const preferredCurrencyCode = countryCurrencyMap[userCountryCode];
+                // Check if the preferred currency is actually in our fetched list
+                if (orderedCurrencies.some(c => c.code === preferredCurrencyCode)) {
+                    determinedCurrency = preferredCurrencyCode;
+                } else {
+                    // Preferred currency not available, fallback to the oldest one
+                    determinedCurrency = orderedCurrencies[0].code;
+                }
+            } else {
+                // No country code or no map entry, fallback to the oldest one
+                determinedCurrency = orderedCurrencies[0].code;
+            }
         }
+        // If orderedCurrencies is empty, determinedCurrency remains "PKR" (initial default)
+
+        setSelectedCurrency(determinedCurrency); // Set the determined currency
+
 
       } catch (error) {
         console.error("Error fetching initial data:", error);
@@ -159,7 +223,7 @@ const Sharry326 = () => {
     };
 
     fetchInitialData();
-  }, [filterServices]); // Add filterServices to dependencies since it's used inside and is memoized
+  }, [filterServices, fetchUserLocation]); // Add fetchUserLocation to dependencies
 
   if (!isClient) {
     return (
@@ -177,7 +241,6 @@ const Sharry326 = () => {
 
   // --- Tab management functions ---
   const handleTabClick = (tab) => {
-    // When a tab is clicked, filter services based on the current 'services' state
     filterServices(tab, services);
   };
 
@@ -204,14 +267,12 @@ const Sharry326 = () => {
         throw new Error(errorData.details || "Failed to save tabs");
       }
 
-      const savedTabsData = await response.json(); // API returns array of strings
-      setTabs(savedTabsData); // Update main tabs state
-      setEditTabs([...savedTabsData]); // Keep editTabs in sync
+      const savedTabsData = await response.json();
+      setTabs(savedTabsData);
+      setEditTabs([...savedTabsData]);
       setIsEditingTabs(false);
       toast.success("Tabs saved successfully!");
-      // After saving tabs, re-filter services to ensure correct display with new/updated categories
-      filterServices(activeTab, services);
-
+      filterServices(activeTab, services); // Re-filter to show changes immediately
     } catch (error) {
       console.error("Error saving tabs:", error);
       toast.error(`Failed to save tabs: ${error.message}`);
@@ -350,6 +411,7 @@ const Sharry326 = () => {
         </span>
       </h2>
 
+      {/* CurrencySelector now receives `selectedCurrency` which is set in parent */}
       <CurrencySelector
         selectedCurrency={selectedCurrency}
         setSelectedCurrency={setSelectedCurrency}
