@@ -1,3 +1,4 @@
+// src/app/sharry326/page.jsx
 "use client";
 import React, { useEffect, useState, useCallback } from "react";
 import Image from "next/image";
@@ -6,8 +7,35 @@ import CurrencySelector from "../_components/CurrencySelector";
 import AnimatedSection from "../_components/AnimatedSection";
 import NotificationPopup from "../_components/Alertmesage.jsx";
 import { toast } from "react-hot-toast";
+import { DndContext, closestCenter } from '@dnd-kit/core';
+import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
-// FIX: countryCurrencyMap ko dobara add kiya gaya hai
+// Sortable Service Item component for drag and drop
+function SortableServiceItem({ service, children }) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+  } = useSortable({ id: service._id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    cursor: 'grab', // Visual cue that the card is draggable
+  };
+
+  return (
+    // Apply ref, style, attributes, and listeners to the main draggable element
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+      {children}
+    </div>
+  );
+}
+
 const countryCurrencyMap = {
   PK: "PKR", US: "USD", IN: "INR", AE: "AED", GB: "GBP", DE: "EUR", FR: "EUR",
 };
@@ -16,6 +44,7 @@ const Sharry326 = () => {
   const [isClient, setIsClient] = useState(false);
   const [services, setServices] = useState([]);
   const [filteredServices, setFilteredServices] = useState([]);
+  const [orderedServices, setOrderedServices] = useState([]);
   const [activeTab, setActiveTab] = useState("Tiktok");
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -29,17 +58,19 @@ const Sharry326 = () => {
   const [conversionRates, setConversionRates] = useState({ PKR: 1 });
   const [isEditingCurrencies, setIsEditingCurrencies] = useState(false);
   const [isEditingStats, setIsEditingStats] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const pkrRegex = /(\d{1,3}(?:,?\d{3})*|\d+)\s*PKR/gi;
 
   const filterServices = useCallback((category, allServicesList) => {
-    let filtered;
+    let tempFiltered = [];
+
     if (category.toLowerCase() === "offers") {
-      filtered = allServicesList.filter((service) =>
+      tempFiltered = allServicesList.filter((service) =>
         service.title.toLowerCase().includes("offer")
       );
     } else {
-      filtered = allServicesList.filter((service) => {
+      tempFiltered = allServicesList.filter((service) => {
         const title = service.title.toLowerCase();
         const serviceCategory = service.category ? service.category.toLowerCase() : "";
         return (
@@ -48,9 +79,20 @@ const Sharry326 = () => {
         );
       });
     }
-    setFilteredServices(filtered);
+
+    if (searchTerm) {
+      const lowerCaseSearchTerm = searchTerm.toLowerCase();
+      tempFiltered = tempFiltered.filter(service =>
+        service.title.toLowerCase().includes(lowerCaseSearchTerm) ||
+        service.description.toLowerCase().includes(lowerCaseSearchTerm) ||
+        (service.category && service.category.toLowerCase().includes(lowerCaseSearchTerm))
+      );
+    }
+    
+    setFilteredServices(tempFiltered);
+    setOrderedServices(tempFiltered);
     setActiveTab(category);
-  }, []);
+  }, [searchTerm]);
 
   const convertPrice = useCallback((price) => {
     const rate = conversionRates[selectedCurrency] || 1;
@@ -104,12 +146,14 @@ const Sharry326 = () => {
         ]);
         const fetchedServicesData = await servicesResponse.json();
         setServices(fetchedServicesData);
+
         const fetchedTabsData = await tabsResponse.json();
         setTabs(fetchedTabsData);
         setEditTabs([...fetchedTabsData]);
-        const initialActiveTab = fetchedTabsData.length > 0 ? fetchedTabsData[0] : "Tiktok";
-        filterServices(initialActiveTab, fetchedServicesData);
         
+        const initialActiveTab = fetchedTabsData.length > 0 ? fetchedTabsData[0] : "Tiktok";
+        setActiveTab(initialActiveTab);
+
         const fetchedCurrenciesData = await currenciesResponse.json();
         const orderedCurrencies = fetchedCurrenciesData.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
         const rates = orderedCurrencies.reduce((acc, curr) => { acc[curr.code] = curr.rate; return acc; }, {});
@@ -131,7 +175,14 @@ const Sharry326 = () => {
       }
     };
     fetchAllInitialData();
-  }, [filterServices, fetchUserLocation]);
+  }, []);
+
+  useEffect(() => {
+    if (services.length > 0 && activeTab) {
+      filterServices(activeTab, services);
+    }
+  }, [services, activeTab, searchTerm, filterServices]);
+
 
   if (!isClient || isLoading) {
     return (
@@ -142,7 +193,7 @@ const Sharry326 = () => {
   }
 
   const handleTabClick = (tab) => {
-    filterServices(tab, services);
+    setActiveTab(tab);
   };
 
   const handleSaveTabs = async () => {
@@ -162,7 +213,7 @@ const Sharry326 = () => {
       setTabs(savedTabsData);
       setEditTabs([...savedTabsData]);
       setIsEditingTabs(false);
-      filterServices(savedTabsData.length > 0 ? savedTabsData[0] : "Tiktok", services);
+      setActiveTab(savedTabsData.length > 0 ? savedTabsData[0] : "Tiktok");
       toast.success("Tabs saved successfully!");
     } catch (error) {
       toast.error(`Failed to save tabs: ${error.message}`);
@@ -177,9 +228,10 @@ const Sharry326 = () => {
             const errorData = await response.json();
             throw new Error(errorData.details || "Failed to delete service");
         }
-        const updatedServices = services.filter((s) => s._id !== id);
-        setServices(updatedServices);
-        filterServices(activeTab, updatedServices);
+        const updatedServicesResponse = await fetch("/api/services");
+        const updatedServicesData = await updatedServicesResponse.json();
+        setServices(updatedServicesData);
+        filterServices(activeTab, updatedServicesData);
         toast.success("Service deleted!");
       } catch (error) {
         toast.error(`Failed to delete service: ${error.message}`);
@@ -207,12 +259,11 @@ const Sharry326 = () => {
             throw new Error(result.error || "Failed to save service");
         }
 
-        let updatedServices = currentService._id 
-            ? services.map((s) => (s._id === result._id ? result : s)) 
-            : [...services, result];
-            
-        setServices(updatedServices);
-        filterServices(activeTab, updatedServices);
+        const updatedServicesResponse = await fetch("/api/services");
+        const updatedServicesData = await updatedServicesResponse.json();
+        setServices(updatedServicesData);
+        filterServices(activeTab, updatedServicesData);
+
         setIsModalOpen(false);
         toast.success("Service saved successfully!");
     } catch (error) {
@@ -235,6 +286,52 @@ const Sharry326 = () => {
   const handleAddTab = () => {
     setEditTabs([...editTabs, ""]);
   };
+
+  // DND Handlers
+  const handleDragEnd = (event) => {
+    const { active, over } = event;
+    if (active.id !== over.id) {
+      setOrderedServices((items) => {
+        const oldIndex = items.findIndex((item) => item._id === active.id);
+        const newIndex = items.findIndex((item) => item._id === over.id);
+        const newOrderedArray = arrayMove(items, oldIndex, newIndex);
+        return newOrderedArray;
+      });
+    }
+  };
+
+  const handleSaveOrder = async () => {
+    setIsLoading(true);
+    try {
+      const orderPayload = orderedServices.map((service, index) => ({
+        id: service._id,
+        orderIndex: index,
+      }));
+
+      const response = await fetch('/api/services/reorder', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(orderPayload),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.details || "Failed to save order");
+      }
+      
+      const updatedServicesResponse = await fetch("/api/services");
+      const updatedServicesData = await updatedServicesResponse.json();
+      setServices(updatedServicesData);
+      filterServices(activeTab, updatedServicesData);
+
+      toast.success("Service order saved successfully!");
+    } catch (error) {
+      toast.error(`Failed to save order: ${error.message}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
 
   return (
     <section className="mb-10">
@@ -282,41 +379,66 @@ const Sharry326 = () => {
               ))}
             </div>
           ) : (
-            <div className="flex flex-wrap gap-3 justify-center">
+            <div className="flex flex-wrap gap-3 justify-center ">
               {tabs.map((tab) => (
-                <button key={tab} className={`btn btn-md px-5 font-semibold ${activeTab === tab ? "bg-blue-700 text-white" : "bg-white text-black border"}`} onClick={() => handleTabClick(tab)}>
+                <button
+                  key={tab}
+                  className={`btn btn-md px-5 font-semibold shadow-equal ${activeTab === tab ? "bg-blue-700 text-white" : "bg-white text-black no-border-tab "} capitalize rounded-lg`}
+                  onClick={() => handleTabClick(tab)}
+                >
                   {tab}
                 </button>
               ))}
             </div>
           )}
+           <div className="mt-6">
+            <input
+              type="text"
+              placeholder="Search services by title, description, or category..."
+              className="input input-bordered w-full bg-customGray outline-none px-3 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 py-2"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
         </div>
       </AnimatedSection>
-      <div className="flex justify-end px-6 pt-6 pb-2">
-        <button className="btn btn-primary" onClick={handleAddService}>Add Service</button>
+      <div className="flex justify-end px-6 pt-6 pb-2 space-x-2">
+        <button className="btn btn-primary text-white" onClick={handleAddService}>Add Service</button>
+        <button className="btn btn-success text-white" onClick={handleSaveOrder}>Save Order</button>
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 px-4">
-        {selectedCurrency && filteredServices.map((service) => (
-          <AnimatedSection key={service._id}>
-            <div className="group relative hover:scale-105 transition-all border p-3 rounded-lg max-w-xs mx-auto cursor-pointer">
-              <div className="relative h-40 w-full mb-3">
-                <img src={service.imageUrl || '/placeholder.png'} alt={service.title} className="object-contain h-full w-full" />
-              </div>
-              <h2 className="font-bold text-xl mt-2 text-center">{service.title}</h2>
-              <p className="text-center text-sm text-gray-600">
-                Price: {convertPrice(service.price || 0)} {selectedCurrency}
-                {service.quantity && (<> <br /> {convertQuantityString(service.quantity).split("\n").map((l, i) => (<React.Fragment key={i}>{l}<br /></React.Fragment>))} </>)}
-              </p>
-              <div className="absolute bottom-0 left-0 w-full p-3 bg-white opacity-0 group-hover:opacity-100 max-h-40 overflow-y-auto">
-                {convertDescriptionString(service.description, service.price).split("\n").map((l, i) => (<React.Fragment key={i}>{l}<br /></React.Fragment>))}
-              </div>
-            </div>
-            <div className="flex justify-center mt-4 space-x-2">
-              <button className="btn btn-sm" onClick={() => handleEditService(service)}>Edit</button>
-              <button className="btn btn-sm btn-error" onClick={() => handleDeleteService(service._id)}>Delete</button>
-            </div>
-          </AnimatedSection>
-        ))}
+        <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <SortableContext items={orderedServices.map(s => s._id)} strategy={verticalListSortingStrategy}>
+            {orderedServices.map((service) => (
+              <SortableServiceItem key={service._id} service={service}>
+                <AnimatedSection>
+                  <div className="group relative hover:scale-105 transition-all border p-3 rounded-lg max-w-xs mx-auto">
+                    
+                    <div className="relative h-40 w-full mb-3">
+                      <img src={service.imageUrl || '/placeholder.png'} alt={service.title} className="object-contain h-full w-full" />
+                    </div>
+                    <h2 className="font-bold text-xl mt-2 text-center">{service.title}</h2>
+                    <p className="text-center text-sm text-gray-600">
+                      Price: {convertPrice(service.price || 0)} {selectedCurrency}
+                      {service.quantity && (<span className="inline">  {convertQuantityString(service.quantity)}</span>)}
+                    </p>
+                    <div className="absolute bottom-0 left-0 w-full p-3 bg-white opacity-0 group-hover:opacity-100 max-h-40 overflow-y-auto">
+                       <p className="text-xs sm:text-sm whitespace-pre-line">
+                         {convertDescriptionString(service.description, service.price)}
+                       </p>
+                    </div>
+                  </div>
+                  {/* Edit/Delete buttons - Use onPointerDown for robust clickability */}
+                  {/* e.stopPropagation() and e.preventDefault() are now inside the specific button handlers */}
+                  <div className="flex justify-center mt-4 space-x-2">
+                    <button className="btn btn-sm" onPointerDown={(e) => { e.stopPropagation(); e.preventDefault(); handleEditService(service); }}>Edit</button>
+                    <button className="btn btn-sm btn-error" onPointerDown={(e) => { e.stopPropagation(); e.preventDefault(); handleDeleteService(service._id); }}>Delete</button>
+                  </div>
+                </AnimatedSection>
+              </SortableServiceItem>
+            ))}
+          </SortableContext>
+        </DndContext>
       </div>
 
       {isModalOpen && (

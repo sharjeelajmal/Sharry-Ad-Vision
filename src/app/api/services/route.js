@@ -18,13 +18,35 @@ function handleError(error, message) {
 }
 
 // GET all services
-export async function GET() {
+export async function GET(request) {
   try {
     console.log('[GET /api/services] Connecting to MongoDB...');
     await mongooseConnect(); // Call the function directly
     console.log('[GET /api/services] Fetching services...');
 
-    const services = await Service.find().sort({ createdAt: -1 });
+    const { searchParams } = new URL(request.url);
+    const searchTerm = searchParams.get('searchTerm');
+    const category = searchParams.get('category');
+
+    let query = {};
+
+    if (searchTerm) {
+      // Use the text index for searching across title, description, and category
+      query.$text = { $search: searchTerm };
+    }
+
+    if (category && category.toLowerCase() !== 'all' && category !== 'undefined') {
+        // Agar category 'Offers' hai toh title mein 'offer' search karein
+        if (category.toLowerCase() === 'offers') {
+            query.title = { $regex: 'offer', $options: 'i' };
+        } else {
+            // Agar koi aur category hai toh category field par filter karein
+            query.category = new RegExp(category, 'i'); // Case-insensitive category search
+        }
+    }
+
+    // Always sort by orderIndex by default, then by createdAt if orderIndex is the same
+    const services = await Service.find(query).sort({ orderIndex: 1, createdAt: -1 });
     console.log(`[GET /api/services] Found ${services.length} services`);
 
     return NextResponse.json(services);
@@ -58,8 +80,13 @@ export async function POST(request) {
       );
     }
 
+    // Assign a new orderIndex if not provided (e.g., for new services)
+    // Find the current max orderIndex and add 1
+    const latestService = await Service.findOne().sort({ orderIndex: -1 });
+    const newOrderIndex = latestService ? latestService.orderIndex + 1 : 0;
+
     console.log('[POST /api/services] Creating new service...');
-    const newService = new Service(body);
+    const newService = new Service({ ...body, orderIndex: newOrderIndex });
     const savedService = await newService.save();
     console.log('[POST /api/services] Service created:', savedService._id);
 

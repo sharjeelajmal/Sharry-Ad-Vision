@@ -34,6 +34,10 @@ const serviceSchema = new mongoose.Schema({
     required: [true, 'Category is required'],
     trim: true
   },
+  orderIndex: { // NEW FIELD FOR DRAG & DROP ORDER
+    type: Number,
+    default: 0,
+  },
   createdAt: {
     type: Date,
     default: Date.now,

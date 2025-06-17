@@ -71,3 +71,8 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+/* Custom CSS to remove border from tabs */
+.btn.no-border-tab {
+  border: none !important;
+}

@@ -6,7 +6,6 @@ import CurrencySelector from "../_components/CurrencySelector";
 import AnimatedSection from "../_components/AnimatedSection";
 import { toast } from "react-hot-toast";
 
-// FIX: countryCurrencyMap ko add kiya gaya hai taake country code ko currency mein badla ja sake
 const countryCurrencyMap = {
   PK: "PKR", US: "USD", IN: "INR", AE: "AED", GB: "GBP", DE: "EUR", FR: "EUR",
 };
@@ -20,23 +19,37 @@ const Services = () => {
   const [tabs, setTabs] = useState([]);
   const [selectedCurrency, setSelectedCurrency] = useState("");
   const [conversionRates, setConversionRates] = useState({ PKR: 1 });
+  const [searchTerm, setSearchTerm] = useState('');
 
   const pkrRegex = /(\d{1,3}(?:,?\d{3})*|\d+)\s*PKR/gi;
 
   const filterServices = useCallback((category, allServicesList) => {
-    let filtered;
+    let tempFiltered = [];
+
+    // Filter by category first
     if (category.toLowerCase() === 'offers') {
-      filtered = allServicesList.filter(service => service.title.toLowerCase().includes('offer'));
+      tempFiltered = allServicesList.filter(service => service.title.toLowerCase().includes('offer'));
     } else {
-      filtered = allServicesList.filter(service => {
+      tempFiltered = allServicesList.filter(service => {
         const serviceCategory = (service.category || '').toLowerCase();
         const title = service.title.toLowerCase();
         return serviceCategory === category.toLowerCase() || (title.includes(category.toLowerCase()) && !title.includes('offer'));
       });
     }
-    setFilteredServices(filtered);
+
+    // Then apply search term if present
+    if (searchTerm) {
+      const lowerCaseSearchTerm = searchTerm.toLowerCase();
+      tempFiltered = tempFiltered.filter(service =>
+        service.title.toLowerCase().includes(lowerCaseSearchTerm) ||
+        service.description.toLowerCase().includes(lowerCaseSearchTerm) ||
+        (service.category && service.category.toLowerCase().includes(lowerCaseSearchTerm))
+      );
+    }
+
+    setFilteredServices(tempFiltered);
     setActiveTab(category);
-  }, []);
+  }, [searchTerm]);
 
   const convertPrice = useCallback((price) => {
     const rate = conversionRates[selectedCurrency] || 1;
@@ -46,6 +59,8 @@ const Services = () => {
 
   const convertQuantityString = useCallback((quantityString) => {
     if (!quantityString) return "";
+    // Only return the quantity string, do not convert price within it here if it's meant to be separate
+    // The price is handled by convertPrice function directly where it's displayed
     return quantityString.replace(pkrRegex, (match, p1) => {
       const numericValue = parseFloat(p1.replace(/,/g, ""));
       if (isNaN(numericValue)) return match;
@@ -97,14 +112,13 @@ const Services = () => {
         setTabs(tabsData);
 
         const initialTab = tabsData.length > 0 ? tabsData[0] : "Tiktok";
-        filterServices(initialTab, servicesData);
+        setActiveTab(initialTab);
 
         const currenciesData = await currenciesResponse.json();
         const orderedCurrencies = (currenciesData || []).sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
         const rates = orderedCurrencies.reduce((acc, curr) => { acc[curr.code] = curr.rate; return acc; }, { PKR: 1 });
         setConversionRates(rates);
 
-        // FIX: Ab country code ke hisab se currency select hogi
         const userCountryCode = await fetchUserLocation();
         const preferredCurrency = countryCurrencyMap[userCountryCode] || "PKR";
         
@@ -122,7 +136,14 @@ const Services = () => {
       }
     };
     fetchInitialData();
-  }, [filterServices, fetchUserLocation]);
+  }, [fetchUserLocation]);
+
+  useEffect(() => {
+    if (services.length > 0 && activeTab) {
+      filterServices(activeTab, services);
+    }
+  }, [services, activeTab, searchTerm, filterServices]);
+
 
   if (!isClient || isLoading) {
     return (
@@ -159,12 +180,22 @@ const Services = () => {
             {tabs.map((tab) => (
               <button
                 key={tab}
-                className={`btn btn-md px-5 font-semibold ${activeTab === tab ? "bg-blue-700 text-white" : "bg-white text-black border"} capitalize rounded-lg`}
-                onClick={() => filterServices(tab, services)}
+                // Apply the new class here
+                className={`btn btn-md px-5 font-semibold shadow-equal ${activeTab === tab ? "bg-blue-700 text-white" : "bg-white text-black no-border-tab"} capitalize rounded-lg`}
+                onClick={() => setActiveTab(tab)}
               >
                 {tab}
               </button>
             ))}
+          </div>
+          <div className="mt-6">
+            <input
+              type="text"
+              placeholder="Search services by title, description, or category..."
+              className="input input-bordered w-full bg-customGray outline-none px-3 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 py-2"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
           </div>
         </div>
       </AnimatedSection>
@@ -178,10 +209,12 @@ const Services = () => {
                 <h2 className="font-bold text-xl mt-2 text-center">{service.title}</h2>
                 <p className="text-center text-sm text-gray-600">
                   Price: {convertPrice(service.price || 0)} {selectedCurrency}
-                  {service.quantity && (<> <br /> {convertQuantityString(service.quantity).split("\n").map((line, index) => (<React.Fragment key={index}>{line}<br /></React.Fragment>))} </>)}
+                  {service.quantity && (<span className="inline"> {convertQuantityString(service.quantity)}</span>)} {/* CHANGE: Quantity in same line */}
                 </p>
                 <div className="absolute bottom-0 left-0 w-full p-3 bg-white opacity-0 group-hover:opacity-100 transition-all duration-300 max-h-40 overflow-y-auto">
-                   {convertDescriptionString(service.description, service.price).split("\n").map((line, index) => (<React.Fragment key={index}>{line}<br /></React.Fragment>))}
+                   <p className="text-xs sm:text-sm whitespace-pre-line"> {/* CHANGE: Smaller font on small devices */}
+                     {convertDescriptionString(service.description, service.price)}
+                   </p>
                 </div>
               </div>
             </AnimatedSection>

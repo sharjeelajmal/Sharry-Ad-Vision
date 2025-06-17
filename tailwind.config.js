@@ -10,6 +10,10 @@ module.exports = {
   theme: {
 		
   	extend: {
+			 boxShadow: {
+        'equal': '0 0 15px rgba(0, 0, 0, 0.10)',
+        'equal-lg': '0 0 25px rgba(0, 0, 0, 0.15)',
+      },
   		colors: {
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
