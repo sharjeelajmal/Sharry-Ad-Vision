@@ -9,6 +9,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 
+
 const outfit = Outfit({
   subsets: ["latin"],
 });
@@ -30,7 +31,7 @@ export default function RootLayout({ children }) {
       <body className={outfit.className}>
         <Header />
         <UpHeader />
-       
+
         <NotificationPopup/>
         {children}
 
