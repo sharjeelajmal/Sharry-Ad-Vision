@@ -1,5 +1,5 @@
-// src/app/sharry326/page.jsx
 "use client";
+
 import React, { useEffect, useState, useCallback } from "react";
 import Image from "next/image";
 import StatsCards from "../_components/StatCards";
@@ -8,59 +8,28 @@ import AnimatedSection from "../_components/AnimatedSection";
 import NotificationPopup from "../_components/Alertmesage.jsx";
 import { toast } from "react-hot-toast";
 
-// Define a mapping of country codes to preferred default currencies.
-// This should be comprehensive for the regions you serve.
 const countryCurrencyMap = {
-  PK: "PKR", // Pakistan
-  US: "USD", // United States
-  IN: "INR", // India
-  AE: "AED", // United Arab Emirates
-  GB: "GBP", // United Kingdom
-  DE: "EUR", // Germany (example for Eurozone)
-  FR: "EUR", // France
-  // Add more as needed:
-  // JP: "JPY", // Japan
-  // AU: "AUD", // Australia
-  // CA: "CAD", // Canada
-  // SA: "SAR", // Saudi Arabia
-  // QA: "QAR", // Qatar
+  PK: "PKR", US: "USD", IN: "INR", AE: "AED", GB: "GBP", DE: "EUR", FR: "EUR",
 };
 
 const Sharry326 = () => {
   const [isClient, setIsClient] = useState(false);
-
-  // Services state
   const [services, setServices] = useState([]);
   const [filteredServices, setFilteredServices] = useState([]);
-  const [activeTab, setActiveTab] = useState("Tiktok"); // Default tab, will be set by fetched data
+  const [activeTab, setActiveTab] = useState("Tiktok");
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentService, setCurrentService] = useState({
-    title: "",
-    description: "",
-    price: 0,
-    quantity: "",
-    imageUrl: "",
-    category: "Tiktok", // Default category for new service, can be changed
+    title: "", description: "", price: 0, quantity: "", imageUrl: "", category: "Tiktok",
   });
-
-  // Tabs state
   const [tabs, setTabs] = useState([]);
   const [isEditingTabs, setIsEditingTabs] = useState(false);
   const [editTabs, setEditTabs] = useState([]);
-
-  // Currency state
-  // Set initial selectedCurrency to null/empty string so it gets determined by location/first-added on load
   const [selectedCurrency, setSelectedCurrency] = useState("");
   const [conversionRates, setConversionRates] = useState({ PKR: 1 });
   const [isEditingCurrencies, setIsEditingCurrencies] = useState(false);
-
-  // Stats state
   const [isEditingStats, setIsEditingStats] = useState(false);
 
-  // --- Functions that need to be defined before useEffect ---
-
-  // filterServices function
   const filterServices = useCallback((category, allServicesList) => {
     let filtered;
     if (category.toLowerCase() === "offers") {
@@ -72,7 +41,7 @@ const Sharry326 = () => {
         const title = service.title.toLowerCase();
         const serviceCategory = service.category ? service.category.toLowerCase() : "";
         return (
-          serviceCategory === category.toLowerCase() || // Prefer exact category match
+          serviceCategory === category.toLowerCase() ||
           (title.includes(category.toLowerCase()) && !title.includes("offer"))
         );
       });
@@ -81,174 +50,100 @@ const Sharry326 = () => {
     setActiveTab(category);
   }, []);
 
-  // Currency conversion functions
   const convertPrice = useCallback((price) => {
     const rate = conversionRates[selectedCurrency] || 1;
     let converted = price * rate;
-
-    if (converted % 1 === 0) {
-      return converted.toFixed(0);
-    } else {
-      return converted.toFixed(2);
-    }
+    return converted % 1 === 0 ? converted.toFixed(0) : converted.toFixed(2);
   }, [conversionRates, selectedCurrency]);
+
+  // **FIX: Yeh naya Regex har qisam ke number (e.g., 4000 aur 4,000) ko sahi se pakdega**
+  const pkrRegex = /(\d{1,3}(?:,?\d{3})*|\d+)\s*PKR/gi;
 
   const convertQuantityString = useCallback((quantityString) => {
     if (!quantityString) return "";
-
-    const regex = /(\d{1,3}(?:,\d{3})*)\s*PKR/g;
-
-    return quantityString.replace(regex, (match, p1) => {
+    return quantityString.replace(pkrRegex, (match, p1) => {
       const numericValue = parseFloat(p1.replace(/,/g, ""));
       if (isNaN(numericValue)) return match;
-
-      const convertedValue = convertPrice(numericValue);
-      return `${convertedValue} ${selectedCurrency}`;
+      return `${convertPrice(numericValue)} ${selectedCurrency}`;
     });
-  }, [convertPrice, selectedCurrency]);
+  }, [convertPrice, selectedCurrency, pkrRegex]);
 
-  // --- Helper function to fetch user location ---
+  const convertDescriptionString = useCallback((description, basePrice) => {
+    if (!description) return "";
+    let convertedDesc = description.replace(/{{price}}/g, `${convertPrice(Number(basePrice || 0))} ${selectedCurrency}`);
+    convertedDesc = convertedDesc.replace(pkrRegex, (match, p1) => {
+      const numericValue = parseFloat(p1.replace(/,/g, ""));
+      if (isNaN(numericValue)) return match;
+      return `${convertPrice(numericValue)} ${selectedCurrency}`;
+    });
+    return convertedDesc;
+  }, [convertPrice, selectedCurrency, pkrRegex]);
+
   const fetchUserLocation = useCallback(async () => {
+    const cachedCountryCode = sessionStorage.getItem('userCountryCode');
+    if (cachedCountryCode) return cachedCountryCode;
     try {
-      // **CRITICAL FIX: Changed http:// to https:// for Vercel deployment**
-      // For production, consider using a server-side endpoint to fetch location
-      // to avoid rate limits on public APIs and potential CORS issues.
-      const geoResponse = await fetch("https://ip-api.com/json/");
-      if (!geoResponse.ok) {
-        console.error("Geolocation API response not OK:", geoResponse.status);
-        throw new Error("Failed to fetch location from ip-api.com");
-      }
+      const geoResponse = await fetch("/api/get-user-location");
+      if (!geoResponse.ok) return null;
       const geoData = await geoResponse.json();
       if (geoData && geoData.countryCode) {
+        sessionStorage.setItem('userCountryCode', geoData.countryCode);
         return geoData.countryCode;
-      } else {
-        console.warn("Geolocation data missing countryCode.");
-        return null;
       }
+      return null;
     } catch (error) {
-      console.error("Error fetching user location:", error);
-      toast.error("Failed to determine your location. Defaulting currency."); // More user-friendly message
       return null;
     }
   }, []);
 
-  // --- useEffect for initial data fetching ---
   useEffect(() => {
     setIsClient(true);
-    const fetchInitialData = async () => {
+    const fetchAllInitialData = async () => {
+      setIsLoading(true);
       try {
-        setIsLoading(true);
-
         const [servicesResponse, tabsResponse, currenciesResponse] = await Promise.all([
-          fetch("/api/services"),
-          fetch("/api/tabs"),
-          fetch("/api/currencies"),
+          fetch("/api/services"), fetch("/api/tabs"), fetch("/api/currencies"),
         ]);
-
-        // Services
-        if (!servicesResponse.ok) {
-          const errorData = await servicesResponse.json();
-          throw new Error(`HTTP error! status: ${servicesResponse.status} for services: ${errorData.details || servicesResponse.statusText}`);
-        }
-        const servicesData = await servicesResponse.json();
-        setServices(servicesData);
-
-        // Tabs
-        if (!tabsResponse.ok) {
-          const errorData = await tabsResponse.json();
-          throw new Error(`HTTP error! status: ${tabsResponse.status} for tabs: ${errorData.details || tabsResponse.statusText}`);
-        }
-        const tabsData = await tabsResponse.json();
-        let initialActiveTab;
-        if (tabsData.length > 0) {
-          setTabs(tabsData);
-          setEditTabs([...tabsData]);
-          initialActiveTab = tabsData[0];
-        } else {
-          const defaultTabs = ["Tiktok", "Youtube", "Facebook", "Instagram", "X-Twitter", "Whatsapp", "Website Development", "Graphics Designing", "Offers"];
-          setTabs(defaultTabs);
-          setEditTabs(defaultTabs);
-          initialActiveTab = "Tiktok";
-        }
-        filterServices(initialActiveTab, servicesData);
-
-        // Currencies
-        if (!currenciesResponse.ok) {
-          const errorData = await currenciesResponse.json();
-          throw new Error(`HTTP error! status: ${currenciesResponse.status} for currencies: ${errorData.details || currenciesResponse.statusText}`);
-        }
-        const currenciesData = await currenciesResponse.json();
-
-        // Sort currencies by 'createdAt' to ensure oldest is first
-        // Ensure your backend provides a 'createdAt' timestamp for reliable sorting!
-        const orderedCurrencies = currenciesData.sort((a, b) => {
-            const dateA = new Date(a.createdAt || 0); // Use 0 if createdAt is missing for robust comparison
-            const dateB = new Date(b.createdAt || 0);
-            return dateA.getTime() - dateB.getTime(); // Ascending order (oldest first)
-        });
-
-        const rates = orderedCurrencies.reduce((acc, curr) => {
-          acc[curr.code] = curr.rate;
-          return acc;
-        }, {});
+        const fetchedServicesData = await servicesResponse.json();
+        setServices(fetchedServicesData);
+        const fetchedTabsData = await tabsResponse.json();
+        setTabs(fetchedTabsData);
+        setEditTabs([...fetchedTabsData]);
+        const initialActiveTab = fetchedTabsData.length > 0 ? fetchedTabsData[0] : "Tiktok";
+        filterServices(initialActiveTab, fetchedServicesData);
+        const fetchedCurrenciesData = await currenciesResponse.json();
+        const orderedCurrencies = fetchedCurrenciesData.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+        const rates = orderedCurrencies.reduce((acc, curr) => { acc[curr.code] = curr.rate; return acc; }, {});
         setConversionRates(rates);
-
-        // --- Location-based currency determination logic ---
-        const userCountryCode = await fetchUserLocation(); // Await location
-        let determinedCurrency = "PKR"; // Fallback default if all else fails
-
-        if (orderedCurrencies.length > 0) {
-            if (userCountryCode && countryCurrencyMap[userCountryCode]) {
-                const preferredCurrencyCode = countryCurrencyMap[userCountryCode];
-                // Check if the preferred currency is actually in our fetched list
-                if (orderedCurrencies.some(c => c.code === preferredCurrencyCode)) {
-                    determinedCurrency = preferredCurrencyCode;
-                } else {
-                    // Preferred currency from location is not available in fetched currencies, fallback to the oldest one
-                    determinedCurrency = orderedCurrencies[0].code;
-                }
-            } else {
-                // No country code detected or no map entry for it, fallback to the oldest one
-                determinedCurrency = orderedCurrencies[0].code;
-            }
+        const userCountryCode = await fetchUserLocation();
+        let newDeterminedCurrency = orderedCurrencies[0]?.code || "PKR";
+        if (userCountryCode && countryCurrencyMap[userCountryCode]) {
+          const preferredCurrencyCode = countryCurrencyMap[userCountryCode];
+          if (orderedCurrencies.some(c => c.code === preferredCurrencyCode)) {
+            newDeterminedCurrency = preferredCurrencyCode;
+          }
         }
-        // If orderedCurrencies is empty, determinedCurrency remains "PKR" (initial default)
-
-        setSelectedCurrency(determinedCurrency); // Set the determined currency
-
-
+        setSelectedCurrency(newDeterminedCurrency);
       } catch (error) {
-        console.error("Error fetching initial data for admin dashboard:", error);
-        toast.error(`Failed to load admin data: ${error.message}`);
+        toast.error(`Failed to load essential data: ${error.message}`);
+        setSelectedCurrency("PKR");
       } finally {
         setIsLoading(false);
       }
     };
+    fetchAllInitialData();
+  }, [filterServices, fetchUserLocation]);
 
-    fetchInitialData();
-  }, [filterServices, fetchUserLocation]); // Add fetchUserLocation to dependencies
-
-  if (!isClient) {
+  if (!isClient || isLoading) {
     return (
       <div className="flex justify-center items-center h-screen">
-        <img
-          src="/loader326.gif"
-          alt="loading"
-          width={140}
-          height={140}
-          className="block mx-auto max-w-full"
-        />
+        <img src="/loader326.gif" alt="loading" width={140} height={140} />
       </div>
     );
   }
 
-  // --- Tab management functions ---
   const handleTabClick = (tab) => {
     filterServices(tab, services);
-  };
-
-  const handleAddTab = () => {
-    setEditTabs([...editTabs, ""]);
   };
 
   const handleSaveTabs = async () => {
@@ -257,143 +152,89 @@ const Sharry326 = () => {
       toast.error("At least one tab is required");
       return;
     }
-
     try {
       const response = await fetch("/api/tabs", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(filteredTabs),
       });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.details || "Failed to save tabs");
-      }
-
+      if (!response.ok) throw new Error('Failed to save tabs');
       const savedTabsData = await response.json();
       setTabs(savedTabsData);
       setEditTabs([...savedTabsData]);
       setIsEditingTabs(false);
+      filterServices(savedTabsData.length > 0 ? savedTabsData[0] : "Tiktok", services);
       toast.success("Tabs saved successfully!");
-      filterServices(activeTab, services); // Re-filter to show changes immediately
     } catch (error) {
-      console.error("Error saving tabs:", error);
       toast.error(`Failed to save tabs: ${error.message}`);
     }
-  };
-
-  // --- Service CRUD functions ---
-  const handleAddService = () => {
-    setCurrentService({
-      title: "",
-      description: "",
-      price: 0,
-      quantity: "",
-      imageUrl: "",
-      category: activeTab,
-    });
-    setIsModalOpen(true);
-  };
-
-  const handleEditService = (service) => {
-    setCurrentService({
-      ...service,
-      price: parseFloat(service.price) || 0,
-    });
-    setIsModalOpen(true);
   };
 
   const handleDeleteService = async (id) => {
     if (confirm("Are you sure you want to delete this service?")) {
       try {
-        const response = await fetch(`/api/services?id=${id}`, {
-          method: "DELETE",
-        });
-
+        const response = await fetch(`/api/services?id=${id}`, { method: "DELETE" });
         if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.details || "Failed to delete service");
+            const errorData = await response.json();
+            throw new Error(errorData.details || "Failed to delete service");
         }
-
-        const updatedServices = services.filter((service) => service._id !== id);
+        const updatedServices = services.filter((s) => s._id !== id);
         setServices(updatedServices);
         filterServices(activeTab, updatedServices);
-        toast.success("Service deleted successfully!");
+        toast.success("Service deleted!");
       } catch (error) {
-        console.error("Error deleting service:", error);
         toast.error(`Failed to delete service: ${error.message}`);
       }
+    }
+  };
+  
+  const handleSaveService = async () => {
+    try {
+        if (!currentService.title || !currentService.description || !currentService.category) {
+            toast.error("Title, Description, and Category are required.");
+            return;
+        }
+        const method = currentService._id ? "PUT" : "POST";
+        const url = currentService._id ? `/api/services?id=${currentService._id}` : "/api/services";
+        
+        const response = await fetch(url, {
+            method,
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(currentService),
+        });
+        
+        const result = await response.json();
+        if (!response.ok) {
+            throw new Error(result.error || "Failed to save service");
+        }
+
+        let updatedServices = currentService._id 
+            ? services.map((s) => (s._id === result._id ? result : s)) 
+            : [...services, result];
+            
+        setServices(updatedServices);
+        filterServices(activeTab, updatedServices);
+        setIsModalOpen(false);
+        toast.success("Service saved successfully!");
+    } catch (error) {
+        toast.error(`Save failed: ${error.message}`);
     }
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setCurrentService((prev) => ({
-      ...prev,
-      [name]: name === "price" ? parseFloat(value) || 0 : value,
-    }));
+    setCurrentService((prev) => ({ ...prev, [name]: name === "price" ? parseFloat(value) || 0 : value }));
   };
-
-  const handleSaveService = async () => {
-    try {
-      const serviceData = {
-        title: String(currentService.title).trim(),
-        description: String(currentService.description).trim(),
-        price: parseFloat(currentService.price) || 0,
-        quantity: String(currentService.quantity).trim(),
-        imageUrl: String(currentService.imageUrl).trim(),
-        category: currentService.category || activeTab,
-      };
-
-      if (!serviceData.title || serviceData.title.length < 3) {
-        throw new Error("Title must be at least 3 characters.");
-      }
-      if (!serviceData.description || serviceData.description.length < 10) {
-        throw new Error("Description must be at least 10 characters.");
-      }
-      if (isNaN(serviceData.price) || serviceData.price < 0) {
-        throw new Error("Price must be a non-negative number.");
-      }
-      if (!serviceData.category) {
-        throw new Error("Category is required.");
-      }
-
-      const method = currentService._id ? "PUT" : "POST";
-      const url = currentService._id
-        ? `/api/services?id=${currentService._id}`
-        : "/api/services";
-
-      const response = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(serviceData),
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(
-          result.error || result.details || "Failed to save service"
-        );
-      }
-
-      let updatedServices;
-      if (currentService._id) {
-        updatedServices = services.map((s) =>
-          s._id === result._id ? result : s
-        );
-      } else {
-        updatedServices = [...services, result];
-      }
-      setServices(updatedServices);
-      filterServices(activeTab, updatedServices); // Re-filter to show changes immediately
-
-      setIsModalOpen(false);
-      toast.success("Service saved successfully!");
-    } catch (error) {
-      console.error("Save Service Error:", error);
-      toast.error(`Save failed: ${error.message}`);
-    }
+  const handleAddService = () => {
+    setCurrentService({ title: "", description: "", price: 0, quantity: "", imageUrl: "", category: activeTab });
+    setIsModalOpen(true);
+  };
+  const handleEditService = (service) => {
+    setCurrentService({ ...service, price: parseFloat(service.price) || 0 });
+    setIsModalOpen(true);
+  };
+  const handleAddTab = () => {
+    setEditTabs([...editTabs, ""]);
   };
 
   return (
@@ -402,104 +243,49 @@ const Sharry326 = () => {
         <h2 className="text-2xl font-bold mb-4">Popup Messages</h2>
         <NotificationPopup isAdmin={true} />
       </div>
-
       <AnimatedSection>
         <h1 className="font-bold text-4xl text-center py-5">Our Services</h1>
         <StatsCards isAdmin={true} isEditing={isEditingStats} setIsEditing={setIsEditingStats} />
       </AnimatedSection>
-
       <h2 className="text-center my-7 sticky top-0 z-40">
-        <span className="bg-gradient-to-r from-teal-400 via-cyan-500 to-blue-600 text-white shadow-lg rounded-lg py-2 px-2 sm:py-4 sm:px-4 mx-4 sm:mx-7 font-semibold text-xs sm:text-sm">
+        <span className="bg-gradient-to-r from-teal-400 via-cyan-500 to-blue-600 text-white shadow-lg rounded-lg py-2 px-4 font-semibold text-sm">
           Check Service Description? Just Click the Icon!
         </span>
       </h2>
-
-      {/* CurrencySelector now receives `selectedCurrency` which is set in parent */}
-      <CurrencySelector
-        selectedCurrency={selectedCurrency}
-        setSelectedCurrency={setSelectedCurrency}
-        conversionRates={conversionRates}
-        setConversionRates={setConversionRates}
-        isAdmin={true}
-        isEditing={isEditingCurrencies}
-        setIsEditing={setIsEditingCurrencies}
-      />
+      {selectedCurrency && (
+        <CurrencySelector
+          selectedCurrency={selectedCurrency} setSelectedCurrency={setSelectedCurrency}
+          conversionRates={conversionRates} setConversionRates={setConversionRates}
+          isAdmin={true} isEditing={isEditingCurrencies} setIsEditing={setIsEditingCurrencies}
+        />
+      )}
       <AnimatedSection>
         <div className="rounded-lg p-6 mb-6 bg-white w-full max-w-4xl mx-auto">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold">Service Categories</h2>
             {isEditingTabs ? (
               <div className="flex space-x-2">
-                <button
-                  className="btn btn-md btn-success text-white"
-                  onClick={handleSaveTabs}
-                >
-                  Save
-                </button>
-                <button
-                  className="btn btn-md btn-error text-white"
-                  onClick={() => {
-                    setIsEditingTabs(false);
-                    setEditTabs([...tabs]);
-                  }}
-                >
-                  Cancel
-                </button>
-                <button
-                  className="btn btn-md btn-primary text-white"
-                  onClick={handleAddTab}
-                >
-                  Add Tab
-                </button>
+                <button className="btn btn-md btn-success text-white" onClick={handleSaveTabs}>Save</button>
+                <button className="btn btn-md btn-error text-white" onClick={() => { setIsEditingTabs(false); setEditTabs([...tabs]); }}>Cancel</button>
+                <button className="btn btn-md btn-primary text-white" onClick={handleAddTab}>Add Tab</button>
               </div>
-            ) : (
-              <button
-                className="btn btn-md btn-primary text-white"
-                onClick={() => setIsEditingTabs(true)}
-              >
-                Edit Categories
-              </button>
-            )}
+            ) : ( <button className="btn btn-md btn-primary text-white" onClick={() => setIsEditingTabs(true)}>Edit Categories</button> )}
           </div>
-
           {isEditingTabs ? (
-            <div className="space-y-3 w-full bg-white">
+            <div className="space-y-3 w-full">
               {editTabs.map((tab, index) => (
-                <div key={index} className="flex items-center space-x-3 bg-white">
-                  <input
-                    type="text"
-                    className="input input-md w-full bg-gray-50 text-gray-800 border border-gray-300 rounded-lg px-4 py-2"
-                    value={tab}
-                    onChange={(e) => {
-                      const newTabs = [...editTabs];
-                      newTabs[index] = e.target.value;
-                      setEditTabs(newTabs);
-                    }}
-                    placeholder="Enter category name"
+                <div key={index} className="flex items-center space-x-3">
+                  <input type="text" className="input input-md w-full bg-gray-50 border" value={tab}
+                    onChange={(e) => { const newTabs = [...editTabs]; newTabs[index] = e.target.value; setEditTabs(newTabs); }}
                   />
-                  <button
-                    className="btn btn-md btn-error min-w-[3rem] h-10 text-lg"
-                    onClick={() => {
-                      setEditTabs(editTabs.filter((_, i) => i !== index));
-                    }}
-                  >
-                    ×
-                  </button>
+                  <button className="btn btn-md btn-error text-white" onClick={() => setEditTabs(editTabs.filter((_, i) => i !== index))}>×</button>
                 </div>
               ))}
             </div>
           ) : (
             <div className="flex flex-wrap gap-3 justify-center">
               {tabs.map((tab) => (
-                <button
-                  key={tab}
-                  className={`btn btn-md px-5 font-semibold py-2 text-md ${
-                    activeTab === tab
-                      ? "bg-blue-700 text-white shadow-lg hover:bg-blue-700"
-                      : "bg-white text-black hover:bg-gray-200 border border-gray-300"
-                  } capitalize rounded-lg`}
-                  onClick={() => handleTabClick(tab)}
-                >
+                <button key={tab} className={`btn btn-md px-5 font-semibold ${activeTab === tab ? "bg-blue-700 text-white" : "bg-white text-black border"}`} onClick={() => handleTabClick(tab)}>
                   {tab}
                 </button>
               ))}
@@ -507,198 +293,56 @@ const Sharry326 = () => {
           )}
         </div>
       </AnimatedSection>
-
       <div className="flex justify-end px-6 pt-6 pb-2">
-        <button className="btn btn-primary" onClick={handleAddService}>
-          Add Service
-        </button>
+        <button className="btn btn-primary" onClick={handleAddService}>Add Service</button>
       </div>
-
       <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 px-4">
-        {filteredServices.map((service) => {
-          const dynamicDescription = service.description.replace(
-            /{{price}}/g,
-            `${convertPrice(Number(service.price || 0))} ${selectedCurrency}`
-          );
-
-          return (
-            <AnimatedSection key={service._id}>
-              <div className="group relative hover:scale-105 transition-all border border-gray-300 rounded-lg p-3 max-w-xs mx-auto cursor-pointer">
-                {service.imageUrl && (
-                  <div className="relative h-40 w-full mb-3">
-                    <img
-                      src={service.imageUrl}
-                      alt={service.title}
-                      className="object-contain h-full w-full"
-                      onError={(e) => {
-                        e.target.src = "/placeholder-image.png";
-                        e.target.className =
-                          "object-contain h-full w-full opacity-50";
-                      }}
-                    />
-                  </div>
-                )}
-                <h2 className="font-bold text-xl mt-2 text-center ">
-                  {service.title}
-                </h2>
-                <p className="text-center text-sm text-gray-600">
-                  Price: {convertPrice(service.price || 0)} {selectedCurrency}
-                  {service.quantity && (
-                    <>
-                      <br />
-                      {convertQuantityString(service.quantity)
-                        .split("\n")
-                        .map((line, index) => (
-                          <React.Fragment key={index}>
-                            {line}
-                            <br />
-                          </React.Fragment>
-                        ))}
-                    </>
-                  )}
-                </p>
-                <div className="absolute bottom-0 left-0 w-full p-3 bg-white opacity-0 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 transform translate-y-4 max-h-40 overflow-y-auto whitespace-pre-wrap text-xs sm:text-sm">
-                  {dynamicDescription.split("\n").map((line, index) => (
-                    <React.Fragment key={index}>
-                      {line}
-                      <br />
-                    </React.Fragment>
-                  ))}
-                </div>
+        {selectedCurrency && filteredServices.map((service) => (
+          <AnimatedSection key={service._id}>
+            <div className="group relative hover:scale-105 transition-all border p-3 rounded-lg max-w-xs mx-auto cursor-pointer">
+              <div className="relative h-40 w-full mb-3">
+                <img src={service.imageUrl || '/placeholder.png'} alt={service.title} className="object-contain h-full w-full" />
               </div>
-              <div className="flex justify-center mt-4 space-x-2">
-                <button
-                  className="btn btn-sm"
-                  onClick={() => handleEditService(service)}
-                >
-                  Edit
-                </button>
-                <button
-                  className="btn btn-sm btn-error"
-                  onClick={() => handleDeleteService(service._id)}
-                >
-                  Delete
-                </button>
+              <h2 className="font-bold text-xl mt-2 text-center">{service.title}</h2>
+              <p className="text-center text-sm text-gray-600">
+                Price: {convertPrice(service.price || 0)} {selectedCurrency}
+                {service.quantity && (<> <br /> {convertQuantityString(service.quantity).split("\n").map((l, i) => (<React.Fragment key={i}>{l}<br /></React.Fragment>))} </>)}
+              </p>
+              <div className="absolute bottom-0 left-0 w-full p-3 bg-white opacity-0 group-hover:opacity-100 max-h-40 overflow-y-auto">
+                {convertDescriptionString(service.description, service.price).split("\n").map((l, i) => (<React.Fragment key={i}>{l}<br /></React.Fragment>))}
               </div>
-            </AnimatedSection>
-          );
-        })}
+            </div>
+            <div className="flex justify-center mt-4 space-x-2">
+              <button className="btn btn-sm" onClick={() => handleEditService(service)}>Edit</button>
+              <button className="btn btn-sm btn-error" onClick={() => handleDeleteService(service._id)}>Delete</button>
+            </div>
+          </AnimatedSection>
+        ))}
       </div>
 
       {isModalOpen && (
-        <dialog open className="modal modal-open ">
+        <dialog open className="modal modal-open">
           <div className="modal-box max-w-3xl bg-white">
-            <h3 className="font-bold text-lg">
-              {currentService._id ? "Edit Service" : "Add New Service"}
-            </h3>
+            <h3 className="font-bold text-lg">{currentService._id ? "Edit Service" : "Add New Service"}</h3>
             <div className="py-4 space-y-4">
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text">Title*</span>
-                </label>
-                <input
-                  type="text"
-                  className="input input-bordered w-full bg-white"
-                  name="title"
-                  value={currentService.title}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text">Price (PKR)*</span>
-                </label>
-                <input
-                  type="number"
-                  className="input input-bordered w-full bg-white"
-                  name="price"
-                  value={currentService.price}
-                  onChange={handleInputChange}
-                  min="0"
-                  step="0.01"
-                  required
-                />
-              </div>
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text">Quantity</span>
-                </label>
-                <textarea
-                  className="textarea textarea-bordered h-24 bg-white"
-                  name="quantity"
-                  value={currentService.quantity}
-                  onChange={handleInputChange}
-                  placeholder="Enter quantity details (e.g., 1k or 1k Price: 1,200 PKR = 10k)"
-                />
-              </div>
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text">Image URL</span>
-                </label>
-                <input
-                  type="url"
-                  className="input input-bordered w-full bg-white"
-                  name="imageUrl"
-                  value={currentService.imageUrl}
-                  onChange={handleInputChange}
-                  placeholder="https://example.com/image.jpg"
-                />
-                {currentService.imageUrl && (
-                  <div className="mt-2">
-                    <p className="text-sm text-gray-500">Image Preview:</p>
-                    <img
-                      src={currentService.imageUrl}
-                      alt="Preview"
-                      className="mt-1 max-h-20 object-contain"
-                      onError={(e) => {
-                        e.target.src = "/placeholder-image.png";
-                        e.target.className =
-                          "mt-1 max-h-20 object-contain opacity-50";
-                      }}
-                    />
-                  </div>
-                )}
-              </div>
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text">Description*</span>
-                </label>
-                <textarea
-                  className="textarea textarea-bordered h-32 bg-white"
-                  name="description"
-                  value={currentService.description}
-                  onChange={handleInputChange}
-                  placeholder="Use {{price}} for dynamic price insertion"
-                  required
-                />
-              </div>
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text">Category*</span>
-                </label>
-                <select
-                  className="select select-bordered w-full bg-white"
-                  name="category"
-                  value={currentService.category}
-                  onChange={handleInputChange}
-                  required
-                >
-                  {tabs.map((tab) => (
-                    <option key={tab} value={tab}>
-                      {tab}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <input type="text" className="input input-bordered w-full bg-white" name="title" value={currentService.title} onChange={handleInputChange} placeholder="	Enter a Clear & Catchy Service Title (e.g.,YouTube Subscribers)" />
+              <input type="number" className="input input-bordered w-full bg-white" name="price" value={currentService.price} onChange={handleInputChange} placeholder="Enter the Service Price in PKR (e.g., 300)" />
+              <textarea className="textarea textarea-bordered h-24 bg-white w-full" name="quantity" value={currentService.quantity} onChange={handleInputChange} placeholder="Enter Service Quantity (e.g., 1000, 10k, Unlimited)" />
+              <input type="url" className="input input-bordered w-full bg-white" name="imageUrl" value={currentService.imageUrl} onChange={handleInputChange} placeholder="Paste a Valid Image URL (e.g., /images/tiktok.gif)" />
+              {currentService.imageUrl && (
+                <div className="mt-2 p-2 border rounded-md w-32">
+                  <p className="text-sm text-gray-500 mb-1 ">Image Preview:</p>
+                  <img src={currentService.imageUrl} alt="Preview" className="max-h-40 object-contain mx-auto" onError={(e) => { e.target.src = '/placeholder.png'; }} />
+                </div>
+              )}
+              <textarea className="textarea textarea-bordered h-32 bg-white w-full" name="description" value={currentService.description} onChange={handleInputChange} placeholder="Write a Detailed Service Description. Use {{price}} to dynamically show the price" />
+              <select className="select select-bordered w-full bg-white" name="category" value={currentService.category} onChange={handleInputChange}>
+                {tabs.map((tab) => (<option key={tab} value={tab}>{tab}</option>))}
+              </select>
             </div>
             <div className="modal-action">
-              <button className="btn" onClick={() => setIsModalOpen(false)}>
-                Cancel
-              </button>
-              <button className="btn btn-primary" onClick={handleSaveService}>
-                Save
-              </button>
+              <button className="btn" onClick={() => setIsModalOpen(false)}>Cancel</button>
+              <button className="btn btn-primary" onClick={handleSaveService}>Save</button>
             </div>
           </div>
         </dialog>
