@@ -6,7 +6,10 @@ import CurrencySelector from "../_components/CurrencySelector";
 import AnimatedSection from "../_components/AnimatedSection";
 import { toast } from "react-hot-toast";
 
-// countryCurrencyMap ki ab zaroorat nahi hai
+// FIX: countryCurrencyMap ko add kiya gaya hai taake country code ko currency mein badla ja sake
+const countryCurrencyMap = {
+  PK: "PKR", US: "USD", IN: "INR", AE: "AED", GB: "GBP", DE: "EUR", FR: "EUR",
+};
 
 const Services = () => {
   const [isClient, setIsClient] = useState(false);
@@ -61,24 +64,21 @@ const Services = () => {
     return convertedDesc;
   }, [convertPrice, selectedCurrency, pkrRegex]);
 
-
-  const fetchUserCurrency = useCallback(async () => {
-    const cachedCurrency = sessionStorage.getItem('userCurrency');
-    if (cachedCurrency) {
-      console.log('Currency cache se mili (Services Page):', cachedCurrency);
-      return cachedCurrency;
+  const fetchUserLocation = useCallback(async () => {
+    const cachedCountryCode = sessionStorage.getItem('userCountryCode');
+    if (cachedCountryCode) {
+      return cachedCountryCode;
     }
     try {
       const geoResponse = await fetch("/api/get-user-location");
       const data = await geoResponse.json();
-      if (data && data.currency) {
-        sessionStorage.setItem('userCurrency', data.currency);
-        return data.currency;
+      if (data && data.countryCode) {
+        sessionStorage.setItem('userCountryCode', data.countryCode);
+        return data.countryCode;
       }
-      return 'PKR'; // Fallback
+      return 'PK';
     } catch (error) {
-      console.error("fetchUserCurrency mein error:", error);
-      return 'PKR'; // Fallback
+      return 'PK';
     }
   }, []);
 
@@ -104,10 +104,12 @@ const Services = () => {
         const rates = orderedCurrencies.reduce((acc, curr) => { acc[curr.code] = curr.rate; return acc; }, { PKR: 1 });
         setConversionRates(rates);
 
-        const determinedCurrency = await fetchUserCurrency();
+        // FIX: Ab country code ke hisab se currency select hogi
+        const userCountryCode = await fetchUserLocation();
+        const preferredCurrency = countryCurrencyMap[userCountryCode] || "PKR";
         
-        if (orderedCurrencies.some(c => c.code === determinedCurrency)) {
-            setSelectedCurrency(determinedCurrency);
+        if (orderedCurrencies.some(c => c.code === preferredCurrency)) {
+            setSelectedCurrency(preferredCurrency);
         } else {
             setSelectedCurrency(orderedCurrencies[0]?.code || "PKR");
         }
@@ -120,7 +122,7 @@ const Services = () => {
       }
     };
     fetchInitialData();
-  }, [filterServices, fetchUserCurrency]);
+  }, [filterServices, fetchUserLocation]);
 
   if (!isClient || isLoading) {
     return (

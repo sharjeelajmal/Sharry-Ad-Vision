@@ -7,7 +7,10 @@ import AnimatedSection from "../_components/AnimatedSection";
 import NotificationPopup from "../_components/Alertmesage.jsx";
 import { toast } from "react-hot-toast";
 
-// countryCurrencyMap ki ab zaroorat nahi hai.
+// FIX: countryCurrencyMap ko dobara add kiya gaya hai
+const countryCurrencyMap = {
+  PK: "PKR", US: "USD", IN: "INR", AE: "AED", GB: "GBP", DE: "EUR", FR: "EUR",
+};
 
 const Sharry326 = () => {
   const [isClient, setIsClient] = useState(false);
@@ -75,22 +78,19 @@ const Sharry326 = () => {
     return convertedDesc;
   }, [convertPrice, selectedCurrency, pkrRegex]);
 
-  const fetchUserCurrency = useCallback(async () => {
-    const cachedCurrency = sessionStorage.getItem('userCurrency');
-    if (cachedCurrency) {
-      console.log('Currency cache se mili (Admin Panel):', cachedCurrency);
-      return cachedCurrency;
-    }
+  const fetchUserLocation = useCallback(async () => {
+    const cachedCountryCode = sessionStorage.getItem('userCountryCode');
+    if (cachedCountryCode) return cachedCountryCode;
     try {
       const geoResponse = await fetch("/api/get-user-location");
       const data = await geoResponse.json();
-      if (data && data.currency) {
-        sessionStorage.setItem('userCurrency', data.currency);
-        return data.currency;
+      if (data && data.countryCode) {
+        sessionStorage.setItem('userCountryCode', data.countryCode);
+        return data.countryCode;
       }
-      return 'PKR';
+      return 'PK';
     } catch (error) {
-      return 'PKR';
+      return 'PK';
     }
   }, []);
 
@@ -115,10 +115,11 @@ const Sharry326 = () => {
         const rates = orderedCurrencies.reduce((acc, curr) => { acc[curr.code] = curr.rate; return acc; }, {});
         setConversionRates(rates);
 
-        const determinedCurrency = await fetchUserCurrency();
+        const userCountryCode = await fetchUserLocation();
+        const preferredCurrency = countryCurrencyMap[userCountryCode] || "PKR";
         
-        if (orderedCurrencies.some(c => c.code === determinedCurrency)) {
-            setSelectedCurrency(determinedCurrency);
+        if (orderedCurrencies.some(c => c.code === preferredCurrency)) {
+            setSelectedCurrency(preferredCurrency);
         } else {
             setSelectedCurrency(orderedCurrencies[0]?.code || "PKR");
         }
@@ -130,7 +131,7 @@ const Sharry326 = () => {
       }
     };
     fetchAllInitialData();
-  }, [filterServices, fetchUserCurrency]);
+  }, [filterServices, fetchUserLocation]);
 
   if (!isClient || isLoading) {
     return (
@@ -237,7 +238,6 @@ const Sharry326 = () => {
 
   return (
     <section className="mb-10">
-      {/*... The rest of the JSX is the same as the user provided, no changes needed here ...*/}
       <div className="my-8 p-4 border rounded-lg">
         <h2 className="text-2xl font-bold mb-4">Popup Messages</h2>
         <NotificationPopup isAdmin={true} />
