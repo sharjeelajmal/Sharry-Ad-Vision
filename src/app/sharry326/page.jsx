@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useEffect, useState, useCallback } from "react";
 import Image from "next/image";
 import StatsCards from "../_components/StatCards";
@@ -8,9 +7,7 @@ import AnimatedSection from "../_components/AnimatedSection";
 import NotificationPopup from "../_components/Alertmesage.jsx";
 import { toast } from "react-hot-toast";
 
-const countryCurrencyMap = {
-  PK: "PKR", US: "USD", IN: "INR", AE: "AED", GB: "GBP", DE: "EUR", FR: "EUR",
-};
+// countryCurrencyMap ki ab zaroorat nahi hai.
 
 const Sharry326 = () => {
   const [isClient, setIsClient] = useState(false);
@@ -29,6 +26,8 @@ const Sharry326 = () => {
   const [conversionRates, setConversionRates] = useState({ PKR: 1 });
   const [isEditingCurrencies, setIsEditingCurrencies] = useState(false);
   const [isEditingStats, setIsEditingStats] = useState(false);
+
+  const pkrRegex = /(\d{1,3}(?:,?\d{3})*|\d+)\s*PKR/gi;
 
   const filterServices = useCallback((category, allServicesList) => {
     let filtered;
@@ -56,9 +55,6 @@ const Sharry326 = () => {
     return converted % 1 === 0 ? converted.toFixed(0) : converted.toFixed(2);
   }, [conversionRates, selectedCurrency]);
 
-  // **FIX: Yeh naya Regex har qisam ke number (e.g., 4000 aur 4,000) ko sahi se pakdega**
-  const pkrRegex = /(\d{1,3}(?:,?\d{3})*|\d+)\s*PKR/gi;
-
   const convertQuantityString = useCallback((quantityString) => {
     if (!quantityString) return "";
     return quantityString.replace(pkrRegex, (match, p1) => {
@@ -79,20 +75,22 @@ const Sharry326 = () => {
     return convertedDesc;
   }, [convertPrice, selectedCurrency, pkrRegex]);
 
-  const fetchUserLocation = useCallback(async () => {
-    const cachedCountryCode = sessionStorage.getItem('userCountryCode');
-    if (cachedCountryCode) return cachedCountryCode;
+  const fetchUserCurrency = useCallback(async () => {
+    const cachedCurrency = sessionStorage.getItem('userCurrency');
+    if (cachedCurrency) {
+      console.log('Currency cache se mili (Admin Panel):', cachedCurrency);
+      return cachedCurrency;
+    }
     try {
       const geoResponse = await fetch("/api/get-user-location");
-      if (!geoResponse.ok) return null;
-      const geoData = await geoResponse.json();
-      if (geoData && geoData.countryCode) {
-        sessionStorage.setItem('userCountryCode', geoData.countryCode);
-        return geoData.countryCode;
+      const data = await geoResponse.json();
+      if (data && data.currency) {
+        sessionStorage.setItem('userCurrency', data.currency);
+        return data.currency;
       }
-      return null;
+      return 'PKR';
     } catch (error) {
-      return null;
+      return 'PKR';
     }
   }, []);
 
@@ -111,19 +109,19 @@ const Sharry326 = () => {
         setEditTabs([...fetchedTabsData]);
         const initialActiveTab = fetchedTabsData.length > 0 ? fetchedTabsData[0] : "Tiktok";
         filterServices(initialActiveTab, fetchedServicesData);
+        
         const fetchedCurrenciesData = await currenciesResponse.json();
         const orderedCurrencies = fetchedCurrenciesData.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
         const rates = orderedCurrencies.reduce((acc, curr) => { acc[curr.code] = curr.rate; return acc; }, {});
         setConversionRates(rates);
-        const userCountryCode = await fetchUserLocation();
-        let newDeterminedCurrency = orderedCurrencies[0]?.code || "PKR";
-        if (userCountryCode && countryCurrencyMap[userCountryCode]) {
-          const preferredCurrencyCode = countryCurrencyMap[userCountryCode];
-          if (orderedCurrencies.some(c => c.code === preferredCurrencyCode)) {
-            newDeterminedCurrency = preferredCurrencyCode;
-          }
+
+        const determinedCurrency = await fetchUserCurrency();
+        
+        if (orderedCurrencies.some(c => c.code === determinedCurrency)) {
+            setSelectedCurrency(determinedCurrency);
+        } else {
+            setSelectedCurrency(orderedCurrencies[0]?.code || "PKR");
         }
-        setSelectedCurrency(newDeterminedCurrency);
       } catch (error) {
         toast.error(`Failed to load essential data: ${error.message}`);
         setSelectedCurrency("PKR");
@@ -132,7 +130,7 @@ const Sharry326 = () => {
       }
     };
     fetchAllInitialData();
-  }, [filterServices, fetchUserLocation]);
+  }, [filterServices, fetchUserCurrency]);
 
   if (!isClient || isLoading) {
     return (
@@ -239,6 +237,7 @@ const Sharry326 = () => {
 
   return (
     <section className="mb-10">
+      {/*... The rest of the JSX is the same as the user provided, no changes needed here ...*/}
       <div className="my-8 p-4 border rounded-lg">
         <h2 className="text-2xl font-bold mb-4">Popup Messages</h2>
         <NotificationPopup isAdmin={true} />
@@ -325,7 +324,7 @@ const Sharry326 = () => {
           <div className="modal-box max-w-3xl bg-white">
             <h3 className="font-bold text-lg">{currentService._id ? "Edit Service" : "Add New Service"}</h3>
             <div className="py-4 space-y-4">
-              <input type="text" className="input input-bordered w-full bg-white" name="title" value={currentService.title} onChange={handleInputChange} placeholder="	Enter a Clear & Catchy Service Title (e.g.,YouTube Subscribers)" />
+              <input type="text" className="input input-bordered w-full bg-white" name="title" value={currentService.title} onChange={handleInputChange} placeholder="Enter a Clear & Catchy Service Title (e.g.,YouTube Subscribers)" />
               <input type="number" className="input input-bordered w-full bg-white" name="price" value={currentService.price} onChange={handleInputChange} placeholder="Enter the Service Price in PKR (e.g., 300)" />
               <textarea className="textarea textarea-bordered h-24 bg-white w-full" name="quantity" value={currentService.quantity} onChange={handleInputChange} placeholder="Enter Service Quantity (e.g., 1000, 10k, Unlimited)" />
               <input type="url" className="input input-bordered w-full bg-white" name="imageUrl" value={currentService.imageUrl} onChange={handleInputChange} placeholder="Paste a Valid Image URL (e.g., /images/tiktok.gif)" />

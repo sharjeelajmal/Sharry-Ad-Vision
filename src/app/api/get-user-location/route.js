@@ -1,73 +1,50 @@
 import { NextResponse } from 'next/server';
 
 export async function GET(request) {
-  // ==================================================================
-  // ========== DEVELOPMENT FIX: LOCAL MACHINE PAR ERROR KHATAM KAREN ==========
-  // ==================================================================
-  // Yeh check karega ke app development mode mein chal rahi hai ya nahi.
+  // Development mode mein mock response bhej den taake local machine par error na aaye
   if (process.env.NODE_ENV === 'development') {
-    console.log("Development Mode: Mock location istemal ki ja rahi hai (PK). Asli API call nahi hogi.");
-    // Apne computer par testing ke liye, hum ek farzi location bhej denge.
-    // Is se aapki IP block nahi hogi.
-    return NextResponse.json({ countryCode: 'PK' }); 
+    console.log("Development Mode: Mock currency (PKR) istemal ki ja rahi hai.");
+    return NextResponse.json({ currency: 'PKR' }); 
   }
 
-  // ==================================================================
-  // ========= PRODUCTION FIX: LIVE WEBSITE KE LIYE MAZBOOT BANAYEN =========
-  // ==================================================================
-  // Yeh code sirf live website (Vercel etc.) par chalega.
-
-  let userIp = request.headers.get('x-forwarded-for');
+  // Production (live website) ka code
+  let userIp = request.headers.get('x-forwarded-for') || '8.8.8.8'; // Google's DNS as a reliable fallback
 
   if (userIp && userIp.includes(',')) {
     userIp = userIp.split(',')[0].trim();
   }
 
-  // Agar kisi wajah se IP nahi milti, to ek default IP istemal karen
-  if (!userIp) {
-    userIp = '103.208.208.0'; // Default fallback
-  }
-
   try {
-    // APNA API KEY ISTEMAL KAREN
-    // ipapi.co par free account bana kar apna key yahan daalen.
     const apiKey = process.env.IPAPI_KEY;
     if (!apiKey) {
-        throw new Error("IPAPI_KEY environment variable set nahi hai.");
+      // Yeh error Vercel logs mein nazar aayega agar aapne key set nahi ki
+      console.error("CRITICAL: IPAPI_KEY environment variable Vercel mein set nahi hai.");
+      throw new Error("IPAPI_KEY environment variable not set.");
     }
     
     const geoResponse = await fetch(`https://ipapi.co/${userIp}/json/?key=${apiKey}`);
 
     if (!geoResponse.ok) {
       const errorData = await geoResponse.json();
-      console.error(`Error from ipapi.co: ${geoResponse.status} -`, errorData);
-      return NextResponse.json(
-        { error: 'External API se location fetch karne mein nakami', details: errorData.reason || 'Unknown Error' },
-        { status: geoResponse.status }
-      );
+      console.error(`Error from ipapi.co: ${geoResponse.status}`, errorData);
+      // Agar API se error aaye, to default PKR bhej den taake website na ruke
+      return NextResponse.json({ currency: 'PKR' });
     }
 
     const geoData = await geoResponse.json();
 
-    if (geoData && geoData.country_code) {
-      return NextResponse.json({ countryCode: geoData.country_code });
-    } else if (geoData.error) {
-       console.error(`API Error from ipapi.co:`, geoData.reason);
-       return NextResponse.json(
-        { error: 'Geolocation API ne error diya', details: geoData.reason },
-        { status: 400 }
-      );
+    // Ab hum direct currency code bhejenge
+    if (geoData && geoData.currency) {
+      console.log(`Live Mode: Location ke hisab se currency mili: ${geoData.currency}`);
+      return NextResponse.json({ currency: geoData.currency });
     } else {
-      return NextResponse.json(
-        { error: 'Geolocation data mein country code nahi mila' },
-        { status: 404 }
-      );
+      // Agar API response mein currency na ho, to default PKR bhej den
+      console.warn("API response mein currency nahi mili, fallback (PKR) istemal kiya ja raha hai.");
+      return NextResponse.json({ currency: 'PKR' });
     }
   } catch (error) {
-    console.error("Geolocation lookup ke dauran server-side error:", error);
-    return NextResponse.json(
-      { error: 'Server error during geolocation lookup', details: error.message },
-      { status: 500 }
-    );
+    console.error("get-user-location API route mein server error:", error);
+    // Kisi bhi error ki surat mein default PKR bhej den
+    return NextResponse.json({ currency: 'PKR' });
   }
 }
