@@ -113,7 +113,7 @@ export default function StatsCards({ isAdmin = false, isEditing, setIsEditing })
             </>
           ) : (
             <button
-              className="btn btn-sm btn-primary"
+              className="btn btn-sm btn-primary  text-white"
               onClick={handleEditClick}
             >
               Edit Stats

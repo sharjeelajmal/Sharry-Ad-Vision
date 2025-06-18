@@ -356,7 +356,7 @@ const Sharry326 = () => {
         />
       )}
       <AnimatedSection>
-        <div className="rounded-lg p-6 mb-6 bg-white w-full max-w-4xl mx-auto">
+        <div className="rounded-lg px-6  bg-white w-full max-w-4xl mx-auto">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold">Service Categories</h2>
             {isEditingTabs ? (
@@ -383,7 +383,7 @@ const Sharry326 = () => {
               {tabs.map((tab) => (
                 <button
                   key={tab}
-                  className={`btn btn-md px-5 font-semibold shadow-equal ${activeTab === tab ? "bg-blue-700 text-white" : "bg-white text-black no-border-tab "} capitalize rounded-lg`}
+                  className={`btn btn-md px-5 font-semibold shadow-equal ${activeTab === tab ? "bg-gradient-to-r from-teal-400 via-cyan-500 to-blue-600 text-white" : "bg-white text-black no-border-tab "} capitalize rounded-lg`}
                   onClick={() => handleTabClick(tab)}
                 >
                   {tab}
@@ -391,18 +391,32 @@ const Sharry326 = () => {
               ))}
             </div>
           )}
-           <div className="mt-6">
-            <input
-              type="text"
-              placeholder="Search services by title, description, or category..."
-              className="input input-bordered w-full bg-customGray outline-none px-3 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 py-2"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
+         <div className="mt-5 relative">
+  <input
+    type="text"
+    placeholder="Search services..."
+    className="input w-full bg-white border-2 border-gray-200 outline-none px-5 py-3 rounded-full shadow-sm  focus:scale-105 focus:border-transparent transition-all duration-200 "
+    value={searchTerm}
+    onChange={(e) => setSearchTerm(e.target.value)}
+  />
+  <svg 
+    className="absolute right-4 top-3.5 h-5 w-5 text-gray-400"
+    fill="none" 
+    stroke="currentColor" 
+    viewBox="0 0 24 24" 
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path 
+      strokeLinecap="round" 
+      strokeLinejoin="round" 
+      strokeWidth={2} 
+      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" 
+    />
+  </svg>
+</div>
         </div>
       </AnimatedSection>
-      <div className="flex justify-end px-6 pt-6 pb-2 space-x-2">
+      <div className="flex justify-end px-6 pt-6 pb-4 space-x-2">
         <button className="btn btn-primary text-white" onClick={handleAddService}>Add Service</button>
         <button className="btn btn-success text-white" onClick={handleSaveOrder}>Save Order</button>
       </div>
@@ -431,8 +445,8 @@ const Sharry326 = () => {
                   {/* Edit/Delete buttons - Use onPointerDown for robust clickability */}
                   {/* e.stopPropagation() and e.preventDefault() are now inside the specific button handlers */}
                   <div className="flex justify-center mt-4 space-x-2">
-                    <button className="btn btn-sm" onPointerDown={(e) => { e.stopPropagation(); e.preventDefault(); handleEditService(service); }}>Edit</button>
-                    <button className="btn btn-sm btn-error" onPointerDown={(e) => { e.stopPropagation(); e.preventDefault(); handleDeleteService(service._id); }}>Delete</button>
+                    <button className="btn btn-sm text-white bg-black" onPointerDown={(e) => { e.stopPropagation(); e.preventDefault(); handleEditService(service); }}>Edit</button>
+                    <button className="btn btn-sm btn-error text-white" onPointerDown={(e) => { e.stopPropagation(); e.preventDefault(); handleDeleteService(service._id); }}>Delete</button>
                   </div>
                 </AnimatedSection>
               </SortableServiceItem>
@@ -462,7 +476,7 @@ const Sharry326 = () => {
               </select>
             </div>
             <div className="modal-action">
-              <button className="btn" onClick={() => setIsModalOpen(false)}>Cancel</button>
+              <button className="btn text-white bg-red-700" onClick={() => setIsModalOpen(false)}>Cancel</button>
               <button className="btn btn-primary" onClick={handleSaveService}>Save</button>
             </div>
           </div>

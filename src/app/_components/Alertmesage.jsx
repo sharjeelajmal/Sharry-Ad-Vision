@@ -274,7 +274,7 @@ export default function NotificationPopup({ isAdmin = false }) {
                   {isAdmin && (
                     <button
                       onClick={() => setIsEditing(true)}
-                      className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
+                      className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-700"
                     >
                       Edit
                     </button>
