@@ -11,6 +11,7 @@ import { DndContext, closestCenter } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { Button } from "@/components/ui/button";
 
 // Sortable Service Item component for drag and drop
 function SortableServiceItem({ service, children }) {
@@ -381,13 +382,13 @@ const Sharry326 = () => {
           ) : (
             <div className="flex flex-wrap gap-3 justify-center ">
               {tabs.map((tab) => (
-                <button
+                <Button
                   key={tab}
-                  className={`btn btn-md px-5 font-semibold shadow-equal ${activeTab === tab ? "bg-gradient-to-r from-teal-400 via-cyan-500 to-blue-600 text-white" : "bg-white text-black no-border-tab "} capitalize rounded-lg`}
+                  className={`btn btn-md px-5 font-semibold hover:bg-gradient-to-r from-teal-400 via-cyan-500 to-blue-400 hover:text-white shadow-equal ${activeTab === tab ? "bg-gradient-to-r from-teal-400 via-cyan-500 to-blue-600 text-white" : "bg-white text-black no-border-tab "} capitalize rounded-lg`}
                   onClick={() => handleTabClick(tab)}
                 >
                   {tab}
-                </button>
+                </Button>
               ))}
             </div>
           )}
@@ -476,8 +477,9 @@ const Sharry326 = () => {
               </select>
             </div>
             <div className="modal-action">
-              <button className="btn text-white bg-red-700" onClick={() => setIsModalOpen(false)}>Cancel</button>
-              <button className="btn btn-primary" onClick={handleSaveService}>Save</button>
+                  <Button className=" text-white bg-red-700 hover:bg-red-500" onClick={() => setIsModalOpen(false)}>Cancel</Button>
+              <Button className=" btn-primary" onClick={handleSaveService}>Save</Button>
+      B
             </div>
           </div>
         </dialog>
