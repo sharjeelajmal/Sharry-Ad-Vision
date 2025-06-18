@@ -384,7 +384,7 @@ const Sharry326 = () => {
               {tabs.map((tab) => (
                 <Button
                   key={tab}
-                  className={`btn btn-md px-5 font-semibold hover:bg-gradient-to-r from-teal-400 via-cyan-500 to-blue-400 hover:text-white shadow-equal ${activeTab === tab ? "bg-gradient-to-r from-teal-400 via-cyan-500 to-blue-600 text-white" : "bg-white text-black no-border-tab "} capitalize rounded-lg`}
+                  className={`btn-md px-5 font-semibold hover:bg-gray-300 shadow-equal ${activeTab === tab ? "bg-gradient-to-r from-teal-400 via-cyan-500 to-blue-600 text-white" : "bg-white text-black no-border-tab "} capitalize rounded-lg`}
                   onClick={() => handleTabClick(tab)}
                 >
                   {tab}
@@ -479,7 +479,7 @@ const Sharry326 = () => {
             <div className="modal-action">
                   <Button className=" text-white bg-red-700 hover:bg-red-500" onClick={() => setIsModalOpen(false)}>Cancel</Button>
               <Button className=" btn-primary" onClick={handleSaveService}>Save</Button>
-      B
+
             </div>
           </div>
         </dialog>

@@ -5,6 +5,7 @@ import StatsCards from "../_components/StatCards";
 import CurrencySelector from "../_components/CurrencySelector";
 import AnimatedSection from "../_components/AnimatedSection";
 import { toast } from "react-hot-toast";
+import { Button } from "@/components/ui/button";
 
 const countryCurrencyMap = {
   PK: "PKR", US: "USD", IN: "INR", AE: "AED", GB: "GBP", DE: "EUR", FR: "EUR",
@@ -178,14 +179,14 @@ const Services = () => {
           <h2 className="text-xl font-semibold w-full text-center mb-4">Service Categories</h2>
           <div className="flex flex-wrap gap-3 justify-center">
             {tabs.map((tab) => (
-              <button
+              <Button
                 key={tab}
                 // Apply the new class here
-                className={`btn btn-md px-5 font-semibold shadow-equal ${activeTab === tab ? "bg-gradient-to-r from-teal-400 via-cyan-500 to-blue-600 text-white" : "bg-white text-black border-none no-border-tab"} capitalize rounded-lg`}
+                className={` btn-md px-5 font-semibold hover:bg-gray-300 shadow-equal ${activeTab === tab ? "bg-gradient-to-r from-teal-400 via-cyan-500 to-blue-600 text-white" : "bg-white text-black border-none no-border-tab"} capitalize rounded-lg`}
                 onClick={() => setActiveTab(tab)}
               >
                 {tab}
-              </button>
+              </Button> 
             ))}
           </div>
 

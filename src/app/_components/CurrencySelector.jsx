@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import AnimatedSection from "./AnimatedSection";
 import toast from "react-hot-toast";
+import { Button } from "@/components/ui/button";
 
 const currencySymbols = {
   PKR: "₨",
@@ -254,9 +255,10 @@ const CurrencySelector = ({
           </div>
         ) : (
           <div className="relative inline-block text-left w-full sm:w-auto">
-            <button
+            
+            <Button
               type="button"
-              className="btn w-full sm:w-auto m-1 bg-gradient-to-r from-teal-400 to-blue-600 text-white shadow-lg flex items-center justify-center space-x-2 px-4 py-2"
+              className="w-full sm:w-auto m-1 bg-gradient-to-r from-teal-400 to-blue-600 text-white shadow-lg flex items-center justify-center space-x-2 px-4 py-2"
               onClick={() => setIsOpen((prev) => !prev)}
             >
               <span>
@@ -278,7 +280,7 @@ const CurrencySelector = ({
                   d="M19 9l-7 7-7-7"
                 />
               </svg>
-            </button>
+            </Button>
             {isOpen && (
               <ul className="dropdown-content z-[1] menu p-2 shadow bg-white rounded-box w-full sm:w-48 absolute mt-1 right-0 max-h-60 overflow-y-auto">
                 {currencies.map((currency) => (
