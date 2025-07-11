@@ -1,11 +1,15 @@
 // src/app/api/currencies/route.js
 import { NextResponse } from 'next/server';
-import mongooseConnect from '@/lib/mongodb'; // Corrected import
+import mongooseConnect from '@/lib/mongodb'; // Corrected im
+// port
 import Currency from '@/models/Currency'; // Already correct
+
+// Connect to the database once when the module loads
+mongooseConnect();
 
 export async function GET() {
   try {
-    await mongooseConnect(); // Call the function directly
+
     const currencies = await Currency.find({}).sort({ code: 1 });
     return NextResponse.json(currencies);
   } catch (error) {
@@ -19,7 +23,7 @@ export async function GET() {
 
 export async function POST(request) {
   try {
-    await mongooseConnect(); // Call the function directly
+
     const currencyData = await request.json();
 
     // Basic validation

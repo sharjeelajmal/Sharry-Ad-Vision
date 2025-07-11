@@ -1,23 +1,23 @@
 // src/app/api/stats/route.js
 import { NextResponse } from "next/server";
-import mongooseConnect from '@/lib/mongodb'; // Corrected import
-import Stat from '@/models/Stat'; // Corrected model path
+import mongooseConnect from '@/lib/mongodb';
+import Stat from '@/models/Stat';
+
+mongooseConnect(); // Connect once
 
 export async function GET() {
   try {
-    await mongooseConnect(); // Call the function directly
     let stats = await Stat.find({});
 
-    // Agar database mein koi stats nahi hain, to default stats insert karo
+    // Agar stats nahi hain, to default bhejein, lekin DB mein insert na karein
     if (stats.length === 0) {
-      const defaultStats = [
+      console.log("No stats found in DB, returning default stats.");
+      return NextResponse.json([
         { label: "Users", value: "4123" },
         { label: "Orders", value: "112306" },
         { label: "Designs Delivered", value: "850" },
         { label: "Websites Built", value: "220" }
-      ];
-      await Stat.insertMany(defaultStats);
-      stats = await Stat.find({}); // Insert karne ke baad dobara fetch karo
+      ]);
     }
     return NextResponse.json(stats);
   } catch (error) {
@@ -31,7 +31,7 @@ export async function GET() {
 
 export async function POST(request) {
   try {
-    await mongooseConnect(); // Call the function directly
+
     const newStats = await request.json();
 
     if (!Array.isArray(newStats)) {
