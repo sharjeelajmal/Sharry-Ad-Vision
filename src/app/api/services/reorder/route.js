@@ -4,12 +4,11 @@ import mongooseConnect from '@/lib/mongodb';
 import Service from '@/models/Service';
 import mongoose from 'mongoose';
 
-// Connect to the database once when the module loads
-mongooseConnect();
+
 
 export async function POST(request) {
   try {
-
+await mongooseConnect();
     const orderedServices = await request.json(); // Array of { id: 'serviceId', orderIndex: 0 }
 
     if (!Array.isArray(orderedServices)) {

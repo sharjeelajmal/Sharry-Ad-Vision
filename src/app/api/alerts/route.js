@@ -3,8 +3,7 @@ import { NextResponse } from 'next/server';
 import mongooseConnect from '@/lib/mongodb'; // Corrected import
 import Alert from '@/models/Alert'; // Corrected model path
 
-// Connect to the database once when the module loads
-mongooseConnect();
+
 
 export async function GET() {
   try {
@@ -12,7 +11,7 @@ export async function GET() {
     // Get the latest alert. If multiple alerts can exist, you might need to adjust logic.
     // For a single persistent alert, findOne is suitable.
     const alert = await Alert.findOne().sort({ updatedAt: -1 });
-
+await mongooseConnect();
     if (!alert) {
       // Agar koi alert nahi hai, toh default data ke saath response do
       return NextResponse.json(null);
@@ -31,7 +30,7 @@ export async function POST(request) {
   try {
    
     const alertData = await request.json();
-
+await mongooseConnect();
     // Validate incoming data
     if (!alertData.title || !alertData.message) {
       return NextResponse.json(

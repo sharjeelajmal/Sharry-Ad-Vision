@@ -4,12 +4,11 @@ import mongooseConnect from '@/lib/mongodb'; // Corrected im
 // port
 import Currency from '@/models/Currency'; // Already correct
 
-// Connect to the database once when the module loads
-mongooseConnect();
+
 
 export async function GET() {
   try {
-
+await mongooseConnect();
     const currencies = await Currency.find({}).sort({ code: 1 });
     return NextResponse.json(currencies);
   } catch (error) {
@@ -25,7 +24,7 @@ export async function POST(request) {
   try {
 
     const currencyData = await request.json();
-
+await mongooseConnect();
     // Basic validation
     if (!Array.isArray(currencyData)) {
       return NextResponse.json(

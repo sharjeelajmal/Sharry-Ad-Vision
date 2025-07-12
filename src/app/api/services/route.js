@@ -4,8 +4,8 @@ import mongooseConnect from '@/lib/mongodb'; // Corrected import
 import Service from '@/models/Service';
 import mongoose from 'mongoose';
 
-// Connect to the database once when the module loads
-mongooseConnect();
+
+
 
 // Helper function to handle errors
 function handleError(error, message) {
@@ -24,7 +24,7 @@ function handleError(error, message) {
 export async function GET(request) {
   try {
     console.log('[GET /api/services] Connecting to MongoDB...');
- 
+ await mongooseConnect();
     console.log('[GET /api/services] Fetching services...');
 
     const { searchParams } = new URL(request.url);
@@ -64,7 +64,7 @@ export async function POST(request) {
   try {
     console.log('[POST /api/services] Connecting to MongoDB...');
   // Call the function directly
-
+await mongooseConnect();
     const body = await request.json();
     console.log('[POST /api/services] Request body:', body);
 
@@ -103,7 +103,7 @@ export async function POST(request) {
 // UPDATE existing service
 export async function PUT(request) {
   try {
-
+await mongooseConnect();
 
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
@@ -160,7 +160,7 @@ export async function PUT(request) {
 export async function DELETE(request) {
   try {
     console.log('[DELETE /api/services] Connecting to MongoDB...');
-
+await mongooseConnect();
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
     console.log(`[DELETE /api/services] Deleting service: ${id}`);

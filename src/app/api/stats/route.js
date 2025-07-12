@@ -3,12 +3,12 @@ import { NextResponse } from "next/server";
 import mongooseConnect from '@/lib/mongodb';
 import Stat from '@/models/Stat';
 
-mongooseConnect(); // Connect once
+
 
 export async function GET() {
   try {
     let stats = await Stat.find({});
-
+await mongooseConnect();
     // Agar stats nahi hain, to default bhejein, lekin DB mein insert na karein
     if (stats.length === 0) {
       console.log("No stats found in DB, returning default stats.");
@@ -31,7 +31,7 @@ export async function GET() {
 
 export async function POST(request) {
   try {
-
+await mongooseConnect();
     const newStats = await request.json();
 
     if (!Array.isArray(newStats)) {
