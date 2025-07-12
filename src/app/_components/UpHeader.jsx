@@ -14,16 +14,15 @@ const UpHeader = () => {
 
   return (
     <div>
-      <div className=' flex justify-between md:px-16 bg-customGray pt-8 px-6'>
+      <div className=' flex justify-around md:justify-between md:px-16 bg-customGray pt-8 px-6'>
         <AnimatedSection>
-          <Image
-            src="/logo.svg"
-            alt="Logo"
-            className="w-20 h-10 sm:w-24 sm:h-12 md:w-32 md:h-16 lg:w-40 lg:h-20 xl:w-48 xl:h-24"
-            width={180}
-            height={90} // Width aur Height ko aspect ratio ke hisab se set karen
-            style={{ height: "auto" }} // **FIX: Yeh line warning ko fix kar degi**
-          />
+         <Image
+        src="/logo.svg"
+        alt="Logo"
+        width={180}
+        height={90}
+        className="h-auto w-32 sm:w-36 md:w-40 lg:w-48"
+      />
         </AnimatedSection>
         {/* WhatsApp Button */}
         <AnimatedSection>

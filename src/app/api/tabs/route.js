@@ -3,11 +3,11 @@ import { NextResponse } from "next/server";
 import mongooseConnect from '@/lib/mongodb';
 import Tab from '@/models/Tab';
 
-// Yahan se mongooseConnect() ki call hata di gayi hai
+export const revalidate = 3600; 
 
 export async function GET() {
   try {
-    await mongooseConnect(); // Connection ka intezar karne ke liye await wapas laga diya gaya hai
+    await mongooseConnect();
     let tabs = await Tab.find({}).sort({ createdAt: 1 });
 
     if (tabs.length === 0) {

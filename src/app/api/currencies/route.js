@@ -4,7 +4,7 @@ import mongooseConnect from '@/lib/mongodb'; // Corrected im
 // port
 import Currency from '@/models/Currency'; // Already correct
 
-
+export const revalidate = 3600;
 
 export async function GET() {
   try {

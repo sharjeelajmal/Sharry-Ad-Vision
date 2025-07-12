@@ -7,8 +7,9 @@ import Stat from '@/models/Stat';
 
 export async function GET() {
   try {
+    await mongooseConnect();
     let stats = await Stat.find({});
-await mongooseConnect();
+
     // Agar stats nahi hain, to default bhejein, lekin DB mein insert na karein
     if (stats.length === 0) {
       console.log("No stats found in DB, returning default stats.");

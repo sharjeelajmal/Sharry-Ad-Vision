@@ -7,11 +7,11 @@ import Alert from '@/models/Alert'; // Corrected model path
 
 export async function GET() {
   try {
-  
+  await mongooseConnect();
     // Get the latest alert. If multiple alerts can exist, you might need to adjust logic.
     // For a single persistent alert, findOne is suitable.
     const alert = await Alert.findOne().sort({ updatedAt: -1 });
-await mongooseConnect();
+
     if (!alert) {
       // Agar koi alert nahi hai, toh default data ke saath response do
       return NextResponse.json(null);

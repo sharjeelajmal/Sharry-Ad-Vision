@@ -98,25 +98,26 @@ const Services = () => {
     }
   }, []);
 
-  useEffect(() => {
+ useEffect(() => {
     setIsClient(true);
     const fetchInitialData = async () => {
       setIsLoading(true);
       try {
-        const [servicesResponse, tabsResponse, currenciesResponse] = await Promise.all([
-          fetch("/api/services"), fetch("/api/tabs"), fetch("/api/currencies"),
-        ]);
-        const servicesData = await servicesResponse.json();
-        setServices(servicesData);
+        // Sirf ek API call /api/initial-data par bhejni hai
+        const response = await fetch("/api/initial-data");
+        if (!response.ok) {
+          throw new Error("Data load nahi ho saka.");
+        }
+        
+        const data = await response.json();
 
-        const tabsData = await tabsResponse.json();
-        setTabs(tabsData);
+        setServices(data.services);
+        setTabs(data.tabs);
 
-        const initialTab = tabsData.length > 0 ? tabsData[0] : "Tiktok";
+        const initialTab = data.tabs.length > 0 ? data.tabs[0] : "Tiktok";
         setActiveTab(initialTab);
 
-        const currenciesData = await currenciesResponse.json();
-        const orderedCurrencies = (currenciesData || []).sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+        const orderedCurrencies = data.currencies.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
         const rates = orderedCurrencies.reduce((acc, curr) => { acc[curr.code] = curr.rate; return acc; }, { PKR: 1 });
         setConversionRates(rates);
 
@@ -222,9 +223,28 @@ const Services = () => {
         {filteredServices.map((service) => (
             <AnimatedSection key={service._id}>
               <div className="group relative hover:scale-105 transition-all border border-gray-300 rounded-lg p-3 max-w-xs mx-auto cursor-pointer">
+                 {/* ▼▼▼ THIS IS THE CHANGED PART ▼▼▼ */}
                 <div className="relative h-40 w-full mb-3">
-                  <img src={service.imageUrl || '/placeholder.png'} alt={service.title} className="object-contain h-full w-full" />
+                  {service.imageUrl && (service.imageUrl.endsWith('.mp4') || service.imageUrl.endsWith('.webm')) ? (
+                    <video
+                      src={service.imageUrl}
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      className="object-contain h-full w-full"
+                    >
+                      Your browser does not support the video tag.
+                    </video>
+                  ) : (
+                    <img
+                      src={service.imageUrl || '/placeholder.png'}
+                      alt={service.title}
+                      className="object-contain h-full w-full"
+                    />
+                  )}
                 </div>
+                {/* ▲▲▲ END OF CHANGE ▲▲▲ */}
                 <h2 className="font-bold text-xl mt-2 text-center">{service.title}</h2>
                 <p className="text-center text-sm text-gray-600">
                   Price: {convertPrice(service.price || 0)} {selectedCurrency}
