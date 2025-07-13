@@ -25,9 +25,9 @@ const Hero = () => {
       className="hidden md:flex md:max-w-sm" /> </AnimatedSection>
     <div>
       <AnimatedSection>
-      <h1 className="text-5xl font-bold">Best & Cheapest SMM Panel Provider in World</h1>
+      <h1 className="text-5xl font-bold">Best & Cheapest SMM Services Provider in World</h1>
       <p className="py-6">
-      Our support team is available 24/7 on live chat, responding in 0-5 minutes. Mostly, issues are resolved within 1 hour. If an issue is not resolved within 24 hours, we offer a full refund.
+      Our support team is available 24/7 on Whatsapp, responding in 0-5 minutes. Mostly, issues are resolved within 1 hour. If an issue is not resolved within 24 hours, we offer a full refund.
       <strong>✅If You Want To Order  Contact On Whatsapp Please 💯 </strong>
       </p>
 
