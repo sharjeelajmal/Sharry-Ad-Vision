@@ -7,8 +7,8 @@ import NotificationPopup from "./_components/Alertmesage";
 import { Toaster } from 'react-hot-toast';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
-
+import { AuthProvider } from "./Authprovider";
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -29,6 +29,7 @@ export default function RootLayout({ children }) {
         <link rel="icon" type="image/x-icon" href="/favicon.ico" />
       </head>
       <body className={outfit.className}>
+         <AuthProvider>
         <Header />
         <UpHeader />
 
@@ -38,6 +39,7 @@ export default function RootLayout({ children }) {
         <Toaster position="top-center" reverseOrder={false} />
 
         <Footer />
+        </AuthProvider>
       </body>
     </html>
   );

@@ -6,8 +6,8 @@ import CurrencySelector from "../_components/CurrencySelector";
 import AnimatedSection from "../_components/AnimatedSection";
 import { toast } from "react-hot-toast";
 import { Button } from "@/components/ui/button";
+import io from 'socket.io-client';
 
-// Mapping of country codes to their respective currencies.
 const countryCurrencyMap = {
   PK: "PKR", US: "USD", IN: "INR", AE: "AED", GB: "GBP", DE: "EUR", FR: "EUR",
 };
@@ -19,102 +19,100 @@ const Services = () => {
   const [activeTab, setActiveTab] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [tabs, setTabs] = useState([]);
-  const [selectedCurrency, setSelectedCurrency] = useState("PKR"); // Default to PKR
+  const [selectedCurrency, setSelectedCurrency] = useState("PKR");
   const [conversionRates, setConversionRates] = useState({ PKR: 1 });
   const [searchTerm, setSearchTerm] = useState('');
+  
+  // ▼▼▼ YEH STATE ADD KARNA ZAROORI HAI ▼▼▼
+  const [stats, setStats] = useState([]);
 
   const pkrRegex = /(\d{1,3}(?:,?\d{3})*|\d+)\s*PKR/gi;
 
-  // Fetches the user's location to set a preferred currency. Caches the result in sessionStorage.
   const fetchUserLocation = useCallback(async () => {
     const cachedCountryCode = sessionStorage.getItem('userCountryCode');
-    if (cachedCountryCode) {
-      return cachedCountryCode;
-    }
+    if (cachedCountryCode) return cachedCountryCode;
     try {
       const geoResponse = await fetch("/api/get-user-location");
       const data = await geoResponse.json();
-      if (data && data.countryCode) {
+      if (data?.countryCode) {
         sessionStorage.setItem('userCountryCode', data.countryCode);
         return data.countryCode;
       }
-      return 'PK'; // Default country
+      return 'PK';
     } catch (error) {
       console.error("Could not fetch user location, defaulting to PK.", error);
       return 'PK';
     }
   }, []);
 
-  // Main data fetching function, called only once on component mount.
   const fetchInitialData = useCallback(async () => {
-    setIsLoading(true);
+    if(!isLoading) setIsLoading(true);
     try {
-      // 1. Single API call to get all necessary data (services, tabs, currencies).
-      const response = await fetch("/api/initial-data");
-      if (!response.ok) {
-        throw new Error("Check Your Internet Connection ! Data could not be loaded.");
-      }
+      const response = await fetch(`/api/initial-data?_=${new Date().getTime()}`);
+      if (!response.ok) throw new Error("Check Your Internet Connection! Data could not be loaded.");
+      
       const data = await response.json();
-
-      // 2. Set state with the fetched data.
       setServices(data.services || []);
-      const serviceTabs = data.tabs || [];
-      setTabs(serviceTabs);
+      setTabs(data.tabs || []);
+      
+      // ▼▼▼ STATS KO STATE MEIN SAVE KAREIN ▼▼▼
+      setStats(data.stats || []);
 
-      // Set the initial active tab.
-      if (serviceTabs.length > 0) {
-        setActiveTab(serviceTabs[0]);
-      }
+      setActiveTab(prevTab => {
+        if (prevTab && data.tabs.includes(prevTab)) return prevTab;
+        return data.tabs.length > 0 ? data.tabs[0] : "";
+      });
 
-      // Process and set currency conversion rates.
       const orderedCurrencies = (data.currencies || []).sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
-      const rates = orderedCurrencies.reduce((acc, curr) => {
-        acc[curr.code] = curr.rate;
-        return acc;
-      }, { PKR: 1 });
+      const rates = orderedCurrencies.reduce((acc, curr) => ({ ...acc, [curr.code]: curr.rate }), { PKR: 1 });
       setConversionRates(rates);
 
-      // 3. Determine and set the user's preferred currency.
       const userCountryCode = await fetchUserLocation();
       const preferredCurrency = countryCurrencyMap[userCountryCode] || "PKR";
       
-      // Check if the preferred currency is available, otherwise fall back to the first available or PKR.
       if (orderedCurrencies.some(c => c.code === preferredCurrency)) {
-          setSelectedCurrency(preferredCurrency);
+        setSelectedCurrency(preferredCurrency);
       } else if (orderedCurrencies.length > 0) {
-          setSelectedCurrency(orderedCurrencies[0].code);
+        setSelectedCurrency(orderedCurrencies[0].code);
       } else {
-          setSelectedCurrency("PKR");
+        setSelectedCurrency("PKR");
       }
-
     } catch (error) {
       console.error("Error fetching initial data:", error);
-      toast.error("Refresh Plzz ! Data could not be loaded. Defaulting to PKR.");
-      setSelectedCurrency("PKR"); // Fallback currency
+      toast.error("Refresh Plzz! Data could not be loaded.");
     } finally {
       setIsLoading(false);
     }
-  }, [fetchUserLocation]); // Dependency ensures fetchUserLocation is available.
+  }, [fetchUserLocation, isLoading]);
 
-  // This effect runs only once to fetch all initial data.
   useEffect(() => {
     setIsClient(true);
+    
+    fetch('/api/socket').then(() => {
+        const socket = io(undefined, { path: '/socket.io' });
+        socket.on('connect', () => console.log('Socket connected successfully!'));
+        socket.on('serviceUpdate', () => {
+          console.log('Update received, refetching all data...');
+          toast('Content has been updated!', { icon: '🔄', duration: 2000 });
+          fetchInitialData();
+        });
+        socket.on('connect_error', (err) => console.error('Socket connection error:', err));
+        return () => socket.disconnect();
+    });
+
     fetchInitialData();
-  }, [fetchInitialData]);
-  
-  // Memoized function to filter services based on the active tab and search term.
+  }, []);
+
   const filterServices = useCallback(() => {
     if (!activeTab) return;
-    
+    const visibleServices = services.filter(service => !service.isHidden);
     let tempFiltered = [];
     const lowerCaseActiveTab = activeTab.toLowerCase();
-
     if (lowerCaseActiveTab === 'offers') {
-      tempFiltered = services.filter(service => service.title.toLowerCase().includes('offer'));
+      tempFiltered = visibleServices.filter(service => service.title.toLowerCase().includes('offer'));
     } else {
-      tempFiltered = services.filter(service => (service.category || '').toLowerCase() === lowerCaseActiveTab);
+      tempFiltered = visibleServices.filter(service => (service.category || '').toLowerCase() === lowerCaseActiveTab);
     }
-
     if (searchTerm) {
       const lowerCaseSearchTerm = searchTerm.toLowerCase();
       tempFiltered = tempFiltered.filter(service =>
@@ -123,18 +121,15 @@ const Services = () => {
         (service.category && service.category.toLowerCase().includes(lowerCaseSearchTerm))
       );
     }
-
     setFilteredServices(tempFiltered);
   }, [services, activeTab, searchTerm]);
 
-  // This effect re-runs whenever the filters (active tab, search term) or services list change.
   useEffect(() => {
     if (services.length > 0) {
       filterServices();
     }
   }, [services, activeTab, searchTerm, filterServices]);
 
-  // Memoized functions for converting prices and strings containing prices.
   const convertPrice = useCallback((price) => {
     const rate = conversionRates[selectedCurrency] || 1;
     let converted = price * rate;
@@ -160,7 +155,6 @@ const Services = () => {
     });
   }, [convertPrice, selectedCurrency, pkrRegex]);
 
-  // Loading state UI
   if (!isClient || isLoading) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -169,12 +163,12 @@ const Services = () => {
     );
   }
 
-  // Main component render
   return (
     <section className="mb-10">
       <AnimatedSection>
         <h1 className="font-bold text-4xl text-center py-5">Our Services</h1>
-        <StatsCards isAdmin={false} />
+        {/* ▼▼▼ STATS KA DATA YAHAN PASS KAREIN ▼▼▼ */}
+        <StatsCards isAdmin={false} statsData={stats} />
       </AnimatedSection>
 
       <h2 className="text-center my-7 sticky top-0 z-40">
@@ -227,6 +221,11 @@ const Services = () => {
         {filteredServices.map((service) => (
           <AnimatedSection key={service._id}>
             <div className="group relative hover:scale-105 transition-all border border-gray-300 rounded-lg p-3 max-w-xs mx-auto cursor-pointer">
+              {service.serviceId && (
+                <span className="absolute top-2 right-2 bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded z-10">
+                  ID: {service.serviceId}
+                </span>
+              )}
               <div className="relative h-40 w-full mb-3">
                 {service.imageUrl && (service.imageUrl.endsWith('.mp4') || service.imageUrl.endsWith('.webm')) ? (
                   <video src={service.imageUrl} autoPlay loop muted playsInline className="object-contain h-full w-full">
@@ -244,9 +243,9 @@ const Services = () => {
               </div>
               <h2 className="font-bold text-xl mt-2 text-center">{service.title}</h2>
            <p className="text-center text-sm text-gray-600 whitespace-pre-line">
-  Price: {convertPrice(service.price || 0)} {selectedCurrency}
-  {service.quantity && (<span> {convertQuantityString(service.quantity)}</span>)}
-</p>
+              Price: {convertPrice(service.price || 0)} {selectedCurrency}
+              {service.quantity && (<span> {convertQuantityString(service.quantity)}</span>)}
+            </p>
               <div className="absolute bottom-0 left-0 w-full p-3 bg-white opacity-0 group-hover:opacity-100 transition-all duration-300 max-h-40 overflow-y-auto">
                 <p className="text-xs sm:text-sm whitespace-pre-line">
                   {convertDescriptionString(service.description, service.price)}

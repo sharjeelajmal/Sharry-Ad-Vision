@@ -1,15 +1,11 @@
-// src/app/api/services/reorder/route.js
 import { NextResponse } from 'next/server';
 import mongooseConnect from '@/lib/mongodb';
 import Service from '@/models/Service';
-import mongoose from 'mongoose';
-
-
 
 export async function POST(request) {
   try {
-await mongooseConnect();
-    const orderedServices = await request.json(); // Array of { id: 'serviceId', orderIndex: 0 }
+    await mongooseConnect();
+    const orderedServices = await request.json();
 
     if (!Array.isArray(orderedServices)) {
       return NextResponse.json(
@@ -18,7 +14,6 @@ await mongooseConnect();
       );
     }
 
-    // Create bulk operations to update orderIndex for all services
     const operations = orderedServices.map(item => ({
       updateOne: {
         filter: { _id: item.id },
@@ -26,13 +21,18 @@ await mongooseConnect();
       }
     }));
 
-    await Service.bulkWrite(operations); // Efficiently update multiple documents
+    if (operations.length > 0) {
+        await Service.bulkWrite(operations);
+    }
 
-    // Optionally, return the newly ordered services from the database
-    // This fetches all services again, sorted by the new orderIndex
+    // ▼▼▼ YEH LINE ADD KI GAYI HAI ▼▼▼
+    if (request.socket?.server?.io) {
+        request.socket.server.io.emit('serviceUpdate');
+    }
+    
     const updatedServices = await Service.find({}).sort({ orderIndex: 1, createdAt: -1 });
-
     return NextResponse.json(updatedServices, { status: 200 });
+    
   } catch (error) {
     console.error('POST /api/services/reorder Error:', error);
     return NextResponse.json(

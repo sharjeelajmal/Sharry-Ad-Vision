@@ -1,14 +1,12 @@
-// src/app/api/currencies/route.js
 import { NextResponse } from 'next/server';
-import mongooseConnect from '@/lib/mongodb'; // Corrected im
-// port
-import Currency from '@/models/Currency'; // Already correct
+import mongooseConnect from '@/lib/mongodb';
+import Currency from '@/models/Currency';
 
 export const revalidate = 3600;
 
 export async function GET() {
   try {
-await mongooseConnect();
+    await mongooseConnect();
     const currencies = await Currency.find({}).sort({ code: 1 });
     return NextResponse.json(currencies);
   } catch (error) {
@@ -22,10 +20,9 @@ await mongooseConnect();
 
 export async function POST(request) {
   try {
-
+    await mongooseConnect();
     const currencyData = await request.json();
-await mongooseConnect();
-    // Basic validation
+
     if (!Array.isArray(currencyData)) {
       return NextResponse.json(
         { error: 'Invalid data format. Expected array of currencies.' },
@@ -33,10 +30,7 @@ await mongooseConnect();
       );
     }
 
-    // Delete all existing currencies
     await Currency.deleteMany({});
-
-    // Insert new currencies with validation
     const savedCurrencies = await Currency.insertMany(
       currencyData.map(c => ({
         code: String(c.code).toUpperCase().substring(0, 3),
@@ -45,6 +39,11 @@ await mongooseConnect();
         rate: parseFloat(c.rate) || 0
       }))
     );
+
+    // Socket event bhejein
+    if (request.socket?.server?.io) {
+        request.socket.server.io.emit('serviceUpdate');
+    }
 
     return NextResponse.json(savedCurrencies);
   } catch (error) {

@@ -30,6 +30,12 @@ export async function POST(request) {
     if (operations.length > 0) {
       await Setting.bulkWrite(operations);
     }
+
+    // ▼▼▼ YEH LINE ADD KI GAYI HAI ▼▼▼
+    if (request.socket?.server?.io) {
+      request.socket.server.io.emit('serviceUpdate');
+    }
+
     return NextResponse.json({ success: true, message: 'Settings updated' });
   } catch (error) {
     return NextResponse.json({ error: 'Failed to update settings' }, { status: 500 });

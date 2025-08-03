@@ -1,4 +1,3 @@
-// src/app/api/tabs/route.js
 import { NextResponse } from "next/server";
 import mongooseConnect from '@/lib/mongodb';
 import Tab from '@/models/Tab';
@@ -9,14 +8,12 @@ export async function GET() {
   try {
     await mongooseConnect();
     let tabs = await Tab.find({}).sort({ createdAt: 1 });
-
     if (tabs.length === 0) {
       const defaultTabNames = ["Tiktok", "Youtube", "Facebook", "Instagram", "X-Twitter", "Whatsapp", "Website Development", "Graphics Designing", "Offers"];
       const defaultTabs = defaultTabNames.map(name => ({ name }));
       await Tab.insertMany(defaultTabs);
       tabs = await Tab.find({}).sort({ createdAt: 1 });
     }
-    
     return NextResponse.json(tabs.map(tab => tab.name));
   } catch (error) {
     console.error("GET /api/tabs Error:", error);
@@ -29,20 +26,22 @@ export async function GET() {
 
 export async function POST(request) {
   try {
-    await mongooseConnect(); // Connection ka intezar karne ke liye await wapas laga diya gaya hai
+    await mongooseConnect();
     const newTabNames = await request.json();
-
     if (!Array.isArray(newTabNames)) {
       return NextResponse.json(
         { error: 'Invalid data format. Expected an array of tab names (strings).' },
         { status: 400 }
       );
     }
-
     const tabsToSave = newTabNames.map(name => ({ name: String(name).trim() }));
-
     await Tab.deleteMany({});
     const savedTabs = await Tab.insertMany(tabsToSave);
+
+    // ▼▼▼ YEH LINE ADD KI GAYI HAI ▼▼▼
+    if (request.socket?.server?.io) {
+      request.socket.server.io.emit('serviceUpdate');
+    }
 
     return NextResponse.json(savedTabs.map(tab => tab.name), { status: 201 });
   } catch (error) {

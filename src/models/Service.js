@@ -16,7 +16,7 @@ const serviceSchema = new mongoose.Schema({
     type: Number,
     required: [true, 'Price is required'],
     min: [0, 'Price must be positive'],
-    set: v => parseFloat(v.toFixed(2)) // Ensure 2 decimal places
+    set: v => parseFloat(v.toFixed(2)) // 2 decimal places ko ensure karta hai
   },
   quantity: {
     type: String,
@@ -27,17 +27,34 @@ const serviceSchema = new mongoose.Schema({
     type: String,
     default: '',
     trim: true
-    // Removed URL validation completely
   },
   category: {
     type: String,
     required: [true, 'Category is required'],
     trim: true
   },
-  orderIndex: { // NEW FIELD FOR DRAG & DROP ORDER
+  orderIndex: { // Yeh pehle se tha drag & drop ke liye
     type: Number,
     default: 0,
   },
+  
+  // ▼▼▼ YEH DO NAYE FIELDS ADD KIYE GAYE HAIN ▼▼▼
+  
+  // Service ko hide/unhide karne ke liye
+  isHidden: {
+    type: Boolean,
+    default: false, // Default mein service visible rahegi
+  },
+  
+  // Service ID add karne ke liye
+  serviceId: {
+    type: String,
+    trim: true,
+    default: '', // Default mein ID khaali rahegi
+  },
+  
+  // ▲▲▲ UPAR WALE DO NAYE FIELDS ADD KIYE GAYE HAIN ▲▲▲
+
   createdAt: {
     type: Date,
     default: Date.now,
@@ -49,13 +66,13 @@ const serviceSchema = new mongoose.Schema({
   }
 });
 
-// Update the updatedAt field before saving
+// 'updatedAt' field ko save karne se pehle update karta hai
 serviceSchema.pre('save', function(next) {
   this.updatedAt = new Date();
   next();
 });
 
-// Add text index for searching
+// Search ke liye text index
 serviceSchema.index({
   title: 'text',
   description: 'text',
