@@ -222,7 +222,7 @@ const Services = () => {
           <AnimatedSection key={service._id}>
             <div className="group relative hover:scale-105 transition-all border border-gray-300 rounded-lg p-3 max-w-xs mx-auto cursor-pointer">
               {service.serviceId && (
-                <span className="absolute top-2 right-2 bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded z-10">
+                <span className="absolute top-2 left-2 bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded z-10">
                   ID: {service.serviceId}
                 </span>
               )}
