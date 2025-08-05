@@ -46,7 +46,7 @@ export default function LoginForm() {
               onChange={(e) => setEmail(e.target.value)}
               type="email"
               placeholder="Email"
-              className="w-full px-4 py-2 bg-white border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:scale-[1.02] transition-transform duration-200 ease-in-out"
+              className="w-full px-4 py-2 bg-white border rounded-lg focus:outline-none  focus:scale-[1.02] transition-transform duration-200 ease-in-out"
               required
             />
           </div>
@@ -58,7 +58,7 @@ export default function LoginForm() {
               onChange={(e) => setPassword(e.target.value)}
               type={showPassword ? "text" : "password"}
               placeholder="Password"
-              className="w-full px-4 py-2 bg-white border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:scale-[1.02] transition-transform duration-200 ease-in-out pr-10"
+              className="w-full px-4 py-2 bg-white border rounded-lg focus:outline-none focus:scale-[1.02] transition-transform duration-200 ease-in-out pr-10"
               required
             />
             <button
@@ -77,7 +77,7 @@ export default function LoginForm() {
             </Link>
           </div>
 
-          <button className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+          <button className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 focus:outline-none  transition-colors">
             Login
           </button>
         </form>

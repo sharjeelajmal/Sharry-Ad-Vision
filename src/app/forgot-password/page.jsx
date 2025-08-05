@@ -63,7 +63,7 @@ export default function ForgotPasswordForm() {
                 type="email"
                 placeholder="Email"
                 // ▼▼▼ Yahan changes kiye gaye hain ▼▼▼
-                className="w-full px-4 py-2 bg-white border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:scale-[1.02] transition-transform duration-200 ease-in-out"
+                className="w-full px-4 py-2 bg-white border rounded-lg focus:outline-none  focus:scale-[1.02] transition-transform duration-200 ease-in-out"
                 required
                 disabled={isLoading}
               />
@@ -71,7 +71,7 @@ export default function ForgotPasswordForm() {
             <button 
               type="submit"
               disabled={isLoading}
-              className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors disabled:bg-blue-400 disabled:cursor-not-allowed"
+              className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 focus:outline-none  transition-colors disabled:bg-blue-400 disabled:cursor-not-allowed"
             >
               {isLoading ? 'Sending...' : 'Send Reset Link'}
             </button>
