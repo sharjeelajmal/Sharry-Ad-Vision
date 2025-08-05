@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import mongooseConnect from '@/lib/mongodb';
 import Setting from '@/models/Setting';
+import { pusher } from '@/lib/pusher';
 
 export async function GET() {
   try {
@@ -31,10 +32,8 @@ export async function POST(request) {
       await Setting.bulkWrite(operations);
     }
 
-    // ▼▼▼ YEH LINE ADD KI GAYI HAI ▼▼▼
-    if (request.socket?.server?.io) {
-      request.socket.server.io.emit('serviceUpdate');
-    }
+    // Pusher event trigger karein
+    await pusher.trigger('updates-channel', 'service-update', { message: 'Settings updated' });
 
     return NextResponse.json({ success: true, message: 'Settings updated' });
   } catch (error) {

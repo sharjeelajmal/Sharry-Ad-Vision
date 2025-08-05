@@ -17,14 +17,17 @@ import { CSS } from "@dnd-kit/utilities";
 import { Button } from "@/components/ui/button";
 import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import Pusher from 'pusher-js';
 
 // Helper function to notify clients of an update
 const notifyClients = async () => {
-  try {
-    await fetch("/api/notify");
-  } catch (error) {
-    console.error("Notification failed:", error);
-  }
+    try {
+        await fetch("/api/notify", {
+            method: 'POST', // Make sure it's a POST request if your API expects one
+        });
+    } catch (error) {
+        console.error("Notification failed:", error);
+    }
 };
 
 const countryCurrencyMap = {
@@ -144,8 +147,23 @@ const Sharry326 = () => {
         }
         if (session) {
             setIsClient(true);
-            fetch('/api/socket');
             fetchAllInitialData();
+
+            const pusher = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY, {
+                cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER,
+            });
+
+            const channel = pusher.subscribe('updates-channel');
+            channel.bind('service-update', function(data) {
+                console.log('Admin panel update received, refetching data...');
+                toast('Content updated!', { icon: '🔄', duration: 2000 });
+                fetchAllInitialData();
+            });
+
+            return () => {
+                pusher.unsubscribe('updates-channel');
+                pusher.disconnect();
+            };
         }
     }, [session, status, router, fetchAllInitialData]);
 
@@ -163,7 +181,7 @@ const Sharry326 = () => {
                 (service) =>
                     service.title.toLowerCase().includes(lowerCaseSearchTerm) ||
                     service.description.toLowerCase().includes(lowerCaseSearchTerm) ||
-                    (service.serviceId && service.serviceId.toLowerCase().includes(lowerCaseSearchTerm)) // ID se search
+                    (service.serviceId && service.serviceId.toLowerCase().includes(lowerCaseSearchTerm))
             );
         }
         setOrderedServices(tempFiltered.sort((a, b) => a.orderIndex - b.orderIndex));
@@ -198,7 +216,7 @@ const Sharry326 = () => {
         });
         return convertedDesc;
     }, [convertPrice, selectedCurrency, pkrRegex]);
-
+    
     const handleIdClick = (id) => {
         navigator.clipboard.writeText(id).then(() => {
             toast.success(`ID "${id}" copied to clipboard!`);
@@ -535,7 +553,7 @@ const Sharry326 = () => {
                         </div>
                     )}
                     <div className="mt-5 relative">
-                        <input type="text" placeholder="Search services..." className="input w-full bg-white border-2 border-gray-200 outline-none px-5 py-3 rounded-full shadow-sm focus:scale-105 focus:border-transparent transition-all duration-200" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                        <input type="text" placeholder="Search services by name, description, or ID..." className="input w-full bg-white border-2 border-gray-200 outline-none px-5 py-3 rounded-full shadow-sm focus:scale-105 focus:border-transparent transition-all duration-200" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
                         <svg className="absolute right-4 top-3.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                         </svg>

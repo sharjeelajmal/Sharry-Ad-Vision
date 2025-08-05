@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import mongooseConnect from '@/lib/mongodb';
 import Service from '@/models/Service';
 import mongoose from 'mongoose';
+import { pusher } from '@/lib/pusher';
 
 function handleError(error, message) {
   console.error(message, error);
@@ -50,10 +51,8 @@ export async function POST(request) {
     const newService = new Service({ ...body, orderIndex: newOrderIndex });
     const savedService = await newService.save();
     
-    // ▼▼▼ YEH LINE ADD KI GAYI HAI ▼▼▼
-    if (request.socket?.server?.io) {
-        request.socket.server.io.emit('serviceUpdate');
-    }
+    // Pusher event trigger karein
+    await pusher.trigger('updates-channel', 'service-update', { message: 'Service added' });
 
     return NextResponse.json(savedService, { status: 201 });
   } catch (error) {
@@ -81,10 +80,8 @@ export async function PUT(request) {
       return NextResponse.json({ error: 'Service not found' }, { status: 404 });
     }
 
-    // ▼▼▼ YEH LINE ADD KI GAYI HAI ▼▼▼
-    if (request.socket?.server?.io) {
-        request.socket.server.io.emit('serviceUpdate');
-    }
+    // Pusher event trigger karein
+    await pusher.trigger('updates-channel', 'service-update', { message: 'Service updated' });
 
     return NextResponse.json(updatedService);
   } catch (error) {
@@ -105,10 +102,8 @@ export async function DELETE(request) {
       return NextResponse.json({ error: 'Service not found' }, { status: 404 });
     }
     
-    // ▼▼▼ YEH LINE ADD KI GAYI HAI ▼▼▼
-    if (request.socket?.server?.io) {
-        request.socket.server.io.emit('serviceUpdate');
-    }
+    // Pusher event trigger karein
+    await pusher.trigger('updates-channel', 'service-update', { message: 'Service deleted' });
 
     return NextResponse.json({ success: true });
   } catch (error) {

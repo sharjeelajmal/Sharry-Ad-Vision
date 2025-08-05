@@ -1,12 +1,13 @@
 import { NextResponse } from 'next/server';
 import mongooseConnect from '@/lib/mongodb';
 import Alert from '@/models/Alert';
+import { pusher } from '@/lib/pusher';
 
 export async function GET() {
   try {
     await mongooseConnect();
     const alert = await Alert.findOne().sort({ updatedAt: -1 });
-    return NextResponse.json(alert); // Agar alert nahi hai to null jayega
+    return NextResponse.json(alert);
   } catch (error) {
     console.error('GET /api/alerts Error:', error);
     return NextResponse.json(
@@ -33,10 +34,8 @@ export async function POST(request) {
       { new: true, upsert: true, runValidators: true }
     );
 
-    // Socket event bhejein
-    if (request.socket?.server?.io) {
-        request.socket.server.io.emit('serviceUpdate');
-    }
+    // Pusher event trigger karein
+    await pusher.trigger('updates-channel', 'service-update', { message: 'Alert updated' });
 
     return NextResponse.json(updatedAlert);
   } catch (error) {

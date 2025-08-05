@@ -6,7 +6,7 @@ import Link from "next/link";
 export default function ForgotPasswordForm() {
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
-  const [isLoading, setIsLoading] = useState(false); // <-- Loading state add kiya hai
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -15,7 +15,7 @@ export default function ForgotPasswordForm() {
       return;
     }
     
-    setIsLoading(true); // <-- Submission shuru hone par true set karein
+    setIsLoading(true);
     
     try {
       const res = await fetch("/api/auth/forgot-password", {
@@ -33,39 +33,47 @@ export default function ForgotPasswordForm() {
       setSubmitted(true);
 
     } catch (error) {
-      toast.error(error.message || "An error occurred.");
+      // Safely access error message
+      const errorMessage = error instanceof Error ? error.message : "An error occurred.";
+      toast.error(errorMessage);
     } finally {
-      setIsLoading(false); // <-- Submission khatam hone par false set karein
+      setIsLoading(false);
     }
   };
 
   return (
-    // Responsive padding add kiya hai
+    // Aapka responsive layout bilkul theek hai
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-      {/* Choti screen ke liye padding (p-6) aur badi ke liye (sm:p-8) */}
       <div className="w-full max-w-md bg-white p-6 sm:p-8 rounded-lg shadow-md">
         <h1 className="text-2xl font-bold text-center mb-6">Forgot Password</h1>
         {submitted ? (
-          <p className="text-center text-green-600">
-            Please check your email for the password reset link.
-          </p>
+          <div className="text-center">
+            <p className="text-green-600 mb-4">
+              Please check your email for the password reset link.
+            </p>
+          </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-6">
             <p className="text-center text-sm text-gray-600">Enter your email address and we will send you a link to reset your password.</p>
-            <input
-              onChange={(e) => setEmail(e.target.value)}
-              type="email"
-              placeholder="Email"
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
-              required
-              disabled={isLoading} // <-- Loading ke time input disable rahega
-            />
+            <div>
+              <label htmlFor="email" className="sr-only">Email</label>
+              <input
+                id="email"
+                onChange={(e) => setEmail(e.target.value)}
+                type="email"
+                placeholder="Email"
+                // ▼▼▼ Yahan changes kiye gaye hain ▼▼▼
+                className="w-full px-4 py-2 bg-white border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:scale-[1.02] transition-transform duration-200 ease-in-out"
+                required
+                disabled={isLoading}
+              />
+            </div>
             <button 
               type="submit"
               disabled={isLoading}
-              className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:bg-blue-400 disabled:cursor-not-allowed"
+              className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors disabled:bg-blue-400 disabled:cursor-not-allowed"
             >
-              {isLoading ? 'Sending...' : 'Send Reset Link'} {/* <-- Button text badlega */}
+              {isLoading ? 'Sending...' : 'Send Reset Link'}
             </button>
           </form>
         )}

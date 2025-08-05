@@ -6,7 +6,7 @@ import CurrencySelector from "../_components/CurrencySelector";
 import AnimatedSection from "../_components/AnimatedSection";
 import { toast } from "react-hot-toast";
 import { Button } from "@/components/ui/button";
-import io from 'socket.io-client';
+import Pusher from 'pusher-js';
 
 const countryCurrencyMap = {
   PK: "PKR", US: "USD", IN: "INR", AE: "AED", GB: "GBP", DE: "EUR", FR: "EUR",
@@ -23,10 +23,7 @@ const Services = () => {
   const [conversionRates, setConversionRates] = useState({ PKR: 1 });
   const [searchTerm, setSearchTerm] = useState('');
   const [stats, setStats] = useState([]);
-  
-  // Video elements ke reference store karne ke liye
   const videoRefs = useRef({});
-
   const pkrRegex = /(\d{1,3}(?:,?\d{3})*|\d+)\s*PKR/gi;
 
   const fetchUserLocation = useCallback(async () => {
@@ -46,9 +43,8 @@ const Services = () => {
     }
   }, []);
 
-  // Data fetch karne ka function
   const fetchInitialData = useCallback(async () => {
-    setIsLoading(true); // Loading shuru
+    setIsLoading(true);
     try {
       const response = await fetch('/api/initial-data');
       if (!response.ok) throw new Error("Check Your Internet Connection! Data could not be loaded.");
@@ -81,34 +77,32 @@ const Services = () => {
       console.error("Error fetching initial data:", error);
       toast.error("Refresh Plzz! Data could not be loaded.");
     } finally {
-      setIsLoading(false); // Loading khatam
+      setIsLoading(false);
     }
   }, [fetchUserLocation]);
 
-  // Real-time updates ke liye useEffect
   useEffect(() => {
     setIsClient(true);
-    
     fetchInitialData();
 
-    fetch('/api/socket').then(() => {
-        const socket = io(undefined, {
-            path: '/socket.io',
-            transports: ['websocket'],
-        });
-        socket.on('connect', () => console.log('Socket connected successfully!'));
-        socket.on('serviceUpdate', () => {
-          console.log('Update received, refetching data...');
-          toast('Content has been updated!', { icon: '🔄', duration: 2000 });
-          fetchInitialData();
-        });
-        socket.on('connect_error', (err) => console.error('Socket connection error:', err));
-        return () => socket.disconnect();
+    // Pusher setup
+    const pusher = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY, {
+      cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER,
     });
 
+    const channel = pusher.subscribe('updates-channel');
+    channel.bind('service-update', function(data) {
+      console.log('Update received via Pusher, refetching data...');
+      toast('Content has been updated!', { icon: '🔄', duration: 2000 });
+      fetchInitialData();
+    });
+
+    return () => {
+      pusher.unsubscribe('updates-channel');
+      pusher.disconnect();
+    };
   }, [fetchInitialData]);
 
-  // Services ko filter karne ka logic
   const filterServices = useCallback(() => {
     if (!activeTab) return;
     const visibleServices = services.filter(service => !service.isHidden);
@@ -124,7 +118,7 @@ const Services = () => {
       tempFiltered = tempFiltered.filter(service =>
         service.title.toLowerCase().includes(lowerCaseSearchTerm) ||
         service.description.toLowerCase().includes(lowerCaseSearchTerm) ||
-        (service.serviceId && service.serviceId.toLowerCase().includes(lowerCaseSearchTerm)) // ID se search
+        (service.serviceId && service.serviceId.toLowerCase().includes(lowerCaseSearchTerm))
       );
     }
     setFilteredServices(tempFiltered);
@@ -136,7 +130,6 @@ const Services = () => {
     }
   }, [services, activeTab, searchTerm, filterServices]);
 
-  // Price conversion ka logic
   const convertPrice = useCallback((price) => {
     const rate = conversionRates[selectedCurrency] || 1;
     let converted = price * rate;
@@ -220,7 +213,7 @@ const Services = () => {
           <div className="mt-3 relative">
             <input
               type="text"
-              placeholder="Search services by name, description, or ID..."
+              placeholder="Search services ..."
               className="input w-full bg-white border-2 border-gray-200 outline-none px-5 py-3 rounded-full shadow-sm focus:scale-105 focus:border-transparent transition-all duration-200"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}

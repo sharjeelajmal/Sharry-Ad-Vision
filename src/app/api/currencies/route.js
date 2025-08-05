@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import mongooseConnect from '@/lib/mongodb';
 import Currency from '@/models/Currency';
+import { pusher } from '@/lib/pusher';
 
 export const revalidate = 3600;
 
@@ -40,10 +41,8 @@ export async function POST(request) {
       }))
     );
 
-    // Socket event bhejein
-    if (request.socket?.server?.io) {
-        request.socket.server.io.emit('serviceUpdate');
-    }
+    // Pusher event trigger karein
+    await pusher.trigger('updates-channel', 'service-update', { message: 'Currencies updated' });
 
     return NextResponse.json(savedCurrencies);
   } catch (error) {

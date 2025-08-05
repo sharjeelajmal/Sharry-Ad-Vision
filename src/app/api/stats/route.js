@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import mongooseConnect from '@/lib/mongodb';
 import Stat from '@/models/Stat';
+import { pusher } from '@/lib/pusher';
 
 export async function GET() {
   try {
@@ -36,10 +37,8 @@ export async function POST(request) {
     await Stat.deleteMany({});
     const savedStats = await Stat.insertMany(newStats);
 
-    // ▼▼▼ YEH LINE ADD KI GAYI HAI ▼▼▼
-    if (request.socket?.server?.io) {
-        request.socket.server.io.emit('serviceUpdate');
-    }
+    // Pusher event trigger karein
+    await pusher.trigger('updates-channel', 'service-update', { message: 'Stats updated' });
 
     return NextResponse.json(savedStats, { status: 201 });
   } catch (error) {

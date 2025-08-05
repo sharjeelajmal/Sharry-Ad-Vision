@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import mongooseConnect from '@/lib/mongodb';
 import Service from '@/models/Service';
+import { pusher } from '@/lib/pusher';
 
 export async function POST(request) {
   try {
@@ -25,10 +26,8 @@ export async function POST(request) {
         await Service.bulkWrite(operations);
     }
 
-    // ▼▼▼ YEH LINE ADD KI GAYI HAI ▼▼▼
-    if (request.socket?.server?.io) {
-        request.socket.server.io.emit('serviceUpdate');
-    }
+    // Pusher event trigger karein
+    await pusher.trigger('updates-channel', 'service-update', { message: 'Services reordered' });
     
     const updatedServices = await Service.find({}).sort({ orderIndex: 1, createdAt: -1 });
     return NextResponse.json(updatedServices, { status: 200 });

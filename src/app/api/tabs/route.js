@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import mongooseConnect from '@/lib/mongodb';
 import Tab from '@/models/Tab';
+import { pusher } from '@/lib/pusher';
 
 export const revalidate = 3600; 
 
@@ -38,10 +39,8 @@ export async function POST(request) {
     await Tab.deleteMany({});
     const savedTabs = await Tab.insertMany(tabsToSave);
 
-    // ▼▼▼ YEH LINE ADD KI GAYI HAI ▼▼▼
-    if (request.socket?.server?.io) {
-      request.socket.server.io.emit('serviceUpdate');
-    }
+    // Pusher event trigger karein
+    await pusher.trigger('updates-channel', 'service-update', { message: 'Tabs updated' });
 
     return NextResponse.json(savedTabs.map(tab => tab.name), { status: 201 });
   } catch (error) {
