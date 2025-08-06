@@ -1,22 +1,9 @@
 import { NextResponse } from 'next/server';
 import mongooseConnect from '@/lib/mongodb';
 import Media from '@/models/Media';
-import { unlink } from 'fs/promises';
-import { join } from 'path';
-import { promises as fs } from 'fs';
+import { del } from '@vercel/blob'; // Vercel Blob se 'del' function import karein
 
-// Function to ensure directory exists
-async function ensureUploadsDirectoryExists() {
-    const dir = join(process.cwd(), 'public/uploads');
-    try {
-        await fs.access(dir);
-    } catch (error) {
-        // If directory doesn't exist, create it
-        await fs.mkdir(dir, { recursive: true });
-    }
-}
-
-// GET all media files
+// GET all media files (Is function mein koi change nahi hai)
 export async function GET() {
     try {
         await mongooseConnect();
@@ -27,30 +14,34 @@ export async function GET() {
     }
 }
 
-// DELETE a media file
+// DELETE a media file (Yeh function update kiya gaya hai)
 export async function DELETE(request) {
     try {
         await mongooseConnect();
-        const { id, url } = await request.json();
+        // Frontend se 'id' aur 'url' hasil karein
+        const { id, url } = await request.json(); 
+        
         if (!id || !url) {
             return NextResponse.json({ error: 'ID and URL are required' }, { status: 400 });
         }
 
+        // Step 1: Vercel Blob storage se file delete karein
+        await del(url);
+
+        // Step 2: MongoDB database se file ka record delete karein
         const deletedMedia = await Media.findByIdAndDelete(id);
         if (!deletedMedia) {
-            return NextResponse.json({ error: 'Media not found in DB' }, { status: 404 });
+            // Agar DB mein record na mile, tab bhi theek hai kyunki file Blob se delete ho chuki hai
+            return NextResponse.json({ success: true, message: 'File deleted from Blob, but not found in DB.' });
         }
 
-        try {
-            const filename = url.split('/').pop();
-            const path = join(process.cwd(), 'public/uploads', filename);
-            await unlink(path);
-        } catch (fileError) {
-            console.warn(`File not found on server, but deleted from DB: ${fileError.message}`);
-        }
+        return NextResponse.json({ success: true, message: 'Media deleted successfully' });
 
-        return NextResponse.json({ success: true, message: 'Media deleted' });
     } catch (error) {
+        // Agar Vercel Blob se file delete karte waqt koi error aaye
+        if (error.message.includes('Blob not found')) {
+             return NextResponse.json({ error: 'File not found on the storage server.' }, { status: 404 });
+        }
         return NextResponse.json({ error: 'Failed to delete media', details: error.message }, { status: 500 });
     }
 }

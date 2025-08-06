@@ -574,7 +574,7 @@ const handleGalleryUpload = async (e) => {
     }
   };
 
-  const handleGalleryDelete = async (media) => {
+ const handleGalleryDelete = async (media) => {
     if (confirm(`Are you sure you want to delete ${media.filename}?`)) {
       const originalGallery = [...galleryItems];
       const updatedGallery = galleryItems.filter(
@@ -583,20 +583,25 @@ const handleGalleryUpload = async (e) => {
       setGalleryItems(updatedGallery); // Optimistic delete
 
       try {
-        const response = await fetch("/api/gallery", {
-          // Corrected API endpoint
+        const response = await fetch("/api/api/gallery", { // <-- URL THEEK KIYA GAYA HAI
           method: "DELETE",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ id: media._id, url: media.url }),
         });
-        if (!response.ok) throw new Error("Failed to delete media");
+
+        const result = await response.json();
+        if (!response.ok) {
+            throw new Error(result.error || "Failed to delete media");
+        }
 
         toast.success("Media deleted!");
-        notifyClients({
-          type: "GALLERY_UPDATED",
-          payload: updatedGallery,
-          senderId: session.user.id,
-        });
+        if (typeof notifyClients === 'function') {
+            notifyClients({
+              type: "GALLERY_UPDATED",
+              payload: updatedGallery,
+              senderId: session.user.id,
+            });
+        }
       } catch (error) {
         setGalleryItems(originalGallery); // Rollback
         toast.error(error.message);
