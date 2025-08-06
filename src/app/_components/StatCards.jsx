@@ -4,7 +4,7 @@ import { Users, ShoppingCart, Image, Code } from "lucide-react";
 import { toast } from "react-hot-toast";
 
 const iconMap = {
-  Users: <Users className="h-6 w-6 text-white" />,
+  Clients: <Users className="h-6 w-6 text-white" />,
   Orders: <ShoppingCart className="h-6 w-6 text-white" />,
   "Designs Delivered": <Image className="h-6 w-6 text-white" />,
   "Websites Built": <Code className="h-6 w-6 text-white" />,

@@ -526,37 +526,51 @@ const Sharry326 = () => {
     }
   };
 
-  const handleGalleryUpload = async (e) => {
+const handleGalleryUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
+
     setUploading(true);
-    toast.loading("Uploading...");
-    const formData = new FormData();
-    formData.append("file", file);
+    const toastId = toast.loading('Uploading, please wait...');
 
     try {
-      const uploadRes = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
+      // API endpoint ko filename ke saath call karein
+      const response = await fetch(`/api/upload?filename=${encodeURIComponent(file.name)}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': file.type,
+        },
+        body: file, // Ab FormData ki zaroorat nahi, direct file bhejein
       });
-      const newMedia = await uploadRes.json();
-      if (!uploadRes.ok) throw new Error("File upload nakaam");
 
-      const updatedGallery = [newMedia.media, ...galleryItems];
+      const newMediaData = await response.json();
+      if (!response.ok) {
+        throw new Error(newMediaData.details || 'File upload nakaam ho gaya');
+      }
+
+      // Gallery state ko update karein
+      const updatedGallery = [newMediaData.media, ...galleryItems];
       setGalleryItems(updatedGallery);
+      
+      toast.dismiss(toastId);
+      toast.success('File gallery mein upload ho gayi!');
 
-      toast.dismiss();
-      toast.success("File uploaded to gallery!");
-      notifyClients({
-        type: "GALLERY_UPDATED",
-        payload: updatedGallery,
-        senderId: session.user.id,
-      });
+      // Doosre clients ko notify karein (agar zaroori hai)
+      if (typeof notifyClients === 'function') {
+          notifyClients({
+            type: 'GALLERY_UPDATED',
+            payload: updatedGallery,
+            senderId: session.user.id,
+          });
+      }
+
     } catch (error) {
-      toast.dismiss();
-      toast.error(error.message);
+      toast.dismiss(toastId);
+      toast.error(`Upload failed: ${error.message}`);
     } finally {
       setUploading(false);
+      // Reset the file input so the same file can be selected again
+      e.target.value = null; 
     }
   };
 

@@ -175,7 +175,7 @@ export default function NotificationPopup({ isAdmin = false, galleryItems = [], 
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Popup Media</label>
                         <div className="flex items-center gap-4">
-                            <input type="text" className="input input-bordered w-full" value={editContent.image || ''} onChange={(e) => { setEditContent({...editContent, image: e.target.value}); setImagePreview(e.target.value); }} placeholder="Paste URL or choose from gallery" />
+                            <input type="text" className="input input-bordered w-full bg-white" value={editContent.image || ''} onChange={(e) => { setEditContent({...editContent, image: e.target.value}); setImagePreview(e.target.value); }} placeholder="Paste URL or choose from gallery" />
                             <Button className="btn-secondary" onClick={() => setIsGalleryOpen(true)}>Choose</Button>
                         </div>
                         {imagePreview && (
@@ -188,8 +188,8 @@ export default function NotificationPopup({ isAdmin = false, galleryItems = [], 
                            </div>
                         )}
                     </div>
-                    <input type="text" className="input input-bordered w-full" value={editContent.title || ''} onChange={(e) => setEditContent({...editContent, title: e.target.value})} placeholder="Title" />
-                    <textarea className="textarea textarea-bordered w-full h-48" value={editContent.message || ''} onChange={(e) => setEditContent({...editContent, message: e.target.value})} placeholder="Message" />
+                    <input type="text" className="input input-bordered w-full bg-white" value={editContent.title || ''} onChange={(e) => setEditContent({...editContent, title: e.target.value})} placeholder="Title" />
+                    <textarea className="textarea textarea-bordered w-full h-48 bg-white" value={editContent.message || ''} onChange={(e) => setEditContent({...editContent, message: e.target.value})} placeholder="Message" />
                     <div className="flex justify-center gap-2">
                         <button onClick={handleCancelEditing} className="btn btn-error text-white">Cancel</button>
                         <button onClick={handleSave} className="btn btn-success text-white" disabled={isSaving}>{isSaving ? "Saving..." : "Save"}</button>
