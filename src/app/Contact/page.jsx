@@ -55,7 +55,7 @@ const Contact = () => {
         <header className="bg-blue-600 text-white py-8 text-center">
           <h1 className="text-4xl font-bold">Contact Us</h1>
           <p className="mt-2">
-            We’d love to hear from you. Feel free to reach out!
+            We’d love to hear from you — feel free to get in touch anytime!
           </p>
         </header>
 </AnimatedSection>
