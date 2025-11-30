@@ -52,7 +52,7 @@
   border-color: transparent #f59e0b transparent #f59e0b;
   box-shadow: 0 0 15px rgba(245, 158, 11, 0.5);
   /* Reverse 3D Rotation */
-  animation: spin3D2 2.5s linear infiniteReverse;
+ animation: spin3D2 2.5s linear infinite reverse;
 }
 
 /* --- Keyframe Animations --- */
