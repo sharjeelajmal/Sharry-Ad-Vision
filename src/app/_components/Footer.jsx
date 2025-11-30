@@ -1,101 +1,183 @@
-import React from 'react';
-import AnimatedSection from "./AnimatedSection";
-import { Facebook, Instagram,Github , Linkedin } from 'lucide-react'; // Import Lucide React icons
+'use client';
+import React, { useEffect, useRef } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { Facebook, Instagram, Github, Linkedin, MapPin, Mail, Phone, ArrowRight, Sparkles } from 'lucide-react';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+// Register ScrollTrigger
+gsap.registerPlugin(ScrollTrigger);
 
 const Footer = () => {
+  const footerRef = useRef(null);
+  const marqueeRef = useRef(null);
+
+  // Marquee Items
+  const servicesList = [
+    "Social Media Growth", "Web Development", "UI/UX Design", "SEO Ranking",
+    "Content Creation", "Video Editing", "App Development", "Digital Marketing",
+    "E-commerce", "Email Automation", "Branding", "Lead Generation"
+  ];
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      
+      // 1. NON-STOP INFINITE MARQUEE
+      gsap.to(marqueeRef.current, {
+        xPercent: -50, 
+        repeat: -1,
+        duration: 30, 
+        ease: "linear",
+      });
+
+      // 2. Glass Card Entrance
+      gsap.fromTo(".footer-glass-card",
+        { y: 50, opacity: 0, scale: 0.95 },
+        {
+          y: 0, 
+          opacity: 1, 
+          scale: 1,
+          duration: 1, 
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: footerRef.current,
+            start: "top 80%",
+          }
+        }
+      );
+
+    }, footerRef);
+
+    return () => ctx.revert();
+  }, []);
+
+  const SocialLinks = [
+    { icon: <Facebook className="w-5 h-5" />, href: "https://www.facebook.com/profile.php?id=100084778281907", color: "hover:bg-blue-600 hover:text-white" },
+    { icon: <Instagram className="w-5 h-5" />, href: "https://www.instagram.com/codeenginesharjeel", color: "hover:bg-pink-600 hover:text-white" },
+    { icon: <Github className="w-5 h-5" />, href: "https://github.com/sharjeelajmal", color: "hover:bg-slate-900 hover:text-white" },
+    { icon: <Linkedin className="w-5 h-5" />, href: "https://www.linkedin.com/in/muhammad-sharjeel-701578274/", color: "hover:bg-blue-700 hover:text-white" },
+  ];
+
   return (
-    <footer className="bg-white pb-40">
-      <AnimatedSection>
-      <div className="mx-auto max-w-screen-xl px-4 pb-8 pt-16 sm:px-6 lg:px-8">
-        {/* Email Subscription Section */}
-        <div className="mx-auto max-w-md">
-          <strong className="block text-center text-xl font-bold text-gray-900 sm:text-3xl">
-            Want us to email you with the latest blockbuster news?
-          </strong>
+    <footer ref={footerRef} className="relative bg-slate-50 pt-0 pb-10 overflow-hidden">
+      
+      {/* --- 1. INFINITE MARQUEE STRIP (Premium Black) --- */}
+      <div className="w-full bg-[#0a0a0a] py-5 overflow-hidden relative z-20 shadow-xl">
+         <div className="absolute top-0 left-0 h-full w-24 bg-gradient-to-r from-[#0a0a0a] to-transparent z-20 pointer-events-none"></div>
+         <div className="absolute top-0 right-0 h-full w-24 bg-gradient-to-l from-[#0a0a0a] to-transparent z-20 pointer-events-none"></div>
 
-          <form className="mt-6">
-            <div className="relative max-w-lg">
-              <label className="sr-only" htmlFor="email"> Email </label>
-              <input
-                className="w-full rounded-full border-gray-200 bg-gray-100 p-4 pe-32 text-sm font-medium"
-                id="email"
-                type="email"
-                placeholder="john@doe.com"
-              />
-              <button
-                className="absolute end-1 top-1/2 -translate-y-1/2 rounded-full bg-blue-600 px-5 py-3 text-sm font-medium text-white transition hover:bg-blue-700"
-              >
-                Subscribe
-              </button>
-            </div>
-          </form>
-        </div>
-
-        {/* Footer Links Section */}
-        <div className="mt-16 grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-32">
-          <div className="mx-auto max-w-sm lg:max-w-none">
-            <p className="mt-4 text-center text-gray-500 lg:text-left lg:text-lg">
- <b> Stay Connected</b> Subscribe to our newsletter to get the latest updates, tips, and insights straight to your inbox.
-            </p>
-
-{/* Social Media Links */}
-   <div className="flex space-x-4 mt-4">
-                <a href="https://www.facebook.com/profile.php?id=100084778281907" className="text-blue-600 hover:text-blue-800" target='_blank'>
-                  <Facebook className="h-6 w-6"  />
-                </a>
-                <a href="https://github.com/sharjeelajmal" className="text-blue-600 hover:text-blue-800" target='_blank'>
-                  <Github className="h-6 w-6" />
-                </a>
-                <a href="https://www.instagram.com/codeenginesharjeel" className="text-blue-600 hover:text-blue-800" target='_blank'>
-                  <Instagram className="h-6 w-6" />
-                </a>
-                <a href="https://www.linkedin.com/in/muhammad-sharjeel-701578274/" className="text-blue-600 hover:text-blue-800" target='_blank'>
-                  <Linkedin className="h-6 w-6" />
-                </a>
-              </div>
-
-          </div>
-
-          {/* Footer Links */}
-          <div className="grid grid-cols-1 gap-8 text-center lg:grid-cols-3 lg:text-left">
-            {/* Services Column */}
-            <div>
-              <strong className="font-medium text-gray-900"> Services </strong>
-              <ul className="mt-6 space-y-1">
-                <li><a className="text-gray-700 transition hover:text-gray-700/75" href="/"> Marketing </a></li>
-                <li><a className="text-gray-700 transition hover:text-gray-700/75" href="/"> Graphic Design </a></li>
-                <li><a className="text-gray-700 transition hover:text-gray-700/75" href="/"> SMM</a></li>
-                <li><a className="text-gray-700 transition hover:text-gray-700/75" href="/"> Web Development </a></li>
-              </ul>
-            </div>
-
-            {/* About Column */}
-            <div>
-              <strong className="font-medium text-gray-900"> About </strong>
-              <ul className="mt-6 space-y-1">
-                <li><a className="text-gray-700 transition hover:text-gray-700/75" href="/Reviews"> About </a></li>
-                <li><a className="text-gray-700 transition hover:text-gray-700/75" href="/Reviews"> Careers </a></li>
-                <li><a className="text-gray-700 transition hover:text-gray-700/75" href="/Reviews"> History </a></li>
-                <li><a className="text-gray-700 transition hover:text-gray-700/75" href="/Reviews"> Our Team </a></li>
-              </ul>
-            </div>
-
-            {/* Support Column */}
-            <div>
-              <strong className="font-medium text-gray-900"> Support </strong>
-              <ul className="mt-6 space-y-1">
-                <li><a className="text-gray-700 transition hover:text-gray-700/75" href="/Contact"> FAQs </a></li>
-                <li><a className="text-gray-700 transition hover:text-gray-700/75" href="/Contact"> Contact </a></li>
-                <li><a className="text-gray-700 transition hover:text-gray-700/75" href="/Contact"> Ready To Chat </a></li>
-              </ul>
-            </div>
-           
-          </div>
-        </div>
+         <div ref={marqueeRef} className="flex whitespace-nowrap w-max will-change-transform">
+            {[...servicesList, ...servicesList].map((service, i) => (
+                <div key={`m-${i}`} className="flex items-center mx-8">
+                    <Sparkles size={14} className="text-amber-400 mr-4 animate-pulse" />
+                    <span className="text-white font-bold text-sm tracking-[0.2em] uppercase opacity-90">
+                        {service}
+                    </span>
+                </div>
+            ))}
+         </div>
       </div>
-      <p className='text-center mb-4'>© 2025 Sharry Ads Vision. All Rights Reserved.
-      Built with ❤️ by Sharry Yar.</p>
-      </AnimatedSection>
+
+      {/* --- BACKGROUND DECORATION (Orbs for Glass Effect) --- */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden h-full">
+         <div className="absolute top-[10%] left-[5%] w-[600px] h-[600px] bg-blue-200/40 rounded-full blur-[120px] mix-blend-multiply animate-pulse"></div>
+         <div className="absolute bottom-[10%] right-[5%] w-[500px] h-[500px] bg-amber-200/40 rounded-full blur-[120px] mix-blend-multiply animate-pulse"></div>
+         <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center opacity-[0.04]"></div>
+      </div>
+
+      <div className="container mx-auto px-4 md:px-8 relative z-10 pt-16">
+        
+        {/* --- 2. MAIN GLASS CONTAINER --- */}
+        <div className="footer-glass-card bg-white/60 backdrop-blur-2xl border border-white/60 rounded-[2.5rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.05)] p-8 md:p-12 ring-1 ring-white/80">
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-12 mb-12">
+                
+                {/* Brand Info */}
+                <div className="space-y-6">
+                    <Link href="/" className="inline-block hover:opacity-80 transition-opacity">
+                       <Image src="/logo.svg" alt="Logo" width={150} height={55} className="object-contain drop-shadow-sm" />
+                    </Link>
+                    <p className="text-slate-500 text-sm font-medium leading-relaxed">
+                       Elevating brands with high-end digital solutions. Your growth partner for SMM, Development, and Design.
+                    </p>
+                    <div className="flex gap-3">
+                       {SocialLinks.map((social, idx) => (
+                          <a 
+                            key={idx} 
+                            href={social.href} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className={`w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-500 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md ${social.color}`}
+                          >
+                            {social.icon}
+                          </a>
+                       ))}
+                    </div>
+                </div>
+
+                {/* Quick Links */}
+                <div>
+                    <h3 className="text-slate-900 font-extrabold mb-6 text-sm uppercase tracking-widest">Company</h3>
+                    <ul className="space-y-3">
+                        {['About Us', 'Success Stories', 'Our Team', 'Privacy Policy'].map((item) => (
+                            <li key={item}>
+                                <Link href="/Reviews" className="text-slate-500 hover:text-blue-600 transition-colors flex items-center group text-sm font-bold">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-slate-300 mr-2 group-hover:bg-blue-600 group-hover:w-4 transition-all duration-300"></span>
+                                    {item}
+                                </Link>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+
+                {/* Services */}
+                <div>
+                    <h3 className="text-slate-900 font-extrabold mb-6 text-sm uppercase tracking-widest">Services</h3>
+                    <ul className="space-y-3">
+                        {['SMM Panel', 'Web Development', 'App Design', 'SEO Ranking'].map((item) => (
+                            <li key={item}>
+                                <Link href="/" className="text-slate-500 hover:text-blue-600 transition-colors flex items-center group text-sm font-bold">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-slate-300 mr-2 group-hover:bg-amber-500 group-hover:w-4 transition-all duration-300"></span>
+                                    {item}
+                                </Link>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+
+                {/* Contact */}
+                <div>
+                    <h3 className="text-slate-900 font-extrabold mb-6 text-sm uppercase tracking-widest">Contact</h3>
+                    <ul className="space-y-4 text-sm text-slate-500 font-medium">
+                        <li className="flex items-start gap-3">
+                            <div className="p-2 bg-blue-50 text-blue-600 rounded-lg shadow-sm"><MapPin size={16} /></div>
+                            <span className="mt-1">Council More, Near Harappa Museum, Punjab</span>
+                        </li>
+                        <li className="flex items-center gap-3">
+                            <div className="p-2 bg-blue-50 text-blue-600 rounded-lg shadow-sm"><Mail size={16} /></div>
+                            <span>sharjeelajmalg786@gmail.com</span>
+                        </li>
+                        <li className="flex items-center gap-3">
+                            <div className="p-2 bg-blue-50 text-blue-600 rounded-lg shadow-sm"><Phone size={16} /></div>
+                            <span>+44 7751 497015</span>
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+
+            {/* --- BOTTOM COPYRIGHT (Inside Glass) --- */}
+            <div className="border-t border-slate-200/60 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm font-medium text-slate-400">
+                <p className="hover:text-slate-600 transition-colors">© 2025 Sharry Ads Vision. All Rights Reserved.</p>
+                <p className="flex items-center gap-1">
+                    Designed by <span className="text-slate-900 font-bold">Sharry Yar</span>
+                </p>
+            </div>
+
+        </div>
+
+      </div>
     </footer>
   );
 };

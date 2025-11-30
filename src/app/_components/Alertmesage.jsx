@@ -1,9 +1,10 @@
-// src/app/_components/Alertmesage.jsx
 "use client";
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "react-hot-toast";
 import { Button } from "@/components/ui/button";
+import { X, Edit3, Save, MessageCircle, Image as ImageIcon } from "lucide-react";
+import confetti from "canvas-confetti"; // Import Confetti
 
 const countryCurrencyMap = {
   PK: "PKR", US: "USD", IN: "INR", AE: "AED", GB: "GBP", DE: "EUR", FR: "EUR",
@@ -24,6 +25,7 @@ export default function NotificationPopup({ isAdmin = false, galleryItems = [], 
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
   const [imagePreview, setImagePreview] = useState('');
 
+  // --- Data Loading ---
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -37,12 +39,10 @@ export default function NotificationPopup({ isAdmin = false, galleryItems = [], 
         if (alertRes.ok) {
           const data = await alertRes.json();
           setEditContent(data || {
-            title: "Tiktok Likes Rate Decreased",
+            title: "Limited Offer 🔥",
             image: "/Tiktok.gif",
-            message: `Price PKR = 140\n⚡ Recommended ✅\n⚡ 100% Always working\n⭐ Start: 0-5 minutes / 1 hour\n🔥 Speed: Excellent\n♻️ Refill: Lifetime\n✅ Cancel Button: Yes\n🔥 Drop Ratio: 0%\n⭐ Link: Add Video link\n✅If You Want To Order\nContact On Whatsapp Please 💯`
+            message: "Premium services at unbeatable rates!"
           });
-        } else {
-            toast.error("Failed to load popup alert.");
         }
 
         let finalSelectedCurrency = 'PKR';
@@ -54,12 +54,8 @@ export default function NotificationPopup({ isAdmin = false, galleryItems = [], 
             if (geoRes.ok) {
                 const geoData = await geoRes.json();
                 const preferredCurrency = countryCurrencyMap[geoData.countryCode] || 'PKR';
-                if (rates[preferredCurrency]) {
-                    finalSelectedCurrency = preferredCurrency;
-                }
+                if (rates[preferredCurrency]) finalSelectedCurrency = preferredCurrency;
             }
-        } else {
-            toast.error("Failed to load currency rates.");
         }
         setSelectedCurrency(finalSelectedCurrency);
         
@@ -68,8 +64,7 @@ export default function NotificationPopup({ isAdmin = false, galleryItems = [], 
             if(setGalleryItems) setGalleryItems(galleryData);
         }
       } catch (error) {
-        console.error("Failed to load initial data for popup:", error);
-        toast.error("Failed to load popup data.");
+        console.error("Popup data load failed:", error);
       } finally {
         setTimeout(() => setShowPopup(true), 1500);
       }
@@ -125,16 +120,16 @@ export default function NotificationPopup({ isAdmin = false, galleryItems = [], 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(editContent)
       });
-      if (!res.ok) throw new Error((await res.json()).details || "Failed to save alert");
+      if (!res.ok) throw new Error("Failed to save");
       
       const savedData = await res.json();
       setEditContent(savedData);
       setIsEditing(false);
       setOriginalContent(null);
       setImagePreview('');
-      toast.success("Changes saved successfully!");
+      toast.success("Saved!");
     } catch (error) {
-      toast.error(`Save failed: ${error.message}`);
+      toast.error("Save failed");
     } finally {
       setIsSaving(false);
     }
@@ -146,8 +141,23 @@ export default function NotificationPopup({ isAdmin = false, galleryItems = [], 
     setIsGalleryOpen(false);
   };
 
+  // --- PREMIUM WHATSAPP REDIRECT WITH CELEBRATION ---
   const handleWhatsAppRedirect = () => {
-    window.open(`https://wa.me/447751497015?text=Hello, I want to know more about your services!`, '_blank');
+    // 1. Trigger Confetti (Celebration)
+    const colors = ['#1E40AF', '#FFD700', '#ffffff']; // Gold, Blue, White
+    confetti({
+      particleCount: 150,
+      spread: 100,
+      origin: { y: 0.6 }, // Popup ke center/bottom se niklega
+      colors: colors,
+      zIndex: 10005, // Important: Popup (9999) ke upar dikhne ke liye
+      scalar: 1.2
+    });
+
+    // 2. Redirect after delay
+    setTimeout(() => {
+        window.open(`https://wa.me/447751497015?text=Hello, interested in this offer!`, '_blank');
+    }, 1000);
   };
 
   return (
@@ -155,83 +165,179 @@ export default function NotificationPopup({ isAdmin = false, galleryItems = [], 
       <AnimatePresence>
         {showPopup && (
           <motion.div
-            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+            className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-0"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
+            {/* Dark Backdrop */}
+            <div 
+                className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
+                onClick={() => !isEditing && setShowPopup(false)}
+            ></div>
+
+            {/* --- EXPERT LEVEL COMPACT CARD --- */}
             <motion.div
-              className="bg-white p-6 rounded-2xl shadow-lg text-center relative"
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.8, opacity: 0 }}
+              className="relative w-[90%] max-w-[400px] md:max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row max-h-[90vh]"
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              transition={{ type: "spring", stiffness: 350, damping: 25 }}
             >
-              {isAdmin && !isEditing && (
-                  <button onClick={() => setShowPopup(false)} className="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-2xl font-bold">&times;</button>
+              
+              {/* Close Button (Floating Glass) */}
+              {!isEditing && (
+                  <button 
+                    onClick={() => setShowPopup(false)} 
+                    className="absolute top-3 right-3 z-30 p-2 bg-black/20 hover:bg-black/40 text-white rounded-full transition-colors backdrop-blur-md shadow-sm"
+                  >
+                    <X size={18} />
+                  </button>
               )}
 
-              {isEditing ? (
-                 <div className="space-y-4">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Popup Media</label>
-                        <div className="flex items-center gap-4">
-                            <input type="text" className="input input-bordered w-full bg-white" value={editContent.image || ''} onChange={(e) => { setEditContent({...editContent, image: e.target.value}); setImagePreview(e.target.value); }} placeholder="Paste URL or choose from gallery" />
-                            <Button className="btn-secondary" onClick={() => setIsGalleryOpen(true)}>Choose</Button>
+              {/* === VIEW MODE === */}
+              {!isEditing ? (
+                <>
+                    {/* LEFT: Media Section */}
+                    {/* Compact Height for Mobile (h-32) & Object Contain */}
+                    <div className="w-full md:w-1/2 h-32 md:h-auto bg-slate-50 relative flex-shrink-0">
+                       {editContent.image ? (
+                           (editContent.image.endsWith('.mp4') || editContent.image.endsWith('.webm')) ? (
+                             <video src={editContent.image} autoPlay loop muted playsInline className="w-full h-full object-contain" />
+                           ) : (
+                             <img src={editContent.image} alt="Offer" className="w-full h-full object-contain p-1" onError={(e) => { e.target.style.display = 'none'; }} />
+                           )
+                       ) : (
+                           <div className="w-full h-full flex items-center justify-center bg-slate-100 text-slate-300">
+                               <ImageIcon size={40} />
+                           </div>
+                       )}
+                       <div className="hidden md:block absolute inset-0 bg-gradient-to-r from-transparent to-black/5 pointer-events-none"></div>
+                    </div>
+
+                    {/* RIGHT: Content Section */}
+                    <div className="flex-1 p-5 md:p-8 flex flex-col bg-white overflow-hidden">
+                        
+                        <div className="flex-1 flex flex-col justify-center text-center md:text-left overflow-hidden">
+                            <h2 className="text-xl md:text-2xl font-extrabold text-slate-900 mb-2 leading-tight tracking-tight flex-shrink-0">
+                              {editContent.title}
+                            </h2>
+
+                            {/* Scrollable Message Area */}
+                            <div className="text-sm text-slate-600 font-medium whitespace-pre-line leading-relaxed mb-4 overflow-y-auto custom-scrollbar">
+                              {convertedMessage()}
+                            </div>
                         </div>
+
+                        {/* Actions */}
+                        <div className="flex gap-3 pt-2 flex-shrink-0">
+                            {/* PREMIUM WHATSAPP BUTTON */}
+                            <Button 
+                              onClick={handleWhatsAppRedirect} 
+                              className="flex-1 bg-gradient-to-r from-slate-900 to-slate-800 text-white font-bold text-sm rounded-xl shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all h-11"
+                            >
+                              <MessageCircle className="w-4 h-4 mr-2" /> WhatsApp
+                            </Button>
+                            
+                            <Button 
+                              onClick={() => setShowPopup(false)} 
+                              variant="outline"
+                              className="flex-1 border-slate-200 text-slate-600 text-sm font-bold hover:bg-slate-50 rounded-xl h-11"
+                            >
+                              Cancel
+                            </Button>
+                        </div>
+
+                        {/* Admin Edit Trigger */}
+                        {isAdmin && (
+                          <div className="mt-3 flex justify-center md:justify-start flex-shrink-0">
+                              <button 
+                                onClick={handleStartEditing} 
+                                className="text-[10px] font-bold text-slate-300 hover:text-blue-600 flex items-center gap-1 uppercase tracking-wide transition-colors"
+                              >
+                                <Edit3 size={10} /> Edit
+                              </button>
+                          </div>
+                        )}
+                    </div>
+                </>
+              ) : (
+                /* === EDIT MODE === */
+                <div className="w-full p-5 bg-slate-50 flex flex-col h-full overflow-hidden">
+                    <h3 className="text-sm font-bold text-slate-900 border-b pb-2 mb-3 uppercase tracking-wider text-center flex-shrink-0">Edit Popup</h3>
+                    
+                    <div className="space-y-3 flex-1 overflow-y-auto custom-scrollbar">
+                        <div>
+                            <label className="text-[10px] font-bold text-slate-500 uppercase mb-1 block">Image</label>
+                            <div className="flex gap-2">
+                                <input 
+                                  type="text" 
+                                  className="input input-sm flex-1 bg-white border-slate-200 rounded text-xs" 
+                                  value={editContent.image || ''} 
+                                  onChange={(e) => { setEditContent({...editContent, image: e.target.value}); setImagePreview(e.target.value); }} 
+                                />
+                                <Button size="sm" variant="outline" className="bg-white h-8 text-xs" onClick={() => setIsGalleryOpen(true)}>List</Button>
+                            </div>
+                        </div>
+
                         {imagePreview && (
-                           <div className="mt-2 p-2 border rounded-md w-32 mx-auto">
-                             <p className="text-sm text-gray-500 mb-1">Preview:</p>
+                           <div className="h-20 w-full rounded-lg overflow-hidden bg-white border border-slate-200 relative shadow-sm flex-shrink-0">
                              {(imagePreview.endsWith('.mp4') || imagePreview.endsWith('.webm')) 
-                               ? <video src={imagePreview} autoPlay loop muted playsInline className="max-h-24 object-contain mx-auto" />
-                               : <img src={imagePreview} alt="Preview" className="max-h-24 object-contain mx-auto" />
+                               ? <video src={imagePreview} autoPlay loop muted className="w-full h-full object-contain" />
+                               : <img src={imagePreview} alt="Preview" className="w-full h-full object-contain" />
                              }
                            </div>
                         )}
-                    </div>
-                    <input type="text" className="input input-bordered w-full bg-white" value={editContent.title || ''} onChange={(e) => setEditContent({...editContent, title: e.target.value})} placeholder="Title" />
-                    <textarea className="textarea textarea-bordered w-full h-48 bg-white" value={editContent.message || ''} onChange={(e) => setEditContent({...editContent, message: e.target.value})} placeholder="Message" />
-                    <div className="flex justify-center gap-2">
-                        <button onClick={handleCancelEditing} className="btn btn-error text-white">Cancel</button>
-                        <button onClick={handleSave} className="btn btn-success text-white" disabled={isSaving}>{isSaving ? "Saving..." : "Save"}</button>
-                    </div>
-                 </div>
-              ) : (
-                 <>
-                    {editContent.image && (
-                        <div className="mx-auto" style={{width: "140px", height:"140px"}}>
-                         {(editContent.image.endsWith('.mp4') || editContent.image.endsWith('.webm')) ? (
-                           <video src={editContent.image} autoPlay loop muted playsInline className="max-w-full max-h-full mx-auto" />
-                         ) : (
-                           <img src={editContent.image} alt="Popup" style={{display: "block", margin: "0 auto", maxWidth: "100%", maxHeight: "100%"}} onError={(e) => { e.target.style.display = 'none'; }} />
-                         )}
+
+                        <div>
+                            <label className="text-[10px] font-bold text-slate-500 uppercase mb-1 block">Title</label>
+                            <input 
+                              type="text" 
+                              className="input input-sm w-full bg-white border-slate-200 rounded font-bold text-sm" 
+                              value={editContent.title || ''} 
+                              onChange={(e) => setEditContent({...editContent, title: e.target.value})} 
+                            />
                         </div>
-                    )}
-                    <h2 className="text-lg font-bold mb-4 mt-2">{editContent.title}</h2>
-                    <p className="text-gray-700 mb-6 whitespace-pre-line">{convertedMessage()}</p>
-                    <div className="flex justify-center gap-2">
-                        <button onClick={handleWhatsAppRedirect} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">WhatsApp</button>
-                        <button onClick={() => setShowPopup(false)} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">OK</button>
-                        {isAdmin && (<button onClick={handleStartEditing} className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-700">Edit</button>)}
+                        
+                        <div>
+                            <label className="text-[10px] font-bold text-slate-500 uppercase mb-1 block">Message</label>
+                            <textarea 
+                              className="textarea w-full h-24 bg-white border-slate-200 rounded text-sm resize-none" 
+                              value={editContent.message || ''} 
+                              onChange={(e) => setEditContent({...editContent, message: e.target.value})} 
+                            />
+                        </div>
                     </div>
-                 </>
+
+                    <div className="flex gap-2 pt-3 border-t mt-auto flex-shrink-0">
+                        <Button variant="ghost" size="sm" onClick={handleCancelEditing} className="flex-1 text-slate-500 h-9">Cancel</Button>
+                        <Button size="sm" onClick={handleSave} disabled={isSaving} className="flex-1 bg-slate-900 text-white h-9">
+                          {isSaving ? "Save" : "Save"}
+                        </Button>
+                    </div>
+                </div>
               )}
+
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
       
+      {/* Gallery Modal */}
       {isGalleryOpen && (
-        <dialog open className="modal modal-open z-[52]">
-          <div className="modal-box max-w-5xl bg-white">
-            <h3 className="font-bold text-lg">Select Media from Gallery</h3>
-            <div className="py-4 grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-4 max-h-96 overflow-y-auto">
+        <dialog open className="modal modal-open z-[10000]">
+          <div className="modal-box max-w-2xl bg-white rounded-xl p-5 shadow-2xl">
+            <div className="flex justify-between items-center mb-4">
+                <h3 className="font-bold text-lg text-slate-900">Select Media</h3>
+                <button onClick={() => setIsGalleryOpen(false)} className="p-1.5 hover:bg-slate-100 rounded-full transition-colors"><X size={18}/></button>
+            </div>
+            <div className="grid grid-cols-4 gap-3 max-h-[50vh] overflow-y-auto custom-scrollbar">
               {galleryItems.map(media => (
-                <div key={media._id} className="group cursor-pointer" onClick={() => handleSelectFromGallery(media)}>
-                  {media.filetype === 'video' ? (<video src={media.url} muted className="w-full h-24 object-cover rounded-lg border-2 border-transparent group-hover:border-blue-500"/>) : (<img src={media.url} alt={media.filename} className="w-full h-24 object-cover rounded-lg border-2 border-transparent group-hover:border-blue-500"/>)}
+                <div key={media._id} className="relative group cursor-pointer rounded-lg overflow-hidden aspect-square border hover:border-slate-900 transition-all" onClick={() => handleSelectFromGallery(media)}>
+                  {media.filetype === 'video' ? (<video src={media.url} muted className="w-full h-full object-cover"/>) : (<img src={media.url} alt="media" className="w-full h-full object-cover"/>)}
                 </div>
               ))}
             </div>
-            <div className="modal-action"><Button onClick={() => setIsGalleryOpen(false)}>Cancel</Button></div>
           </div>
         </dialog>
       )}

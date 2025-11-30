@@ -23,6 +23,7 @@ async function mongooseConnect() {
       bufferCommands: false,
       serverSelectionTimeoutMS: 10000,
       socketTimeoutMS: 45000,
+  
     };
 
     cached.promise = mongoose.connect(MONGODB_URI, opts)

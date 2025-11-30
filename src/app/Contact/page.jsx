@@ -1,192 +1,240 @@
 "use client";
+import React, { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  MapPin,
-  Mail,
-  Phone,
-  Facebook,
-  Github,
-  Instagram,
-  Linkedin,
-} from "lucide-react";
-
-import React from "react";
-import AnimatedSection from "../_components/AnimatedSection";
+import { MapPin, Mail, Phone, Facebook, Github, Instagram, Linkedin, Send, MessageCircle, ArrowRight } from "lucide-react";
+import { gsap } from "gsap";
+import confetti from "canvas-confetti";
+import toast from "react-hot-toast";
 
 const Contact = () => {
+  const containerRef = useRef(null);
+  const formRef = useRef(null);
+  
+  const [formData, setFormData] = useState({ name: "", email: "", message: "" });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // --- Animations ---
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      
+      const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+
+      // Header Fade In
+      tl.fromTo(".contact-header", 
+        { y: 50, opacity: 0 },
+        { y: 0, opacity: 1, duration: 1, stagger: 0.1 }
+      );
+
+      // Cards Slide In
+      tl.fromTo(".contact-card",
+        { x: -50, opacity: 0 },
+        { x: 0, opacity: 1, duration: 0.8, stagger: 0.1 },
+        "-=0.5"
+      );
+
+      // Form Slide Up
+      tl.fromTo(formRef.current,
+        { y: 50, opacity: 0, scale: 0.95 },
+        { y: 0, opacity: 1, scale: 1, duration: 0.8 },
+        "-=0.6"
+      );
+
+      // Background movement
+      gsap.to(".bg-glow", {
+        y: 30,
+        duration: 6,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut"
+      });
+
+    }, containerRef);
+
+    return () => ctx.revert();
+  }, []);
+
+  // --- Handlers ---
   const handleWhatsAppRedirect = () => {
-    const phoneNumber = "447751497015"; // Your WhatsApp number
-    const message = "Hello, I want to know more about your services!";
-    const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(
-      message
-    )}`;
-    window.location.href = url; // Redirects to WhatsApp
+    // Celebration
+    confetti({
+      particleCount: 120,
+      spread: 80,
+      origin: { y: 0.6 },
+      colors: ['#22c55e', '#ffffff', '#FFD700']
+    });
+
+    setTimeout(() => {
+        const phoneNumber = "447751497015"; 
+        const message = "Hello, I want to discuss a project!";
+        const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+        window.open(url, '_blank');
+    }, 1000);
   };
 
-  return (
-    <div className="bg-customGray p-8 ">
-      <div className="  md:px-36">
-        <AnimatedSection>
-        <div className="hero-content flex-col lg:flex-row-reverse">
-          <img src="contact.svg" className="hidden md:flex md:max-w-sm" />
-          <div>
-            <h1 className="text-5xl font-bold">Get in Touch with Us</h1>
-            <p className="py-6">
-              We’re here to help! Whether you have a question, need assistance,
-              or want to share feedback, we’d love to hear from you. Reach out
-              to us through any of the options below, and we’ll respond as soon
-              as possible
-            </p>
-            {/* WhatsApp Button */}
-            <Button
-              onClick={handleWhatsAppRedirect}
-              className="active:scale-95 hover:scale-105 transition-all ease-out"
-            >
-              WhatsApp
-            </Button>
-          </div>
-        </div>
-        </AnimatedSection>
-      </div>
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if(!formData.name || !formData.email || !formData.message) {
+        toast.error("Please fill all fields");
+        return;
+    }
     
-      <div className="min-h-screen bg-gray-50">
-        {/* Page Header */}
-            <AnimatedSection>
-        <header className="bg-blue-600 text-white py-8 text-center">
-          <h1 className="text-4xl font-bold">Contact Us</h1>
-          <p className="mt-2">
-            We’d love to hear from you — feel free to get in touch anytime!
-          </p>
-        </header>
-</AnimatedSection>
-        {/* Contact Form and Info Section */}
-        <div className="max-w-6xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            {/* Contact Form */}
-              <AnimatedSection>
-            <div>
-              <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-                Send us a Message
-              </h2>
-              <form className="space-y-6 bg-white shadow-md p-6 rounded-lg">
-                <div>
-                  <label
-                    htmlFor="name"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    Your Name
-                  </label>
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    required
-                    className="mt-1 block w-full bg-customGray outline-none px-3 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 py-2"
-                  />
-                </div>
+    setIsSubmitting(true);
+    
+    // Simulate submission
+    setTimeout(() => {
+        setIsSubmitting(false);
+        toast.success("Message sent successfully!");
+        setFormData({ name: "", email: "", message: "" });
+        
+        // Success Celebration
+        confetti({
+            particleCount: 150,
+            spread: 100,
+            origin: { y: 0.6 },
+            colors: ['#3b82f6', '#000000', '#ffffff']
+        });
+    }, 1500);
+  };
 
-                <div>
-                  <label
-                    htmlFor="email"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    Your Email
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    required
-                    className="mt-1 block w-full border-gray-300 bg-customGray outline-none px-3 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 py-2"
-                  />
-                </div>
+  const ContactInfo = [
+    { icon: <MapPin className="w-6 h-6" />, title: "Visit Us", value: "Council More, Harappa City, Punjab", color: "bg-blue-50 text-blue-600" },
+    { icon: <Mail className="w-6 h-6" />, title: "Email Us", value: "sharjeelajmalg786@gmail.com", color: "bg-amber-50 text-amber-600" },
+    { icon: <Phone className="w-6 h-6" />, title: "Call Us", value: "+44 7751 497015", color: "bg-green-50 text-green-600" },
+  ];
 
-                <div>
-                  <label
-                    htmlFor="message"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    Your Message
-                  </label>
-                  <textarea
-                    id="message"
-                    name="message"
-                    rows="4"
-                    required
-                    className="mt-1 block w-full border-gray-300 bg-customGray outline-none px-3 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 py-2"
-                  ></textarea>
-                </div>
-
-                <button
-                  type="submit"
-                  className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition"
-                >
-                  Send Message
-                </button>
-              </form>
-            </div>
-</AnimatedSection>
-            {/* Contact Info */}
-                   <AnimatedSection>
-            <div>
-              <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-                Contact Information
-              </h2>
-              <div className="space-y-4">
-                <div className="flex items-center">
-                  <MapPin className="h-6 w-6 text-blue-600 mr-4" />
-                  <p>Council More, Near Harappa Museum, Harappa City, District Sahiwal, Punjab</p>
-                </div>
-
-                <div className="flex items-center">
-                  <Mail className="h-6 w-6 text-blue-600 mr-4" />
-                  <p>sharjeelajmalg786@gmail.com</p>
-                </div>
-
-                <div className="flex items-center">
-                  <Phone className="h-6 w-6 text-blue-600 mr-4" />
-                  <p>+447751497015</p>
-                </div>
-              </div>
-
-              {/* Social Links */}
-              <div className="mt-8">
-                <h3 className="text-lg font-semibold text-gray-800">
-                  Follow Us
-                </h3>
-                <div className="flex space-x-4 mt-4">
-                  <a
-                    href="https://www.facebook.com/profile.php?id=100084778281907" target='_blank'
-                    className="text-blue-600 hover:text-blue-800"
-                  >
-                    <Facebook className="h-6 w-6" />
-                  </a>
-                  <a
-                    href="https://github.com/sharjeelajmal" target='_blank'
-                    className="text-blue-600 hover:text-blue-800" 
-                  >
-                    <Github className="h-6 w-6" />
-                  </a>
-                  <a
-                    href="https://www.instagram.com/codeenginesharjeel" target='_blank'
-                    className="text-blue-600 hover:text-blue-800"
-                  >
-                    <Instagram className="h-6 w-6" />
-                  </a>
-                  <a
-                    href="https://www.linkedin.com/in/muhammad-sharjeel-701578274/" target='_blank'
-                    className="text-blue-600 hover:text-blue-800"
-                  >
-                    <Linkedin className="h-6 w-6" />
-                  </a>
-                </div>
-              </div>
-            </div>
-            </AnimatedSection>
-          </div>
-        </div>
+  return (
+    <div ref={containerRef} className="min-h-screen bg-slate-50 relative overflow-hidden pt-32 pb-20">
+      
+      {/* --- Background Decor --- */}
+      <div className="absolute inset-0 pointer-events-none">
+          <div className="bg-glow absolute top-0 right-0 w-[600px] h-[600px] bg-blue-100/60 rounded-full blur-[120px] mix-blend-multiply"></div>
+          <div className="bg-glow absolute bottom-0 left-0 w-[500px] h-[500px] bg-indigo-100/60 rounded-full blur-[120px] mix-blend-multiply"></div>
+          <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center opacity-[0.04]"></div>
       </div>
 
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        
+        {/* --- HEADER --- */}
+        <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
+            <h2 className="contact-header text-sm font-bold text-blue-600 tracking-widest uppercase bg-blue-50 inline-block px-4 py-1 rounded-full border border-blue-100">
+                Get In Touch
+            </h2>
+            <h1 className="contact-header text-4xl md:text-6xl font-black text-slate-900 tracking-tight">
+                Let's Start a <br/>
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">Conversation.</span>
+            </h1>
+            <p className="contact-header text-slate-500 text-lg font-medium">
+                Have a project in mind or just want to say hi? We're all ears.
+            </p>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            
+            {/* --- LEFT COLUMN: CONTACT INFO --- */}
+            <div className="lg:col-span-5 space-y-6">
+                
+                {/* Info Cards */}
+                <div className="space-y-4">
+                    {ContactInfo.map((item, idx) => (
+                        <div key={idx} className="contact-card group p-5 bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-default flex items-center gap-5">
+                            <div className={`p-4 rounded-xl ${item.color} group-hover:scale-110 transition-transform duration-300`}>
+                                {item.icon}
+                            </div>
+                            <div>
+                                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">{item.title}</p>
+                                <p className="text-slate-800 font-bold text-sm sm:text-base">{item.value}</p>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                {/* WhatsApp CTA Card */}
+                <div className="contact-card p-6 bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl shadow-2xl text-white relative overflow-hidden group cursor-pointer" onClick={handleWhatsAppRedirect}>
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-10 -mt-10 group-hover:bg-white/20 transition-colors"></div>
+                    
+                    <h3 className="text-xl font-bold mb-2 relative z-10">Need faster response?</h3>
+                    <p className="text-slate-300 text-sm mb-6 relative z-10">Chat directly with our team on WhatsApp for instant support.</p>
+                    
+                    <Button className="w-full bg-white text-slate-900 hover:bg-blue-50 font-bold rounded-xl h-12 flex items-center justify-center gap-2 group-hover:scale-[1.02] transition-all">
+                        <MessageCircle className="w-5 h-5 text-green-600" /> Open WhatsApp
+                    </Button>
+                </div>
+
+                {/* Social Links */}
+                <div className="contact-card flex gap-3 justify-center lg:justify-start pt-4">
+                  {[
+                    { icon: <Facebook />, href: "https://www.facebook.com/profile.php?id=100084778281907", color: "hover:bg-blue-600" },
+                    { icon: <Github />, href: "https://github.com/sharjeelajmal", color: "hover:bg-slate-900" },
+                    { icon: <Instagram />, href: "https://www.instagram.com/codeenginesharjeel", color: "hover:bg-pink-600" },
+                    { icon: <Linkedin />, href: "https://www.linkedin.com/in/muhammad-sharjeel-701578274/", color: "hover:bg-blue-700" },
+                  ].map((social, i) => (
+                    <a key={i} href={social.href} target="_blank" className={`w-12 h-12 bg-white border border-slate-200 rounded-xl flex items-center justify-center text-slate-500 shadow-sm transition-all hover:text-white hover:-translate-y-1 ${social.color}`}>
+                        {React.cloneElement(social.icon, { size: 20 })}
+                    </a>
+                  ))}
+                </div>
+
+            </div>
+
+            {/* --- RIGHT COLUMN: FORM --- */}
+            <div className="lg:col-span-7">
+                <div ref={formRef} className="bg-white rounded-[2.5rem] p-6 sm:p-10 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.08)] border border-slate-100 relative overflow-hidden">
+                    
+                    {/* Decorative Line */}
+                    <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-blue-500 via-purple-500 to-amber-500"></div>
+
+                    <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <div className="space-y-2">
+                                <label className="text-sm font-bold text-slate-700 ml-1">Your Name</label>
+                                <input 
+                                    type="text" 
+                                    placeholder="John Doe"
+                                    value={formData.name}
+                                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                                    className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-bold text-slate-700 ml-1">Your Email</label>
+                                <input 
+                                    type="email" 
+                                    placeholder="john@example.com"
+                                    value={formData.email}
+                                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                                    className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-sm font-bold text-slate-700 ml-1">Message</label>
+                            <textarea 
+                                placeholder="Tell us about your project..."
+                                rows="5"
+                                value={formData.message}
+                                onChange={(e) => setFormData({...formData, message: e.target.value})}
+                                className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium resize-none"
+                            ></textarea>
+                        </div>
+
+                        <Button 
+                            type="submit" 
+                            disabled={isSubmitting}
+                            className="w-full h-14 bg-slate-900 hover:bg-slate-800 text-white font-bold text-lg rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all flex items-center justify-center gap-2 group"
+                        >
+                            {isSubmitting ? "Sending..." : (
+                                <>
+                                  Send Message <ArrowRight className="group-hover:translate-x-1 transition-transform" />
+                                </>
+                            )}
+                        </Button>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+      </div>
     </div>
   );
 };
