@@ -208,15 +208,18 @@ const [isScrolled, setIsScrolled] = useState(false);
   return (
     <section id="services-section" className="mb-20 bg-slate-50/50 min-h-screen">
       
-      {/* 1. STATS SECTION */}
-      <AnimatedSection>
-        <div className="pt-10 pb-6">
-            <h1 className="font-bold text-4xl sm:text-5xl text-center mb-8 text-slate-900 tracking-tight">
-                Our <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-indigo-600">Impact</span>
-            </h1>
-            <StatsCards isAdmin={false} statsData={stats} />
-        </div>
-      </AnimatedSection>
+    {/* 1. STATS SECTION */}
+<AnimatedSection>
+  <div className="pt-10 pb-6">
+      {/* ORIGINAL PREMIUM HEADING STYLE RESTORED */}
+      <h1 className="text-4xl sm:text-5xl font-extrabold text-center mb-8 text-slate-900 tracking-tight">
+          Our <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-indigo-600">Impact</span>
+      </h1>
+      
+      {/* Stats Cards Component */}
+      <StatsCards isAdmin={false} statsData={stats} />
+  </div>
+</AnimatedSection>
 
    <div 
         className={`sticky top-0 z-50 py-3 transition-all duration-300 ${

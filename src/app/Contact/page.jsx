@@ -115,18 +115,18 @@ const Contact = () => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         {/* --- HEADER --- */}
-        <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
-            <h2 className="contact-header text-sm font-bold text-blue-600 tracking-widest uppercase bg-blue-50 inline-block px-4 py-1 rounded-full border border-blue-100">
-                Get In Touch
-            </h2>
-            <h1 className="contact-header text-4xl md:text-6xl font-black text-slate-900 tracking-tight">
-                Let's Start a <br/>
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">Conversation.</span>
-            </h1>
-            <p className="contact-header text-slate-500 text-lg font-medium">
-                Have a project in mind or just want to say hi? We're all ears.
-            </p>
-        </div>
+      <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
+    <h2 className="contact-header text-sm font-bold text-blue-600 tracking-widest uppercase bg-blue-50 inline-block px-4 py-1 rounded-full border border-blue-100">
+        Let's Collaborate
+    </h2>
+    <h1 className="contact-header text-4xl md:text-6xl font-black text-slate-900 tracking-tight">
+        Ready to <br/>
+        <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">Level Up?</span>
+    </h1>
+    <p className="contact-header text-slate-500 text-lg font-medium">
+        Whether you need a high-converting website, a viral ad campaign, or a complete brand makeover—we have the blueprint for your success.
+    </p>
+</div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             

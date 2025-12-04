@@ -16,6 +16,7 @@ import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Pusher from "pusher-js";
 import confetti from "canvas-confetti";
+import { gsap } from "gsap";
 // Icons imports
 import { Settings, LayoutGrid, Image as ImageIcon, MessageSquare, LogOut, Plus, Save, Trash2, Eye, EyeOff, Edit, Search, X, Hash, ChevronDown } from "lucide-react";
 
@@ -28,6 +29,8 @@ const triggerCelebration = () => {
     colors: ['#1E40AF', '#FFD700', '#10B981']
   });
 };
+
+
 
 const notifyClients = async (payload) => {
   try {
@@ -59,6 +62,67 @@ function SortableServiceItem({ service, children }) {
     </div>
   );
 }
+
+// --- HELPER: PREMIUM CUSTOM DROPDOWN ---
+const CustomDropdown = ({ options, value, onChange, label }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
+  const listRef = useRef(null);
+
+  // Close on outside click
+  useEffect(() => {
+    const handleClick = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) setIsOpen(false);
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  // GSAP Animation for Menu
+  useEffect(() => {
+    if (isOpen) {
+      gsap.fromTo(listRef.current, 
+        { y: -10, opacity: 0, scale: 0.95, display: "none" },
+        { y: 0, opacity: 1, scale: 1, display: "block", duration: 0.3, ease: "back.out(1.7)" }
+      );
+    } else if (listRef.current) {
+      gsap.to(listRef.current, { 
+        y: -10, opacity: 0, scale: 0.95, duration: 0.2, ease: "power2.in", 
+        onComplete: () => gsap.set(listRef.current, { display: "none" }) 
+      });
+    }
+  }, [isOpen]);
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">{label}</label>
+      <button 
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className={`w-full flex items-center justify-between bg-slate-50 border border-slate-200 text-slate-700 font-bold text-sm px-4 py-3.5 rounded-xl transition-all duration-300 ${isOpen ? 'ring-2 ring-blue-500/20 border-blue-500 shadow-md' : 'hover:border-blue-300 hover:bg-white'}`}
+      >
+        <span className="truncate">{value || "Select Category"}</span>
+        <ChevronDown size={16} className={`text-slate-400 transition-transform duration-300 ${isOpen ? "rotate-180 text-blue-500" : ""}`} />
+      </button>
+
+      {/* Dropdown List */}
+      <div ref={listRef} className="absolute z-50 w-full mt-2 bg-white border border-slate-100 rounded-xl shadow-xl shadow-blue-900/10 overflow-hidden hidden origin-top">
+        <div className="max-h-48 overflow-y-auto custom-scrollbar p-1.5">
+          {options.map((option) => (
+            <div 
+              key={option} 
+              onClick={() => { onChange(option); setIsOpen(false); }}
+              className={`px-3 py-2.5 rounded-lg text-sm font-bold cursor-pointer flex items-center justify-between transition-all group ${value === option ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
+            >
+              {option}
+              {value === option && <div className="w-2 h-2 rounded-full bg-blue-500 shadow-sm"></div>}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const Sharry326 = () => {
   const { data: session, status } = useSession();
@@ -527,170 +591,254 @@ const Sharry326 = () => {
            </AnimatedSection>
         </div>
 
-        {/* --- 4. MEDIA GALLERY --- */}
+      {/* --- 4. MEDIA GALLERY (PREMIUM REDESIGN) --- */}
         <AnimatedSection>
-           <div className="bg-white rounded-[2rem] p-8 shadow-xl border border-slate-100">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-                  <div className="flex items-center gap-3">
-                      <div className="p-3 bg-purple-100 text-purple-600 rounded-2xl"><ImageIcon size={24} /></div>
-                      <h2 className="text-xl font-bold text-slate-900">Media Gallery</h2>
+           <div className="bg-white rounded-[2.5rem] p-8 shadow-xl border border-slate-100 relative overflow-hidden">
+              
+              {/* Background Decoration */}
+              <div className="absolute top-0 right-0 w-96 h-96 bg-purple-50/50 rounded-full blur-[100px] -mr-20 -mt-20 pointer-events-none"></div>
+
+              {/* Header Section */}
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 relative z-10">
+                  <div className="flex items-center gap-4">
+                      <div className="p-4 bg-gradient-to-br from-purple-100 to-indigo-50 text-indigo-600 rounded-2xl shadow-sm border border-purple-100">
+                        <ImageIcon size={26} />
+                      </div>
+                      <div>
+                        <h2 className="text-2xl font-black text-slate-900 tracking-tight">Media Gallery</h2>
+                        <p className="text-xs text-slate-500 font-bold uppercase tracking-widest mt-1">Manage Your Assets</p>
+                      </div>
                   </div>
-                  <label className={`btn bg-slate-900 text-white hover:bg-slate-800 rounded-xl border-none shadow-lg font-bold px-6 hover:scale-105 transition-all ${uploading ? "loading" : ""}`}>
-                      {uploading ? "Uploading..." : "Upload New Media"}
+                  
+                  {/* Premium Upload Button */}
+                  <label className={`group relative cursor-pointer overflow-hidden rounded-2xl bg-slate-900 px-8 py-4 text-white shadow-xl shadow-slate-900/20 transition-all hover:scale-[1.02] hover:shadow-2xl active:scale-95 ${uploading ? "opacity-70 pointer-events-none" : ""}`}>
+                      <span className="relative z-10 flex items-center gap-2 font-bold text-sm tracking-wide">
+                        {uploading ? (
+                            <><span className="loading loading-spinner loading-xs"></span> Uploading...</>
+                        ) : (
+                            <>
+                                <Plus size={18} className="group-hover:rotate-90 transition-transform duration-300 text-purple-400" /> 
+                                Upload New Media
+                            </>
+                        )}
+                      </span>
+                      {/* Shine Effect */}
+                      <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/10 to-transparent z-0"></div>
                       <input type="file" hidden accept="image/*,video/mp4,video/webm" onChange={handleGalleryUpload} disabled={uploading} />
                   </label>
               </div>
 
-              <div className="grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-8 gap-4 max-h-80 overflow-y-auto custom-scrollbar p-3 bg-slate-50 rounded-2xl border border-slate-200">
-                  {galleryItems.map((media) => (
-                    <div key={media._id} className="relative group aspect-square rounded-xl overflow-hidden bg-white shadow-sm border border-slate-200 cursor-pointer hover:shadow-md transition-all hover:scale-[1.02]">
-                        {media.filetype === "video" ? (
-                            <video src={media.url} muted className="w-full h-full object-cover" />
-                        ) : (
-                            <Image src={media.url} alt={media.filename} fill className="object-cover" />
-                        )}
-                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
-                            <button 
-                                onPointerDown={(e) => {e.stopPropagation(); handleGalleryDelete(media)}} 
-                                className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors shadow-lg transform hover:scale-110"
+              {/* Gallery Grid Container */}
+              <div className="relative z-10 bg-slate-50/80 rounded-[2rem] border border-slate-200 p-2 min-h-[300px]">
+                  {galleryItems.length === 0 ? (
+                      <div className="flex flex-col items-center justify-center h-72 text-slate-400">
+                          <div className="p-4 bg-white rounded-full shadow-sm mb-3">
+                             <ImageIcon size={40} className="opacity-20 text-slate-900" />
+                          </div>
+                          <p className="font-bold text-sm">Gallery is empty.</p>
+                          <p className="text-xs text-slate-400">Upload images to get started.</p>
+                      </div>
+                  ) : (
+                      <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3 p-3 max-h-[500px] overflow-y-auto custom-scrollbar">
+                        {galleryItems.map((media) => (
+                            <div 
+                                key={media._id} 
+                                className="group relative aspect-square rounded-2xl overflow-hidden bg-white shadow-sm border border-slate-100 cursor-pointer transition-all duration-500 hover:shadow-[0_10px_30px_-10px_rgba(0,0,0,0.15)] hover:-translate-y-1 hover:z-20"
                             >
-                                <Trash2 size={18} />
-                            </button>
-                        </div>
-                    </div>
-                  ))}
+                                {/* Media Content (Zoom Effect) */}
+                                {media.filetype === "video" ? (
+                                    <video src={media.url} muted className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110" />
+                                ) : (
+                                    <Image src={media.url} alt={media.filename} fill className="object-cover transition-transform duration-700 ease-out group-hover:scale-110" />
+                                )}
+
+                                {/* Cinematic Overlay (Slide Up) */}
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
+                                    <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 delay-75">
+                                        <p className="text-white text-[10px] font-bold line-clamp-1 mb-3 opacity-90 tracking-wide">
+                                            {media.filename}
+                                        </p>
+                                        
+                                        {/* Action Buttons Row */}
+                                        <div className="flex gap-2">
+                                            <button 
+                                                onPointerDown={(e) => {e.stopPropagation(); handleGalleryDelete(media)}} 
+                                                className="flex-1 py-2 bg-red-500/90 hover:bg-red-600 text-white rounded-xl shadow-lg backdrop-blur-md transition-all active:scale-95 flex items-center justify-center gap-2 group/btn"
+                                            >
+                                                <Trash2 size={14} className="group-hover/btn:animate-bounce" /> 
+                                                <span className="text-[10px] font-bold">Delete</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                      </div>
+                  )}
               </div>
            </div>
         </AnimatedSection>
 
-        {/* --- 5. SERVICE MANAGEMENT --- */}
+   {/* --- 5. SERVICE MANAGEMENT (PREMIUM UI) --- */}
         <AnimatedSection>
-           <div className="bg-white rounded-[2rem] p-6 sm:p-8 shadow-xl border border-slate-100">
+           <div className="bg-white rounded-[2.5rem] p-8 shadow-xl border border-slate-100 relative overflow-hidden">
               
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-                 <div className="flex items-center gap-3">
-                     <div className="p-3 bg-green-100 text-green-600 rounded-2xl"><LayoutGrid size={24} /></div>
-                     <h2 className="text-xl font-bold text-slate-900">Manage Services</h2>
+              {/* Header Row */}
+              <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6 mb-10 relative z-10">
+                 
+                 {/* Title & Icon */}
+                 <div className="flex items-center gap-4">
+                     <div className="p-4 bg-gradient-to-br from-green-100 to-emerald-50 text-emerald-600 rounded-2xl shadow-sm border border-green-100">
+                        <LayoutGrid size={26} />
+                     </div>
+                     <div>
+                        <h2 className="text-2xl font-black text-slate-900 tracking-tight">Services Hub</h2>
+                        <p className="text-xs text-slate-500 font-bold uppercase tracking-widest mt-1">Manage & Organize</p>
+                     </div>
                  </div>
                  
-                 {/* Premium Action Buttons */}
-                 <div className="flex flex-wrap gap-3">
+                 {/* Action Toolbar */}
+                 <div className="flex flex-wrap items-center gap-3 w-full xl:w-auto p-1.5 bg-slate-50 border border-slate-200 rounded-2xl">
+                     
+                     {/* Edit Categories Toggle */}
                      {isEditingTabs ? (
-                         <div className="flex gap-2 bg-slate-50 p-2 rounded-xl border border-slate-200 shadow-inner">
-                            <Button size="sm" onClick={handleSaveTabs} className="bg-green-500 hover:bg-green-600 text-white rounded-lg font-bold shadow hover:scale-105 transition-all">Save</Button>
-                            <Button size="sm" onClick={() => { setIsEditingTabs(false); setEditTabs([...tabs]); }} variant="destructive" className="rounded-lg font-bold shadow hover:scale-105 transition-all">Cancel</Button>
-                            <Button size="sm" onClick={handleAddTab} variant="outline" className="rounded-lg bg-white shadow hover:scale-105 transition-all"><Plus size={16}/></Button>
+                         <div className="flex gap-2 flex-1 sm:flex-none">
+                            <Button size="sm" onClick={handleSaveTabs} className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-bold shadow-lg shadow-emerald-200 h-10">Save</Button>
+                            <Button size="sm" onClick={() => { setIsEditingTabs(false); setEditTabs([...tabs]); }} variant="ghost" className="flex-1 text-red-500 hover:bg-red-50 rounded-xl font-bold h-10">Cancel</Button>
+                            <Button size="sm" onClick={handleAddTab} variant="outline" className="bg-white border-slate-200 text-slate-600 rounded-xl h-10 w-10 p-0 flex items-center justify-center"><Plus size={18}/></Button>
                          </div>
                      ) : (
-                         <Button onClick={() => setIsEditingTabs(true)} variant="outline" className="rounded-xl border-slate-200 font-bold hover:bg-slate-50 text-slate-600 hover:scale-105 transition-all shadow-sm">Edit Categories</Button>
+                         <Button onClick={() => setIsEditingTabs(true)} variant="ghost" className="text-slate-500 hover:text-slate-900 hover:bg-white rounded-xl font-bold text-xs uppercase tracking-wide h-10 px-4">
+                            Edit Tabs
+                         </Button>
                      )}
                      
-                     <Button onClick={handleAddService} className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl shadow-lg shadow-blue-200 font-bold px-6 hover:scale-105 transition-all">
-                        <Plus size={18} className="mr-2" /> Add Service
+                     <div className="w-px h-6 bg-slate-200 hidden sm:block mx-1"></div>
+
+                     {/* Main Actions */}
+                     <Button onClick={handleAddService} className="flex-1 sm:flex-none bg-slate-900 hover:bg-slate-800 text-white rounded-xl shadow-lg shadow-slate-900/20 font-bold px-6 h-10 transition-all hover:scale-105 active:scale-95">
+                        <Plus size={16} className="mr-2 text-blue-400" /> New Service
                      </Button>
-                     <Button onClick={handleSaveOrder} disabled={isLoading} className="bg-slate-900 hover:bg-slate-800 text-white rounded-xl shadow-lg font-bold px-6 hover:scale-105 transition-all">
+                     <Button onClick={handleSaveOrder} disabled={isLoading} className="flex-1 sm:flex-none bg-white border border-slate-200 text-slate-700 hover:border-slate-300 hover:bg-slate-50 rounded-xl font-bold px-5 h-10 transition-all">
                         {isLoading ? "Saving..." : "Save Order"}
                      </Button>
                  </div>
               </div>
 
-              {/* Tabs & Search (Premium Input) */}
-              <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 mb-8 shadow-inner">
+              {/* Tabs & Search Area */}
+              <div className="relative mb-10 z-10">
                   {isEditingTabs ? (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                      // Edit Mode: Grid Layout for Pills
+                      <div className="bg-slate-50/50 p-6 rounded-3xl border border-slate-200 border-dashed grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-in fade-in zoom-in-95 duration-300">
                           {editTabs.map((tab, index) => (
-                              <div key={index} className="flex gap-2">
-                                  <input type="text" value={tab} onChange={(e) => { const newTabs = [...editTabs]; newTabs[index] = e.target.value; setEditTabs(newTabs); }} className="input input-sm flex-1 rounded-lg border-slate-300 focus:ring-2 focus:ring-green-200" />
-                                  <button onClick={() => setEditTabs(editTabs.filter((_, i) => i !== index))} className="p-1.5 bg-white border border-red-100 text-red-500 rounded-lg hover:bg-red-50"><X size={16}/></button>
+                              <div key={index} className="flex items-center gap-2 bg-white p-1.5 rounded-xl shadow-sm border border-slate-200 focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-100 transition-all">
+                                  <input 
+                                    type="text" 
+                                    value={tab} 
+                                    onChange={(e) => { const newTabs = [...editTabs]; newTabs[index] = e.target.value; setEditTabs(newTabs); }} 
+                                    className="flex-1 bg-transparent border-none focus:ring-0 text-sm font-bold text-slate-700 px-2" 
+                                    autoFocus={index === editTabs.length - 1}
+                                  />
+                                  <button onClick={() => setEditTabs(editTabs.filter((_, i) => i !== index))} className="p-2 hover:bg-red-50 text-slate-400 hover:text-red-500 rounded-lg transition-colors"><X size={14}/></button>
                               </div>
                           ))}
                       </div>
                   ) : (
-                      <div className="flex flex-wrap gap-2 justify-center mb-8">
-                          {tabs.map(tab => (
-                              <button 
-                                key={tab} 
-                                onClick={() => setActiveTab(tab)}
-                                className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${activeTab === tab ? 'bg-slate-900 text-white shadow-lg transform scale-105' : 'bg-white text-slate-600 hover:bg-blue-50 border border-slate-200 hover:-translate-y-0.5 hover:shadow-sm'}`}
-                              >
-                                {tab}
-                              </button>
-                          ))}
+                      // View Mode: Modern Tabs + Search
+                      <div className="flex flex-col lg:flex-row justify-between items-end gap-6">
+                          
+                          {/* Tabs Scroll */}
+                          <div className="w-full lg:w-auto overflow-x-auto pb-2 scrollbar-hide">
+                              <div className="flex gap-2">
+                                {tabs.map(tab => (
+                                    <button 
+                                        key={tab} 
+                                        onClick={() => setActiveTab(tab)}
+                                        className={`relative px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 whitespace-nowrap flex items-center gap-2
+                                            ${activeTab === tab 
+                                                ? 'bg-slate-900 text-white shadow-lg shadow-slate-900/20 translate-y-[-2px]' 
+                                                : 'bg-white text-slate-500 border border-slate-200 hover:border-slate-300 hover:text-slate-700'
+                                            }`}
+                                    >
+                                        {tab}
+                                        {activeTab === tab && <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse"></span>}
+                                    </button>
+                                ))}
+                              </div>
+                          </div>
+
+                          {/* Premium Search Input */}
+                          <div className="relative group w-full lg:w-72 flex-shrink-0">
+                              <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-200 to-purple-200 rounded-xl blur opacity-30 group-hover:opacity-60 transition duration-500"></div>
+                              <div className="relative bg-white rounded-xl flex items-center px-4 h-11 border border-slate-200 shadow-sm group-focus-within:border-blue-400 group-focus-within:ring-2 group-focus-within:ring-blue-50 transition-all">
+                                  <Search className="text-slate-400 w-4 h-4 mr-3 group-focus-within:text-blue-500" />
+                                  <input 
+                                    type="text" 
+                                    placeholder="Search services..." 
+                                    value={searchTerm} 
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className="w-full bg-transparent outline-none text-sm font-bold text-slate-700 placeholder:text-slate-400"
+                                  />
+                              </div>
+                          </div>
                       </div>
                   )}
-                  
-                  {/* PREMIUM SEARCH BAR */}
-                  <div className="relative max-w-lg mx-auto group">
-                      <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-full blur opacity-50 group-hover:opacity-100 transition duration-500"></div>
-                      <div className="relative bg-white rounded-full flex items-center px-4 py-3 shadow-sm border border-slate-200">
-                          <Search className="text-slate-400 w-5 h-5 mr-3 group-focus-within:text-blue-500" />
-                          <input 
-                            type="text" 
-                            placeholder="Search services to edit..." 
-                            value={searchTerm} 
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full bg-transparent outline-none text-slate-700 font-medium placeholder:text-slate-400"
-                          />
-                      </div>
-                  </div>
               </div>
 
-              {/* --- ADMIN CARDS (Hover Flip Premium Style) --- */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {/* Grid Cards (Existing code logic, just wrapped properly) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 relative z-10 min-h-[200px]">
                 <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                   <SortableContext items={orderedServices.map((s) => s._id)} strategy={verticalListSortingStrategy}>
                     {orderedServices.map((service) => (
                       <SortableServiceItem key={service._id} service={service}>
-                        <div className={`group bg-white rounded-3xl p-4 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.05)] border hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] transition-all duration-500 hover:-translate-y-1 relative overflow-hidden ${service.isHidden ? 'border-red-200 bg-red-50/30' : 'border-slate-100'}`}>
+                        <div className={`group bg-white rounded-[1.5rem] p-3 shadow-sm border transition-all duration-500 hover:-translate-y-1 hover:shadow-xl relative overflow-hidden ${service.isHidden ? 'border-red-200 bg-red-50/20' : 'border-slate-100 hover:border-blue-100'}`}>
                             
                             {/* Drag Handle */}
-                            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-10 h-1.5 bg-slate-200 rounded-b-full opacity-50 cursor-grab"></div>
+                            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-slate-200/50 rounded-b-full cursor-grab hover:bg-blue-400 transition-colors"></div>
 
-                            {/* Admin Controls (Visible on Hover) */}
-                            <div className="absolute top-3 right-3 z-30 flex flex-col gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-300 translate-x-2 sm:group-hover:translate-x-0">
+                            {/* Floating Actions */}
+                            <div className="absolute top-3 right-3 z-30 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-4 group-hover:translate-x-0">
                                 <button 
                                     onPointerDown={(e) => {e.stopPropagation(); handleEditService(service)}} 
-                                    className="p-2 bg-white text-blue-600 rounded-xl shadow-lg border border-blue-100 hover:bg-blue-600 hover:text-white transition-colors transform hover:scale-110"
-                                    title="Edit"
+                                    className="w-8 h-8 flex items-center justify-center bg-white text-blue-600 rounded-full shadow-lg border border-slate-100 hover:bg-blue-600 hover:text-white transition-all transform hover:scale-110"
                                 >
-                                    <Edit size={16}/>
+                                    <Edit size={14}/>
                                 </button>
                                 <button 
                                     onPointerDown={(e) => {e.stopPropagation(); handleToggleHide(service._id, !service.isHidden)}} 
-                                    className={`p-2 bg-white rounded-xl shadow-lg border transition-colors transform hover:scale-110 ${service.isHidden ? 'text-green-600 border-green-100 hover:bg-green-600 hover:text-white' : 'text-slate-500 border-slate-100 hover:bg-slate-800 hover:text-white'}`}
-                                    title={service.isHidden ? "Unhide" : "Hide"}
+                                    className={`w-8 h-8 flex items-center justify-center bg-white rounded-full shadow-lg border transition-all transform hover:scale-110 ${service.isHidden ? 'text-green-600 border-green-100 hover:bg-green-600 hover:text-white' : 'text-slate-400 border-slate-100 hover:bg-slate-800 hover:text-white'}`}
                                 >
-                                    {service.isHidden ? <EyeOff size={16}/> : <Eye size={16}/>}
+                                    {service.isHidden ? <EyeOff size={14}/> : <Eye size={14}/>}
                                 </button>
                                 <button 
                                     onPointerDown={(e) => {e.stopPropagation(); handleDeleteService(service._id)}} 
-                                    className="p-2 bg-white text-red-500 rounded-xl shadow-lg border border-red-100 hover:bg-red-500 hover:text-white transition-colors transform hover:scale-110"
-                                    title="Delete"
+                                    className="w-8 h-8 flex items-center justify-center bg-white text-red-500 rounded-full shadow-lg border border-slate-100 hover:bg-red-500 hover:text-white transition-all transform hover:scale-110"
                                 >
-                                    <Trash2 size={16}/>
+                                    <Trash2 size={14}/>
                                 </button>
                             </div>
 
-                            {/* Media */}
-                            <div className="h-44 w-full bg-slate-50 rounded-2xl mb-4 overflow-hidden relative group-hover:shadow-inner transition-all">
+                            {/* Card Media */}
+                            <div className="h-40 w-full bg-slate-50 rounded-2xl mb-3 overflow-hidden relative border border-slate-100">
                                 {(service.imageUrl && (service.imageUrl.endsWith('.mp4') || service.imageUrl.endsWith('.webm'))) 
                                     ? <video src={service.imageUrl} muted className="w-full h-full object-cover" />
                                     : <Image src={service.imageUrl || '/placeholder.png'} alt={service.title} fill className="object-cover" />
                                 }
                                 {service.serviceId && (
-                                    <span className="absolute bottom-2 left-2 bg-black/60 backdrop-blur-md text-white text-[10px] font-bold px-2.5 py-1 rounded-lg shadow-sm">
+                                    <span className="absolute bottom-2 left-2 bg-white/90 backdrop-blur text-slate-900 text-[9px] font-extrabold px-2 py-1 rounded-md shadow-sm border border-slate-200">
                                         #{service.serviceId}
                                     </span>
                                 )}
                             </div>
                             
-                            <div className="space-y-2 px-1">
-                                <h3 className="font-bold text-slate-900 text-sm line-clamp-1 group-hover:text-blue-600 transition-colors">{service.title}</h3>
+                            {/* Card Content */}
+                            <div className="px-1 space-y-2">
+                                <h3 className="font-bold text-slate-900 text-sm line-clamp-1" title={service.title}>{service.title}</h3>
                                 <div className="flex items-center justify-between">
-                                    <p className="text-xs font-bold text-blue-600 bg-blue-50 border border-blue-100 px-3 py-1.5 rounded-lg shadow-sm">
-                                        {convertPrice(service.price)} {selectedCurrency}
-                                    </p>
-                                    {service.isHidden && <span className="text-[10px] font-bold text-red-500 bg-red-50 border border-red-100 px-2 py-1 rounded-lg">HIDDEN</span>}
+                                    <div className="px-2.5 py-1 bg-slate-900 text-white rounded-lg text-xs font-bold shadow-md shadow-slate-900/10">
+                                        {convertPrice(service.price)} <span className="text-amber-400 text-[10px] ml-0.5">{selectedCurrency}</span>
+                                    </div>
+                                    {service.isHidden && <span className="text-[9px] font-black text-red-500 bg-red-50 px-2 py-0.5 rounded border border-red-100">HIDDEN</span>}
                                 </div>
                             </div>
 
@@ -706,77 +854,151 @@ const Sharry326 = () => {
 
       </div>
 
-      {/* --- ADD/EDIT MODAL (Styled) --- */}
+    
+{/* --- ADD/EDIT MODAL (FIXED BUTTONS) --- */}
       {isModalOpen && (
-        <dialog open className="modal modal-open z-[9999]">
-          <div className="modal-box max-w-3xl bg-white rounded-[2.5rem] p-8 shadow-2xl border border-white/50">
-            <div className="flex justify-between items-center mb-6 border-b pb-4">
-                <h3 className="font-bold text-2xl text-slate-900">
-                  {currentService._id ? "Edit Service" : "Add New Service"}
-                </h3>
-                <button onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-slate-100 rounded-full transition-colors"><X size={20}/></button>
+        <dialog open className="modal modal-open z-[9999] flex items-center justify-center">
+          
+          {/* Backdrop */}
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onClick={() => setIsModalOpen(false)}></div>
+
+          {/* Modal Container - Flex Layout Fix */}
+          <div className="modal-box w-full max-w-2xl bg-white rounded-[2.5rem] p-0 shadow-2xl border border-white overflow-hidden relative flex flex-col max-h-[90vh]">
+            
+            {/* 1. Header (Fixed Top) */}
+            <div className="bg-slate-50 border-b border-slate-100 p-6 flex justify-between items-center flex-shrink-0">
+                <div>
+                    <h3 className="font-black text-2xl text-slate-900 tracking-tight">
+                      {currentService._id ? "Edit Service" : "Create Service"}
+                    </h3>
+                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Fill in the details below</p>
+                </div>
+                <button onClick={() => setIsModalOpen(false)} className="p-2 bg-white hover:bg-red-50 text-slate-400 hover:text-red-500 rounded-full border border-slate-200 transition-all shadow-sm active:scale-90">
+                    <X size={20}/>
+                </button>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                <div className="space-y-4">
-                    <div>
-                        <label className="text-xs font-bold text-slate-500 uppercase mb-1 block">Title</label>
-                        <input type="text" name="title" value={currentService.title} onChange={handleInputChange} className="input w-full bg-slate-50 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-200" placeholder="Service Name" />
-                    </div>
-                    <div>
-                        <label className="text-xs font-bold text-slate-500 uppercase mb-1 block">Service ID</label>
-                        <input type="text" name="serviceId" value={currentService.serviceId} onChange={handleInputChange} className="input w-full bg-slate-50 border-slate-200 rounded-xl" placeholder="ID (Optional)" />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <label className="text-xs font-bold text-slate-500 uppercase mb-1 block">Price</label>
-                            <input type="number" name="price" value={currentService.price} onChange={handleInputChange} className="input w-full bg-slate-50 border-slate-200 rounded-xl" />
-                        </div>
-                        <div>
-                            <label className="text-xs font-bold text-slate-500 uppercase mb-1 block">Quantity</label>
-                            <input type="text" name="quantity" value={currentService.quantity} onChange={handleInputChange} className="input w-full bg-slate-50 border-slate-200 rounded-xl" placeholder="1k" />
-                        </div>
-                    </div>
-                </div>
+            {/* 2. Body (Scrollable Middle) */}
+            <div className="p-6 md:p-8 space-y-6 overflow-y-auto custom-scrollbar flex-1">
                 
-                <div className="space-y-4">
-                    <div>
-                        <label className="text-xs font-bold text-slate-500 uppercase mb-1 block">Category</label>
-                        <select name="category" value={currentService.category} onChange={handleInputChange} className="select w-full bg-slate-50 border-slate-200 rounded-xl custom-select">
-                            {tabs.map(tab => <option key={tab} value={tab}>{tab}</option>)}
-                        </select>
+                {/* Row 1: Title & ID */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                    <div className="md:col-span-2">
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Service Title</label>
+                        <input 
+                            type="text" 
+                            name="title" 
+                            value={currentService.title} 
+                            onChange={handleInputChange} 
+                            className="input w-full bg-slate-50 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-bold text-slate-700 text-sm h-12 transition-all shadow-sm" 
+                            placeholder="e.g. Premium Followers" 
+                        />
                     </div>
                     <div>
-                        <label className="text-xs font-bold text-slate-500 uppercase mb-1 block">Media</label>
-                        <div className="flex gap-2">
-                            <input type="text" name="imageUrl" value={currentService.imageUrl} onChange={handleInputChange} className="input flex-1 bg-slate-50 border-slate-200 rounded-xl text-xs" placeholder="URL" />
-                            <Button onClick={() => setIsGalleryOpen(true)} variant="outline" className="bg-white border-slate-200 rounded-xl shadow-sm">Gallery</Button>
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Service ID</label>
+                        <div className="relative">
+                            <Hash size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"/>
+                            <input 
+                                type="text" 
+                                name="serviceId" 
+                                value={currentService.serviceId} 
+                                onChange={handleInputChange} 
+                                className="input w-full bg-slate-50 border-slate-200 rounded-xl pl-9 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-mono font-bold text-slate-700 text-sm h-12" 
+                                placeholder="1024" 
+                            />
                         </div>
-                        {previewUrl && (
-                            <div className="mt-2 h-24 w-full bg-slate-100 rounded-xl overflow-hidden relative border border-slate-200 shadow-inner">
-                                {(previewUrl.endsWith('.mp4') || previewUrl.endsWith('.webm')) 
-                                    ? <video src={previewUrl} muted className="w-full h-full object-cover" />
-                                    : <Image src={previewUrl} alt="Preview" fill className="object-cover" />
-                                }
-                            </div>
-                        )}
                     </div>
                 </div>
-            </div>
-            
-            <div className="mb-8">
-                <label className="text-xs font-bold text-slate-500 uppercase mb-1 block">Description</label>
-                <textarea name="description" value={currentService.description} onChange={handleInputChange} className="textarea w-full h-32 bg-slate-50 border-slate-200 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-blue-200" placeholder="Service Details..."></textarea>
+
+                {/* Row 2: Price, Quantity, Category */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                    <div>
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Price ({selectedCurrency})</label>
+                        <input 
+                            type="number" 
+                            name="price" 
+                            value={currentService.price} 
+                            onChange={handleInputChange} 
+                            className="input w-full bg-slate-50 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-bold text-slate-700 text-sm h-12" 
+                        />
+                    </div>
+                    <div>
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Quantity Info</label>
+                        <input 
+                            type="text" 
+                            name="quantity" 
+                            value={currentService.quantity} 
+                            onChange={handleInputChange} 
+                            className="input w-full bg-slate-50 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-bold text-slate-700 text-sm h-12" 
+                            placeholder="e.g. 1k" 
+                        />
+                    </div>
+                    <div>
+                        {/* CUSTOM ANIMATED DROPDOWN */}
+                        <CustomDropdown 
+                            label="Category"
+                            options={tabs} 
+                            value={currentService.category} 
+                            onChange={(val) => setCurrentService(prev => ({ ...prev, category: val }))} 
+                        />
+                    </div>
+                </div>
+
+                {/* Row 3: Media */}
+                <div>
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Thumbnail Media</label>
+                    <div className="flex gap-3">
+                        <div className="flex-1 relative">
+                            <input 
+                                type="text" 
+                                name="imageUrl" 
+                                value={currentService.imageUrl} 
+                                onChange={handleInputChange} 
+                                className="input w-full bg-slate-50 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-medium text-slate-600 text-xs h-12 pr-20" 
+                                placeholder="https://..." 
+                            />
+                            <Button onClick={() => setIsGalleryOpen(true)} size="sm" variant="ghost" className="absolute right-1 top-1 h-10 text-blue-600 hover:bg-blue-50 font-bold rounded-lg text-xs">
+                                Gallery
+                            </Button>
+                        </div>
+                        {/* Preview Box */}
+                        <div className="w-12 h-12 bg-slate-100 rounded-xl border border-slate-200 overflow-hidden flex-shrink-0">
+                            {(previewUrl && (previewUrl.endsWith('.mp4') || previewUrl.endsWith('.webm'))) 
+                                ? <video src={previewUrl} muted className="w-full h-full object-cover" />
+                                : <Image src={previewUrl || '/placeholder.png'} alt="Preview" width={48} height={48} className="object-cover w-full h-full" />
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                {/* Row 4: Description */}
+                <div>
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Service Details</label>
+                    <textarea 
+                        name="description" 
+                        value={currentService.description} 
+                        onChange={handleInputChange} 
+                        className="textarea w-full h-32 bg-slate-50 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-medium text-slate-700 text-sm resize-none custom-scrollbar p-4" 
+                        placeholder="Describe features, delivery time, etc..."
+                    ></textarea>
+                </div>
+
             </div>
 
-            <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
-                <Button variant="ghost" onClick={() => setIsModalOpen(false)} className="text-slate-500 rounded-xl hover:bg-slate-100 font-bold">Cancel</Button>
-                <Button onClick={handleSaveService} className="bg-slate-900 text-white rounded-xl px-8 font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all">Save Service</Button>
+            {/* 3. Footer Actions (Fixed Bottom) */}
+            <div className="p-6 border-t border-slate-100 bg-slate-50/80 backdrop-blur-sm flex justify-end gap-3 flex-shrink-0 z-20">
+                <Button variant="ghost" onClick={() => setIsModalOpen(false)} className="text-slate-500 font-bold rounded-xl hover:bg-red-50 hover:text-red-600 h-12 px-6 transition-colors">
+                    Cancel
+                </Button>
+                <Button onClick={handleSaveService} className="bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold px-8 h-12 shadow-lg shadow-slate-900/10 hover:scale-105 transition-all flex items-center gap-2">
+                    <Save size={18} />
+                    {currentService._id ? "Update Service" : "Create Service"}
+                </Button>
             </div>
+
           </div>
         </dialog>
       )}
-
       {/* GALLERY MODAL */}
       {isGalleryOpen && (
         <dialog open className="modal modal-open z-[10000]">

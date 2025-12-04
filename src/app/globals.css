@@ -76,3 +76,28 @@ body {
 .btn.no-border-tab {
   border: none !important;
 }
+/* --- Custom Cursor Logic --- */
+@media (min-width: 768px) {
+  /* Sirf body par cursor none karein taake text select karte waqt dikkat na ho */
+  body, a, button, input, textarea {
+    cursor: none; 
+  }
+}
+
+/* --- Hide System Cursor on Desktop --- */
+@media (min-width: 768px) {
+  body, 
+  a, 
+  button, 
+  input, 
+  textarea, 
+  select, 
+  .cursor-pointer {
+    cursor: none !important; /* Default teer gayab */
+  }
+}
+
+/* Jaha cursor wapas chahiye ho (jaise iframe wagera) wahan ye class use karein */
+.show-cursor {
+  cursor: auto !important;
+}

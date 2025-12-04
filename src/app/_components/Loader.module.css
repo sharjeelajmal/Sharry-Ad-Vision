@@ -18,9 +18,8 @@
   border-radius: 50%;
   /* Premium Gradient (Blue to Gold) */
   background: radial-gradient(circle at 30% 30%, #fbbf24, #1e40af);
-  box-shadow: 
-    0 0 20px 5px rgba(30, 64, 175, 0.6), /* Inner blue glow */
-    0 0 40px 10px rgba(251, 191, 36, 0.4); /* Outer gold glow */
+  box-shadow: 0 0 20px 5px rgba(30, 64, 175, 0.6),
+    /* Inner blue glow */ 0 0 40px 10px rgba(251, 191, 36, 0.4); /* Outer gold glow */
   animation: pulseCore 2s ease-in-out infinite alternate;
   z-index: 10;
 }
@@ -52,24 +51,40 @@
   border-color: transparent #f59e0b transparent #f59e0b;
   box-shadow: 0 0 15px rgba(245, 158, 11, 0.5);
   /* Reverse 3D Rotation */
- animation: spin3D2 2.5s linear infinite reverse;
+  animation: spin3D2 2.5s linear infinite reverse;
 }
 
 /* --- Keyframe Animations --- */
 
 @keyframes pulseCore {
-  0% { transform: scale(0.8); opacity: 0.7; filter: brightness(1); }
-  100% { transform: scale(1.1); opacity: 1; filter: brightness(1.3); }
+  0% {
+    transform: scale(0.8);
+    opacity: 0.7;
+    filter: brightness(1);
+  }
+  100% {
+    transform: scale(1.1);
+    opacity: 1;
+    filter: brightness(1.3);
+  }
 }
 
 /* Rotates on X and Z axis */
 @keyframes spin3D1 {
-  0% { transform: rotateZ(0deg) rotateX(65deg); }
-  100% { transform: rotateZ(360deg) rotateX(65deg); }
+  0% {
+    transform: rotateZ(0deg) rotateX(65deg);
+  }
+  100% {
+    transform: rotateZ(360deg) rotateX(65deg);
+  }
 }
 
 /* Rotates on Y and Z axis (reverse) */
 @keyframes spin3D2 {
-  0% { transform: rotateZ(360deg) rotateY(45deg); }
-  100% { transform: rotateZ(0deg) rotateY(45deg); }
+  0% {
+    transform: rotateZ(360deg) rotateY(45deg);
+  }
+  100% {
+    transform: rotateZ(0deg) rotateY(45deg);
+  }
 }

@@ -94,13 +94,13 @@ const Footer = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-12 mb-12">
                 
                 {/* Brand Info */}
-                <div className="space-y-6">
-                    <Link href="/" className="inline-block hover:opacity-80 transition-opacity">
-                       <Image src="/logo.svg" alt="Logo" width={150} height={55} className="object-contain drop-shadow-sm" />
-                    </Link>
-                    <p className="text-slate-500 text-sm font-medium leading-relaxed">
-                       Elevating brands with high-end digital solutions. Your growth partner for SMM, Development, and Design.
-                    </p>
+              <div className="space-y-6">
+    <Link href="/" className="inline-block hover:opacity-80 transition-opacity">
+       <Image src="/logo.svg" alt="Logo" width={150} height={55} className="object-contain drop-shadow-sm" />
+    </Link>
+    <p className="text-slate-500 text-sm font-medium leading-relaxed">
+       Your 360° Digital Partner. We combine AI-driven Marketing, Next-Gen Development, and Elite Design to give your brand the unfair advantage it deserves.
+    </p>
                     <div className="flex gap-3">
                        {SocialLinks.map((social, idx) => (
                           <a 

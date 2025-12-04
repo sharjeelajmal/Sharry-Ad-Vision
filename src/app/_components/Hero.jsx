@@ -89,37 +89,36 @@ const Hero = () => {
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center flex-col-reverse">
           
           {/* --- Left Content --- */}
-          <div ref={contentRef} className="flex flex-col text-center lg:text-left space-y-6 md:space-y-8">
+        <div ref={contentRef} className="flex flex-col text-center lg:text-left space-y-6 md:space-y-8">
             
-            {/* Premium Badge */}
-            <div className="hero-reveal flex justify-center lg:justify-start">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-blue-100 shadow-[0_2px_10px_-2px_rgba(59,130,246,0.2)] backdrop-blur-sm">
-                <span className="relative flex h-2.5 w-2.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-blue-600"></span>
-                </span>
-                <span className="text-[11px] font-bold tracking-[0.15em] text-slate-600 uppercase">
-                  #1 Premium SMM Panel
-                </span>
-              </div>
-            </div>
+         {/* Premium Badge */}
+  <div className="hero-reveal flex justify-center lg:justify-start">
+    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-blue-100 shadow-[0_2px_10px_-2px_rgba(59,130,246,0.2)] backdrop-blur-sm">
+      <span className="relative flex h-2.5 w-2.5">
+        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-blue-600"></span>
+      </span>
+      <span className="text-[11px] font-bold tracking-[0.15em] text-slate-600 uppercase">
+        #1 Digital Growth Partner
+      </span>
+    </div>
+  </div>
+         {/* Main Headline */}
+  <h1 className="hero-reveal text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-slate-900 leading-[1.15]">
+    Scale Your Brand <br className="hidden lg:block"/>
+    <span className="text-transparent bg-clip-text bg-gradient-to-br from-blue-700 via-indigo-600 to-blue-900 drop-shadow-sm">
+      Beyond Limits.
+    </span>
+  </h1>
 
-            {/* Main Headline */}
-            <h1 className="hero-reveal text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-slate-900 leading-[1.15]">
-              Experience <br className="hidden lg:block"/>
-              <span className="text-transparent bg-clip-text bg-gradient-to-br from-blue-700 via-indigo-600 to-blue-900 drop-shadow-sm">
-                Royal Growth
-              </span>
-              <br className="hidden lg:block"/> for Your Brand.
-            </h1>
-
-            {/* Description */}
-            <p className="hero-reveal text-base sm:text-lg text-slate-600 leading-relaxed max-w-lg mx-auto lg:mx-0 font-medium">
-              Unlock the highest quality social media services. We combine 
-              <span className="text-blue-700 font-semibold"> AI-driven speed </span> 
-              with <span className="text-amber-600 font-semibold">premium reliability </span>
-              to give you the influence you deserve.
-            </p>
+        {/* Description - Humanized & Covering All Services */}
+  <p className="hero-reveal text-base sm:text-lg text-slate-600 leading-relaxed max-w-lg mx-auto lg:mx-0 font-medium">
+    Stop juggling multiple agencies. We bring 
+    <span className="text-blue-700 font-semibold"> Targeted Ads</span>, 
+    <span className="text-blue-700 font-semibold"> Custom Web Dev</span>, and 
+    <span className="text-amber-600 font-semibold"> Creative Design </span>
+    together to build a digital presence that dominates.
+  </p>
 
             {/* Feature Pills */}
             <div className="hero-reveal flex flex-wrap justify-center lg:justify-start gap-3 md:gap-4">

@@ -92,24 +92,23 @@ const Reviews = () => {
                 {/* LEFT: Content */}
                 <div ref={titleRef} className="text-center lg:text-left space-y-6">
                     
-                    <div className="review-reveal inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-slate-200 shadow-sm">
-                        <span className="flex h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
-                        <span className="text-xs font-bold tracking-widest text-slate-600 uppercase">
-                           Client Success Stories
-                        </span>
-                    </div>
+                  <div className="review-reveal inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-slate-200 shadow-sm">
+        <span className="flex h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
+        <span className="text-xs font-bold tracking-widest text-slate-600 uppercase">
+           Success Stories
+        </span>
+    </div>
 
-                    <h1 className="review-reveal text-4xl md:text-6xl font-black text-slate-900 leading-tight">
-                        Voices of <br/>
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-600">
-                           Trust & Quality
-                        </span>
-                    </h1>
+    <h1 className="review-reveal text-4xl md:text-6xl font-black text-slate-900 leading-tight">
+        Real Businesses, <br/>
+        <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-600">
+           Real Impact.
+        </span>
+    </h1>
 
-                    <p className="review-reveal text-lg text-slate-600 max-w-lg mx-auto lg:mx-0 leading-relaxed font-medium">
-                        Don't just take our word for it. Read what our happy clients say about our <span className="text-slate-900 font-bold">SMM & Development</span> services.
-                    </p>
-
+    <p className="review-reveal text-lg text-slate-600 max-w-lg mx-auto lg:mx-0 leading-relaxed font-medium">
+        Don't just take our word for it. See how we've transformed ordinary businesses into market leaders through <span className="text-slate-900 font-bold">Strategic Marketing & Development</span>.
+    </p>
                     <div className="review-reveal flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-4">
                         <Button 
                             onClick={handleWhatsAppRedirect}

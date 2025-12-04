@@ -16,9 +16,94 @@ const iconMap = {
   Clients: <Users />,
 };
 
+// --- COMPONENT: ROLLING DIGIT (Random Start Fix) ---
+const RollingDigit = ({ targetDigit, play, delay }) => {
+  const stripRef = useRef(null);
+  const isNumber = !isNaN(parseInt(targetDigit));
+
+  useLayoutEffect(() => {
+    if (!isNumber || !stripRef.current) return;
+
+    const targetIndex = parseInt(targetDigit);
+    // Target position (Strip ko upar move karna hai, isliye negative)
+    const targetY = -targetIndex; 
+
+    if (play) {
+        // --- RANDOM START LOGIC ---
+        // 0 se start nahi karna, balki Target se chhotay kisi number se.
+        // Example: Agar Target '8' hai, to Start '2' se '7' ke beech koi bhi ho sakta hai.
+        // Math.random() logic: Target se kam random number generate karo.
+        
+        let startDigit = 0;
+        if (targetIndex > 1) {
+             // Kam se kam thoda difference ho taaki animation dikhe
+             // targetIndex - 1 tak koi bhi random number
+             startDigit = Math.floor(Math.random() * targetIndex);
+        }
+        
+        const startY = -startDigit; // Start position
+
+        // Animation: Random Start -> Target
+        gsap.fromTo(stripRef.current,
+            { y: `${startY}em` },
+            {
+                y: `${targetY}em`,
+                duration: 1.5,
+                delay: delay,
+                ease: "power2.out", // Smooth Rolling
+            }
+        );
+    } else {
+        // Default State: Target par set raho
+        gsap.set(stripRef.current, { y: `${targetY}em` });
+    }
+  }, [play, targetDigit, delay, isNumber]);
+
+  if (!isNumber) {
+      // Non-numeric characters (comma, +) wese hi dikhao
+      return <span className="inline-block text-slate-900">{targetDigit}</span>;
+  }
+
+  return (
+    // 'text-slate-900' ensures numbers are always visible (Black/Dark Grey)
+    <div className="relative inline-block overflow-hidden h-[1em] align-top mx-[1px] text-slate-900 font-extrabold">
+      <div 
+        ref={stripRef} 
+        className="flex flex-col items-center leading-[1em]"
+      >
+        {/* Strip 0-9 */}
+        {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
+          <span key={num} className="h-[1em] flex items-center justify-center">
+            {num}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// --- COMPONENT: FULL NUMBER CONTROLLER ---
+const SlotCounter = ({ value, isHovered }) => {
+    const characters = value.toString().split("");
+
+    return (
+        <div className="flex items-center">
+            {characters.map((char, index) => (
+                <RollingDigit 
+                    key={index} 
+                    targetDigit={char} 
+                    play={isHovered} 
+                    delay={index * 0.05} // Wave effect
+                />
+            ))}
+        </div>
+    );
+};
+
 export default function StatsCards({ isAdmin = false, isEditing, setIsEditing, notifyClients, statsData }) {
   const [stats, setStats] = useState([]);
   const [editValues, setEditValues] = useState({});
+  const [hoveredIndex, setHoveredIndex] = useState(null); 
   const containerRef = useRef(null);
   const cardsRef = useRef([]);
 
@@ -91,12 +176,10 @@ export default function StatsCards({ isAdmin = false, isEditing, setIsEditing, n
     setEditValues(prev => ({ ...prev, [label]: value }));
   };
 
-  // --- 3. PREMIUM ANIMATIONS ---
+  // --- 3. ENTRANCE ANIMATION ---
   useLayoutEffect(() => {
     if (stats.length === 0) return;
-
     const ctx = gsap.context(() => {
-      // Entrance Animation
       gsap.fromTo(cardsRef.current, 
         { y: 50, opacity: 0, scale: 0.9 },
         {
@@ -112,44 +195,13 @@ export default function StatsCards({ isAdmin = false, isEditing, setIsEditing, n
           }
         }
       );
-
-      // Number Counter Animation
-      cardsRef.current.forEach((card, index) => {
-        const numberElement = card.querySelector(".stat-number");
-        if (!numberElement) return;
-
-        const rawValue = stats[index]?.value || "0";
-        const endValue = parseInt(rawValue.replace(/,/g, ''), 10);
-
-        if (!isNaN(endValue)) {
-          gsap.fromTo(numberElement, 
-            { innerText: 0 },
-            {
-              innerText: endValue,
-              duration: 2,
-              ease: "power1.out",
-              snap: { innerText: 1 },
-              scrollTrigger: {
-                trigger: containerRef.current,
-                start: "top 80%",
-              },
-              onUpdate: function() {
-                this.targets()[0].innerText = Math.ceil(this.targets()[0].innerText).toLocaleString();
-              }
-            }
-          );
-        }
-      });
-
     }, containerRef);
-
     return () => ctx.revert();
   }, [stats]);
 
   return (
     <div ref={containerRef} className="py-8 sm:py-10 px-4 flex flex-col items-center justify-center relative z-10">
       
-      {/* Admin Controls */}
       {isAdmin && (
         <div className="flex space-x-3 mb-8 bg-white/80 backdrop-blur-md p-2 rounded-full border border-slate-200 shadow-sm">
           {isEditing ? (
@@ -166,35 +218,29 @@ export default function StatsCards({ isAdmin = false, isEditing, setIsEditing, n
       )}
 
       {/* Grid Container */}
-      {/* FIX: 'grid-cols-2' for mobile, 'lg:grid-cols-4' for desktop */}
-      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 w-full max-w-7xl">
+    <div className={`grid gap-3 sm:gap-6 w-full max-w-7xl ${isAdmin ? 'grid-cols-2' : 'grid-cols-2 lg:grid-cols-4'}`}>
         {stats.map((stat, index) => (
           <div 
             key={stat.label || index} 
             ref={el => cardsRef.current[index] = el}
             className="group relative"
+            onMouseEnter={() => setHoveredIndex(index)} // Start Rolling
+            onMouseLeave={() => setHoveredIndex(null)}  // Reset
           >
-            {/* --- Premium Glass Card with Visible Shadow --- */}
-            {/* FIX: Shadow increased to 'shadow-xl' and added custom drop-shadow for clarity */}
+            {/* Glass Card */}
             <div className="h-full bg-white/80 backdrop-blur-xl border border-white rounded-[1.5rem] sm:rounded-[2rem] p-4 sm:p-6 shadow-[0_8px_30px_rgb(0,0,0,0.12)] transition-all duration-500 hover:shadow-[0_20px_50px_-10px_rgba(59,130,246,0.3)] hover:-translate-y-2 group-hover:bg-white ring-1 ring-black/5 flex flex-col items-center text-center overflow-hidden">
               
-              {/* Hover Gradient */}
               <div className="absolute inset-0 bg-gradient-to-br from-blue-50/0 via-blue-50/0 to-amber-50/0 group-hover:from-blue-50/50 group-hover:via-white/20 group-hover:to-amber-50/50 transition-all duration-500 opacity-0 group-hover:opacity-100 pointer-events-none" />
 
-              {/* --- Icon Bubble --- */}
               <div className="relative z-10 mb-2 sm:mb-4">
                 <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-white shadow-md flex items-center justify-center border border-slate-100 group-hover:scale-110 transition-transform duration-500 group-hover:rotate-6">
                    <div className="text-slate-400 group-hover:text-blue-600 transition-colors duration-300">
-                     {/* Mobile Icon Size adjusted */}
                      {React.cloneElement(stat.icon, { className: "w-6 h-6 sm:w-8 sm:h-8", strokeWidth: 1.5 })}
                    </div>
                 </div>
-                <div className="absolute inset-0 bg-blue-400/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 scale-150" />
               </div>
 
-              {/* --- Stats Content --- */}
               <div className="relative z-10 flex flex-col items-center gap-0 sm:gap-1 w-full">
-                
                 {isEditing && isAdmin ? (
                   <input
                     type="text"
@@ -203,14 +249,13 @@ export default function StatsCards({ isAdmin = false, isEditing, setIsEditing, n
                     onChange={(e) => handleInputChange(stat.label, e.target.value)}
                   />
                 ) : (
-                  // Number Size: Mobile (2xl) vs Desktop (5xl) taaki 2 column me fit ho
-                  <h3 className="text-2xl sm:text-5xl font-extrabold tracking-tight text-slate-900 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-blue-700 group-hover:to-indigo-600 transition-all duration-300 break-all sm:break-normal">
-                    <span className="stat-number">{stat.value}</span>
-                    <span className="text-lg sm:text-3xl text-slate-400 ml-0.5 sm:ml-1 align-top">+</span>
+                  // --- SLOT MACHINE NUMBERS ---
+                  <h3 className="text-2xl sm:text-5xl font-extrabold tracking-tight text-slate-900 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-blue-700 group-hover:to-indigo-600 transition-all duration-300 flex justify-center items-center h-[1.2em] overflow-hidden">
+                    <SlotCounter value={stat.value} isHovered={hoveredIndex === index} />
+                    <span className="text-lg sm:text-3xl text-slate-400 ml-0.5 sm:ml-1 align-top relative top-[-0.1em]">+</span>
                   </h3>
                 )}
 
-                {/* Label Size: Mobile (xs) vs Desktop (sm) */}
                 <p className="text-[10px] sm:text-sm font-bold text-slate-500 uppercase tracking-widest group-hover:text-amber-600 transition-colors duration-300 mt-1 sm:mt-2 flex items-center justify-center gap-1">
                   {stat.label}
                   <TrendingUp className="w-3 h-3 hidden sm:block opacity-0 group-hover:opacity-100 transition-opacity duration-300 -translate-x-2 group-hover:translate-x-0" />

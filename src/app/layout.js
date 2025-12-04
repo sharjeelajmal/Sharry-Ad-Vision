@@ -9,7 +9,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { AuthProvider } from "./Authprovider";
 import { SpeedInsights } from "@vercel/speed-insights/next"
-
+import CustomCursor from "./_components/CustomCursor";
 const outfit = Outfit({
   subsets: ["latin"],
 });
@@ -30,6 +30,7 @@ export default function RootLayout({ children }) {
       </head>
       <body className={outfit.className}>
          <AuthProvider>
+          <CustomCursor />
         <Header />
         <UpHeader />
 
